@@ -43,6 +43,8 @@ create table properties (
   summary text,
   description text,
   amenities text[] not null default '{}',
+  airbnb_url text,                              -- public listing page, shown on the property page
+  vrbo_url text,
   published boolean not null default false,
   created_at timestamptz not null default now()
 );
@@ -174,6 +176,13 @@ create table cleaning_jobs (
   unique (booking_id)
 );
 
+create table cleaning_photos (
+  id uuid primary key default gen_random_uuid(),
+  job_id uuid not null references cleaning_jobs(id) on delete cascade,
+  storage_path text not null,          -- Supabase Storage bucket: cleaning-photos (private)
+  created_at timestamptz not null default now()
+);
+
 create type ticket_status as enum ('open', 'in_progress', 'resolved');
 
 create table maintenance_tickets (
@@ -210,7 +219,7 @@ create view property_listings with (security_invoker = true) as
 select p.id, p.owner_id, p.slug, p.name, p.city, p.region, p.lat, p.lng,
   p.bedrooms, p.bathrooms, p.max_guests, p.nightly_rate_cents, p.cleaning_fee_cents,
   p.tax_rate_bps, p.min_nights, p.check_in_time, p.check_out_time, p.pets_allowed,
-  p.summary, p.description, p.amenities, p.published,
+  p.summary, p.description, p.amenities, p.published, p.airbnb_url, p.vrbo_url,
   coalesce(round(avg(r.rating) filter (where r.published), 1), 0) as rating,
   count(r.id) filter (where r.published) as review_count
 from properties p
@@ -233,6 +242,7 @@ alter table payouts enable row level security;
 alter table reviews enable row level security;
 alter table cleaners enable row level security;
 alter table cleaning_jobs enable row level security;
+alter table cleaning_photos enable row level security;
 alter table maintenance_tickets enable row level security;
 alter table stripe_events enable row level security;
 alter table audit_log enable row level security;
@@ -274,6 +284,8 @@ create policy "owner reads own tickets" on maintenance_tickets for select
 -- not in any readable table; a server action reveals them on the job day only.
 create policy "cleaner reads own row" on cleaners for select using (clerk_user_id = (auth.jwt() ->> 'sub'));
 create policy "cleaner reads own jobs" on cleaning_jobs for select using (cleaner_id = current_cleaner_id());
+create policy "cleaner reads own job photos" on cleaning_photos for select
+  using (job_id in (select id from cleaning_jobs where cleaner_id = current_cleaner_id()));
 create policy "cleaner reads job properties" on properties for select
   using (id in (select property_id from cleaning_jobs where cleaner_id = current_cleaner_id()));
 -- Writes (bookings, payouts, job status, moderation) happen server-side with the service role.

@@ -79,6 +79,11 @@ export default async function PropertyPage({ params }: PageProps<"/properties/[s
             <button type="submit" className="caps-tight mt-2 w-full rounded-full bg-teal py-3 text-[0.7rem] text-white transition hover:bg-teal-dark">Book and pay</button>
             <p className="text-center text-xs text-muted">Secure payment by Stripe. You&apos;ll hear from Christi or Melissa before you arrive.</p>
           </form>
+          {p.airbnbUrl && (
+            <p className="ui mt-4 border-t border-line pt-4 text-center text-xs text-muted">
+              Prefer Airbnb? <a href={p.airbnbUrl} target="_blank" rel="noopener" className="text-teal underline">See this home on Airbnb</a>
+            </p>
+          )}
         </aside>
       </div>
     </main>

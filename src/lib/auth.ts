@@ -3,9 +3,19 @@ import { redirect } from "next/navigation";
 
 export type Role = "admin" | "owner" | "cleaner";
 
+// Preview-only bypass so Vercel Preview deployments can show the portals before
+// Clerk is configured. Never active in production, whatever the env says.
+export function previewRole(): Role | null {
+  if (process.env.VERCEL_ENV === "production") return null;
+  const r = process.env.PREVIEW_ROLE;
+  return r === "admin" || r === "owner" || r === "cleaner" ? r : null;
+}
+
 // Roles live in Clerk user publicMetadata: { "role": "admin" | "owner" | "cleaner" }.
 // Set them in the Clerk dashboard (Users -> Metadata) or via the Backend API.
 export async function getRole(): Promise<Role | null> {
+  const preview = previewRole();
+  if (preview) return preview;
   const user = await currentUser();
   const role = user?.publicMetadata?.role;
   return role === "admin" || role === "owner" || role === "cleaner" ? role : null;
@@ -14,6 +24,11 @@ export async function getRole(): Promise<Role | null> {
 // Redirects to sign-in when signed out, and to /unauthorized when the role
 // does not match. Admins may open every area.
 export async function requireRole(...allowed: Role[]) {
+  const preview = previewRole();
+  if (preview) {
+    if (preview !== "admin" && !allowed.includes(preview)) redirect("/unauthorized");
+    return { userId: `preview_${preview}`, role: preview };
+  }
   const { userId, redirectToSignIn } = await auth();
   if (!userId) return redirectToSignIn();
   const role = await getRole();

@@ -1,55 +1,96 @@
 import type { Metadata } from "next";
-import Stat from "@/components/Stat";
-import Table from "@/components/Table";
-import { requireRole } from "@/lib/auth";
-import { getOwnerDashboard, getOwnerForClerkUser, money, nameMap } from "@/lib/data";
+import Link from "next/link";
+import TimeSeries from "@/components/charts/TimeSeries";
+import AlmostThere from "@/components/owner/AlmostThere";
+import Card from "@/components/owner/Card";
+import DataTable from "@/components/owner/DataTable";
+import HeadlineTiles from "@/components/owner/HeadlineTiles";
+import PageHeader from "@/components/owner/PageHeader";
+import Pill, { stayTone } from "@/components/owner/Pill";
+import { money, nameMap } from "@/lib/data";
+import { lastMonths, monthLabel, monthlyMetrics } from "@/lib/metrics";
+import { fmtRange, getOwnerData, headline, loadOwner, nightsBetween, percent, scheduledPayoutTotal, upcomingStays } from "@/lib/owner";
 
-export const metadata: Metadata = { title: "Owner portal" };
+export const metadata: Metadata = { title: "Overview" };
 
-export default async function OwnerPortal() {
-  const { userId } = await requireRole("owner");
-  const owner = await getOwnerForClerkUser(userId);
+export default async function OwnerOverview() {
+  const owner = await loadOwner();
+  if (!owner) return <AlmostThere />;
 
-  if (!owner) {
-    return (
-      <main className="mx-auto max-w-xl px-4 py-24 text-center">
-        <h1 className="text-2xl font-semibold">Almost there</h1>
-        <p className="mt-2 text-muted">Your login is not linked to an owner record yet. The team will finish that for you.</p>
-      </main>
-    );
-  }
-
-  const { properties, bookings, payouts } = await getOwnerDashboard(owner);
+  const data = await getOwnerData(owner);
+  const { properties, bookings, payouts } = data;
   const propertyName = nameMap(properties);
-  const paid = payouts.filter((x) => x.status === "paid").reduce((s, x) => s + x.net, 0);
-  const pending = payouts.filter((x) => x.status === "scheduled").reduce((s, x) => s + x.net, 0);
+  const h = headline(bookings, properties);
+  const trend = monthlyMetrics(bookings, properties, lastMonths(12));
+  const upcoming = upcomingStays(bookings);
+  const scheduled = scheduledPayoutTotal(payouts);
+  const firstName = owner.name.split(" ")[0];
 
   return (
-    <main className="mx-auto max-w-6xl space-y-8 px-4 py-12">
-      <div>
-        <h1 className="text-3xl font-semibold">Welcome, {owner.name}</h1>
-        {!owner.payoutsReady && (
-          <form action="/api/stripe/connect/onboard" method="post" className="mt-2 flex flex-wrap items-center gap-3 rounded-lg border border-accent/40 bg-accent/10 px-3 py-2 text-sm">
-            <span>Payouts are not set up yet. Add your bank details with Stripe to receive your share of each booking.</span>
-            <button type="submit" className="rounded-full bg-brand px-4 py-1.5 text-white">Set up payouts</button>
-          </form>
-        )}
+    <>
+      <PageHeader eyebrow="Owner portal" title={`Welcome back, ${firstName}`}
+        intro={properties.length === 1 ? `Here is how ${properties[0].name} is doing this month.` : `Here is how your ${properties.length} homes are doing this month.`} />
+
+      {!owner.payoutsReady && (
+        <form action="/api/stripe/connect/onboard" method="post"
+          className="flex flex-col gap-3 rounded-2xl border border-wave bg-mist px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm leading-relaxed text-charcoal">
+            Payouts are not set up yet. Add your bank details with Stripe and your share of each stay arrives the day after check-in.
+          </p>
+          <button type="submit" className="caps-tight shrink-0 rounded-full bg-teal px-5 py-2 text-[0.7rem] text-white transition hover:bg-teal-dark">Set up payouts</button>
+        </form>
+      )}
+
+      <HeadlineTiles h={h} />
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card title="Revenue by month" aside={<span className="ui text-xs text-muted">Last 12 months</span>}>
+          <TimeSeries title="Revenue by month, last 12 months" points={trend.map((m) => ({ label: monthLabel(m.month), value: m.revenue }))} format={money} />
+        </Card>
+        <Card title="Occupancy by month" aside={<span className="ui text-xs text-muted">Last 12 months</span>}>
+          <TimeSeries kind="bar" title="Occupancy by month, last 12 months" points={trend.map((m) => ({ label: monthLabel(m.month), value: Math.round(m.occupancy * 100) }))} format={(v) => `${v}%`} />
+        </Card>
       </div>
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Stat label="Properties" value={properties.length} />
-        <Stat label="Paid out" value={money(paid)} />
-        <Stat label="Scheduled payouts" value={money(pending)} />
+
+      <div className="grid gap-4 lg:grid-cols-[1fr_280px]">
+        <section>
+          <div className="mb-3 flex items-baseline justify-between">
+            <h2 className="caps-tight text-[0.65rem] text-sky">Upcoming stays</h2>
+            <span className="ui text-xs text-muted">Next {upcoming.length}</span>
+          </div>
+          <DataTable
+            columns={[{ label: "Home" }, { label: "Dates" }, { label: "Guest" }, { label: "Source" }, { label: "Nights", align: "right" }, { label: "Status" }]}
+            empty="No stays on the books yet. They will show up here as soon as a guest books."
+            rows={upcoming.map((b) => [
+              <Link key="p" href={`/owner/properties/${b.propertyId}`} className="text-teal-dark hover:underline">{propertyName(b.propertyId)}</Link>,
+              fmtRange(b.checkIn, b.checkOut),
+              b.guest,
+              b.source,
+              nightsBetween(b.checkIn, b.checkOut),
+              <Pill key="s" tone={stayTone(b.status)}>{b.status}</Pill>,
+            ])}
+          />
+        </section>
+        <div className="space-y-4">
+          <Card title="Scheduled payouts">
+            <p className="display text-4xl not-italic text-charcoal">{money(scheduled)}</p>
+            <p className="ui mt-1 text-xs text-muted">
+              {owner.payoutsReady ? "Released the day after each check-in." : "Held until payouts are set up."}
+            </p>
+            <Link href="/owner/statements" className="caps-tight mt-4 inline-block text-[0.65rem] text-teal-dark hover:underline">See statements</Link>
+          </Card>
+          <Card title="Your homes">
+            <ul className="ui space-y-2 text-sm">
+              {properties.map((p) => (
+                <li key={p.id} className="flex items-baseline justify-between gap-3">
+                  <Link href={`/owner/properties/${p.id}`} className="text-charcoal hover:text-teal">{p.name}</Link>
+                  <span className="text-xs text-muted">{percent(monthlyMetrics(bookings.filter((b) => b.propertyId === p.id), [p], lastMonths(1))[0].occupancy)} occ.</span>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        </div>
       </div>
-      <section>
-        <h2 className="mb-2 font-semibold">Bookings</h2>
-        <Table head={["Property", "Guest", "Dates", "Source", "Status", "Total"]}
-          rows={bookings.map((b) => [propertyName(b.propertyId), b.guest, `${b.checkIn} to ${b.checkOut}`, b.source, b.status, money(b.total)])} />
-      </section>
-      <section>
-        <h2 className="mb-2 font-semibold">Payout statements</h2>
-        <Table head={["Booking", "Gross", "Mgmt fee", "Net to you", "Release", "Status"]}
-          rows={payouts.map((x) => [x.bookingId.slice(0, 8), money(x.gross), money(x.fee), money(x.net), x.releaseOn, x.status])} />
-      </section>
-    </main>
+    </>
   );
 }

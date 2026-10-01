@@ -4,8 +4,12 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 // the route layouts via requireRole(), which can read the user's metadata.
 const isProtected = createRouteMatcher(["/owner(.*)", "/admin(.*)", "/clean(.*)"]);
 
+// PREVIEW_ROLE (never in production) lets preview deployments open the portals
+// without signing in; see src/lib/auth.ts.
+const previewBypass = process.env.VERCEL_ENV !== "production" && ["admin", "owner", "cleaner"].includes(process.env.PREVIEW_ROLE ?? "");
+
 export default clerkMiddleware(async (auth, req) => {
-  if (isProtected(req)) await auth.protect();
+  if (isProtected(req) && !previewBypass) await auth.protect();
 });
 
 export const config = {

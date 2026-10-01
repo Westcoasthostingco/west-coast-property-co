@@ -16,6 +16,7 @@ export type Property = {
   ownerId: string;
   rating: number;
   reviewCount: number;
+  airbnbUrl?: string | null;
 };
 
 export type Owner = { id: string; name: string; email: string; payoutsReady: boolean; feePercent: number };
@@ -42,9 +43,9 @@ export const owners: Owner[] = [
 ];
 
 export const properties: Property[] = [
-  { id: "p1", slug: "the-grand-view", name: "The Grand View", city: "Gig Harbor", region: "WA", bedrooms: 3, bathrooms: 2, guests: 6, nightlyRate: 325, cleaningFee: 150, summary: "Just steps from the shops, restaurants, and waterfront of downtown Gig Harbor, The Grand View offers stunning views of Puget Sound, Mount Rainier, and Gig Harbor itself.", amenities: ["Puget Sound views", "Walk to downtown", "Wi-Fi", "Full kitchen", "Deck", "Parking"], ownerId: "o1", rating: 4.9, reviewCount: 48 },
-  { id: "p2", slug: "the-leonora-by-the-sea", name: "The Leonora by the Sea", city: "Hood Canal", region: "WA", bedrooms: 2, bathrooms: 2, guests: 5, nightlyRate: 285, cleaningFee: 135, summary: "Set on the shores of Hood Canal, The Leonora greets you with Olympic Mountain views, known for its oysters, and access to trails in Olympic National Park and the wider Olympic Peninsula.", amenities: ["Waterfront", "Olympic Mountain views", "Oyster beach", "Fire pit", "Wi-Fi", "Pet friendly"], ownerId: "o1", rating: 5.0, reviewCount: 36 },
-  { id: "p3", slug: "the-bedrock", name: "The Bedrock", city: "Randle", region: "WA", bedrooms: 3, bathrooms: 2, guests: 7, nightlyRate: 240, cleaningFee: 140, summary: "Located in Randle and just minutes from Packwood, The Bedrock offers mountain air, quiet forest, and easy access to some of the best adventures the Cascades have to offer.", amenities: ["Mountain air", "Near Mount Rainier", "Hot tub", "Wood stove", "Wi-Fi", "EV charger"], ownerId: "o2", rating: 4.8, reviewCount: 22 },
+  { id: "p1", slug: "the-grand-view", name: "The Grand View", city: "Gig Harbor", region: "WA", bedrooms: 3, bathrooms: 2, guests: 6, nightlyRate: 325, cleaningFee: 150, summary: "Just steps from the shops, restaurants, and waterfront of downtown Gig Harbor, The Grand View offers stunning views of Puget Sound, Mount Rainier, and Gig Harbor itself.", amenities: ["Puget Sound views", "Walk to downtown", "Wi-Fi", "Full kitchen", "Deck", "Parking"], ownerId: "o1", rating: 4.9, reviewCount: 48, airbnbUrl: "https://www.airbnb.com/rooms/1669272090087857131" },
+  { id: "p2", slug: "the-leonora-by-the-sea", name: "The Leonora by the Sea", city: "Hood Canal", region: "WA", bedrooms: 2, bathrooms: 2, guests: 5, nightlyRate: 285, cleaningFee: 135, summary: "Set on the shores of Hood Canal, The Leonora greets you with Olympic Mountain views, known for its oysters, and access to trails in Olympic National Park and the wider Olympic Peninsula.", amenities: ["Waterfront", "Olympic Mountain views", "Oyster beach", "Fire pit", "Wi-Fi", "Pet friendly"], ownerId: "o1", rating: 5.0, reviewCount: 36, airbnbUrl: "https://www.airbnb.com/rooms/1250729879856529802" },
+  { id: "p3", slug: "the-bedrock", name: "The Bedrock", city: "Randle", region: "WA", bedrooms: 3, bathrooms: 2, guests: 7, nightlyRate: 240, cleaningFee: 140, summary: "Located in Randle and just minutes from Packwood, The Bedrock offers mountain air, quiet forest, and easy access to some of the best adventures the Cascades have to offer.", amenities: ["Mountain air", "Near Mount Rainier", "Hot tub", "Wood stove", "Wi-Fi", "EV charger"], ownerId: "o2", rating: 4.8, reviewCount: 22, airbnbUrl: "https://www.airbnb.com/rooms/1780528394795968142" },
 ];
 
 // ~12 months of sample stays so trends have shape. Generated deterministically.

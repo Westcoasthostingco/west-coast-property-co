@@ -26,6 +26,7 @@ const toProperty = (r: Record<string, unknown>): Property => ({
   ownerId: r.owner_id as string,
   rating: Number(r.rating ?? 0),
   reviewCount: (r.review_count as number) ?? 0,
+  airbnbUrl: (r.airbnb_url as string | null) ?? null,
 });
 
 const toOwner = (r: Record<string, unknown>): Owner => ({
