@@ -15,14 +15,14 @@ export default async function ConditionsCard({ tideStationId, skiResort, classNa
     const trend = t.rising ? "rising" : "falling";
     return (
       <div className={`overflow-hidden rounded-2xl border border-line bg-white ${className}`} aria-label={`Tide at ${t.station.name}: ${t.level.toFixed(1)} feet and ${trend}`}>
-        <div className="ui flex items-baseline justify-between gap-3 px-4 py-2.5 text-xs">
-          <span className="caps-tight text-[0.6rem] text-deep">Tide · {t.station.name}</span>
-          <span className="text-charcoal">
+        <div className="ui flex h-10 items-center justify-between gap-3 px-4 text-xs">
+          <span className="caps-tight min-w-0 truncate text-[0.6rem] text-deep">Tide · {t.station.name.split(",")[0]}</span>
+          <span className="shrink-0 whitespace-nowrap text-charcoal">
             <span className="font-medium">{t.level.toFixed(1)} ft</span> <span className="text-muted">{trend}</span>
             {t.next && <span className="text-muted"> · {t.next.type === "H" ? "high" : "low"} {t.next.timeLabel}</span>}
           </span>
         </div>
-        <TideScene events={t.events} now={t.now.getTime()} level={t.level} />
+        <TideScene events={t.events} now={t.now.getTime()} level={t.level} compact />
       </div>
     );
   }
@@ -30,15 +30,15 @@ export default async function ConditionsCard({ tideStationId, skiResort, classNa
     const c = await getMountainConditions(skiResort, { forceSample });
     return (
       <div className={`overflow-hidden rounded-2xl border border-line bg-white ${className}`} aria-label={`Conditions at ${c.resort.name}: ${c.now.tempF} degrees, ${c.now.label.toLowerCase()}, ${c.snowDepthIn} inches of snow`}>
-        <div className="ui flex items-baseline justify-between gap-3 px-4 py-2.5 text-xs">
-          <span className="caps-tight text-[0.6rem] text-deep">Snow · {c.resort.name}</span>
-          <span className="flex items-center gap-1.5 text-charcoal">
+        <div className="ui flex h-10 items-center justify-between gap-3 px-4 text-xs">
+          <span className="caps-tight min-w-0 truncate text-[0.6rem] text-deep">Snow · {c.resort.name}</span>
+          <span className="flex shrink-0 items-center gap-1.5 whitespace-nowrap text-charcoal">
             <WeatherGlyph icon={c.now.icon} className="h-3.5 w-3.5 text-deep" />
             <span className="font-medium">{c.now.tempF}°F</span> <span className="text-muted">{c.now.label.toLowerCase()}</span>
             <span className="text-muted">· {c.snowDepthIn} in base</span>
           </span>
         </div>
-        <SkiScene snowing={c.now.snowingNow} icon={c.now.icon} />
+        <SkiScene snowing={c.now.snowingNow} icon={c.now.icon} compact />
       </div>
     );
   }
