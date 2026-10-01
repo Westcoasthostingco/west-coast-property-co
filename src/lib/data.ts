@@ -37,8 +37,9 @@ const toOwner = (r: Record<string, unknown>): Owner => ({
 });
 
 const sources: Record<string, Booking["source"]> = {
-  direct: "Direct", airbnb: "Airbnb", vrbo: "Vrbo", booking_com: "Booking.com",
+  direct: "Direct", airbnb: "Airbnb", vrbo: "Vrbo", booking_com: "Booking.com", owner: "Owner stay", manual: "Manual",
 };
+const today = () => new Date().toISOString().slice(0, 10);
 
 const toBooking = (r: Record<string, unknown>): Booking => ({
   id: r.id as string,
@@ -47,8 +48,9 @@ const toBooking = (r: Record<string, unknown>): Booking => ({
   checkIn: r.check_in as string,
   checkOut: r.check_out as string,
   source: sources[r.source as string] ?? "Direct",
-  status: r.status as Booking["status"],
-  total: (r.total_cents as number) / 100,
+  // 'completed' is derived: a confirmed stay whose check-out has passed
+  status: r.status === "confirmed" && (r.check_out as string) < today() ? "completed" : (r.status as Booking["status"]),
+  total: ((r.total_cents as number) ?? 0) / 100,
 });
 
 const toReview = (r: Record<string, unknown>): Review => ({
@@ -67,7 +69,7 @@ const toPayout = (r: Record<string, unknown>): Payout => ({
   gross: (r.gross_cents as number) / 100,
   fee: (r.fee_cents as number) / 100,
   net: (r.net_cents as number) / 100,
-  status: r.status === "paid" ? "paid" : "scheduled",
+  status: r.status as Payout["status"],
   releaseOn: r.release_on as string,
 });
 

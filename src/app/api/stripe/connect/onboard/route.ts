@@ -21,7 +21,6 @@ export async function POST() {
       type: "express",
       country: "US",
       email: owner.email,
-      business_type: "individual",
       capabilities: { transfers: { requested: true } },
       business_profile: { product_description: "Short-term rental income managed by West Coast Property Co" },
       metadata: { owner_id: owner.id },

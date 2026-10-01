@@ -26,14 +26,14 @@ export type Booking = {
   guest: string;
   checkIn: string;
   checkOut: string;
-  source: "Direct" | "Airbnb" | "Vrbo" | "Booking.com";
+  source: "Direct" | "Airbnb" | "Vrbo" | "Booking.com" | "Owner stay" | "Manual";
   status: "confirmed" | "pending" | "completed" | "cancelled";
   total: number;
 };
 
 export type Review = { id: string; propertyId: string; guest: string; rating: number; body: string; status: "published" | "pending" };
 
-export type Payout = { id: string; ownerId: string; bookingId: string; gross: number; fee: number; net: number; status: "scheduled" | "paid"; releaseOn: string };
+export type Payout = { id: string; ownerId: string; bookingId: string; gross: number; fee: number; net: number; status: "scheduled" | "processing" | "paid" | "failed" | "reversed"; releaseOn: string };
 
 export const owners: Owner[] = [
   { id: "o1", name: "Dana Whitfield", email: "dana@example.com", payoutsReady: true, feePercent: 18 },

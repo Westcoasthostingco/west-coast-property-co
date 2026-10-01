@@ -6,6 +6,7 @@ import { feeCents, releaseDate, stripe } from "@/lib/stripe";
 // POST /api/webhooks/stripe
 // Register this URL in the Stripe dashboard with events:
 //   checkout.session.completed, checkout.session.expired, account.updated, charge.refunded
+// Every event id is recorded in stripe_events first; a replay is acknowledged and skipped.
 export async function POST(req: Request) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   const sig = req.headers.get("stripe-signature");
@@ -19,6 +20,8 @@ export async function POST(req: Request) {
   }
 
   const db = supabaseAdmin();
+  const { error: dup } = await db.from("stripe_events").insert({ id: event.id, type: event.type });
+  if (dup) return NextResponse.json({ received: true, duplicate: true }); // 23505 unique violation = replay
 
   switch (event.type) {
     case "checkout.session.completed": {
@@ -26,29 +29,36 @@ export async function POST(req: Request) {
       const bookingId = s.metadata?.booking_id;
       if (!bookingId || s.payment_status !== "paid") break;
 
-      const paymentIntent = typeof s.payment_intent === "string" ? s.payment_intent : s.payment_intent?.id;
+      const piId = typeof s.payment_intent === "string" ? s.payment_intent : s.payment_intent?.id;
+      const pi = piId ? await stripe().paymentIntents.retrieve(piId) : null;
+      const chargeId = typeof pi?.latest_charge === "string" ? pi.latest_charge : pi?.latest_charge?.id ?? null;
+
       const { data: booking } = await db
         .from("bookings")
-        .update({ status: "confirmed", stripe_payment_intent_id: paymentIntent })
+        .update({ status: "confirmed", stripe_payment_intent_id: piId, stripe_charge_id: chargeId })
         .eq("id", bookingId)
-        .select("id, check_in, total_cents, properties(owner_id, owners(fee_percent))")
+        .select("id, check_in, subtotal_cents, properties(owner_id, fee_percent, owners(fee_percent))")
         .single();
       if (!booking) break;
 
-      // Schedule the owner's share. Tax collected by Stripe Tax is not part of the owner's gross.
-      const prop = booking.properties as unknown as { owner_id: string; owners: { fee_percent: number } };
-      const gross = booking.total_cents;
-      const fee = feeCents(gross, Number(prop.owners.fee_percent));
+      // Owner's share: nights subtotal minus the management fee. Cleaning and tax are not owner revenue.
+      const prop = booking.properties as unknown as { owner_id: string; fee_percent: number | null; owners: { fee_percent: number } };
+      const gross = booking.subtotal_cents ?? 0;
+      const fee = feeCents(gross, Number(prop.fee_percent ?? prop.owners.fee_percent));
       await db.from("payouts").upsert(
         { owner_id: prop.owner_id, booking_id: booking.id, gross_cents: gross, fee_cents: fee, net_cents: gross - fee, release_on: releaseDate(booking.check_in), status: "scheduled" },
-        { onConflict: "booking_id" },
+        { onConflict: "booking_id", ignoreDuplicates: true },
       );
+      // TODO: send confirmation email (Resend); create cleaning_job for the checkout date.
       break;
     }
 
     case "checkout.session.expired": {
       const bookingId = event.data.object.metadata?.booking_id;
-      if (bookingId) await db.from("bookings").update({ status: "cancelled" }).eq("id", bookingId).eq("status", "pending");
+      if (bookingId) {
+        await db.from("bookings").update({ status: "cancelled", cancelled_at: new Date().toISOString() })
+          .eq("id", bookingId).eq("status", "pending");
+      }
       break;
     }
 
@@ -59,16 +69,17 @@ export async function POST(req: Request) {
     }
 
     case "charge.refunded": {
-      // Pull back the owner's share for a refunded booking. Full refunds only here;
-      // partial refunds need a manual decision in the admin.
+      // Full refunds only: pull back the owner's share and cancel the stay.
+      // Partial refunds are left for a manual decision in the admin.
       const charge = event.data.object;
-      if (!charge.refunded || !charge.transfer_group) break;
-      const { data: payout } = await db.from("payouts").select("id, status, stripe_transfer_id").eq("booking_id", charge.transfer_group).single();
+      if (charge.amount_refunded !== charge.amount || !charge.transfer_group) break;
+      const bookingId = charge.transfer_group;
+      const { data: payout } = await db.from("payouts").select("id, status, stripe_transfer_id").eq("booking_id", bookingId).single();
       if (payout?.status === "paid" && payout.stripe_transfer_id) {
-        await stripe().transfers.createReversal(payout.stripe_transfer_id);
+        await stripe().transfers.createReversal(payout.stripe_transfer_id, {}, { idempotencyKey: `reverse_${charge.id}` });
       }
-      await db.from("payouts").update({ status: "failed" }).eq("booking_id", charge.transfer_group);
-      await db.from("bookings").update({ status: "cancelled" }).eq("id", charge.transfer_group);
+      await db.from("payouts").update({ status: "reversed" }).eq("booking_id", bookingId);
+      await db.from("bookings").update({ status: "cancelled", cancelled_at: new Date().toISOString() }).eq("id", bookingId);
       break;
     }
   }

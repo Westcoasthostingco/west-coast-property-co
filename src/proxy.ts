@@ -2,7 +2,7 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 // Routes that need a signed-in user. Role checks (admin vs owner) happen in
 // the route layouts via requireRole(), which can read the user's metadata.
-const isProtected = createRouteMatcher(["/owner(.*)", "/admin(.*)"]);
+const isProtected = createRouteMatcher(["/owner(.*)", "/admin(.*)", "/clean(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
   if (isProtected(req)) await auth.protect();

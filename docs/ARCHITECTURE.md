@@ -1,6 +1,6 @@
 # West Coast Property Co: product architecture plan
 
-Status: draft for audit. Four audiences, one Next.js app, one Postgres database, roles enforced by Clerk metadata and Supabase row level security.
+Status: audited 2026-10-01; step 0 fixes applied in code and schema. Four audiences, one Next.js app, one Postgres database, roles enforced by Clerk metadata and Supabase row level security.
 
 ## 1. Audiences and entrances
 
@@ -93,22 +93,29 @@ Row level security:
 
 ## 8. Build order
 
+0. Done: security and correctness fixes from the audit. RLS recursion in `current_owner_id()` (security definer), secrets moved out of the public view into `property_integrations` and `ical_feeds`, `stripe_events` idempotency, cron claims rows before transferring and uses `source_transaction`, lodging tax as a line item from `tax_rate_bps`, fee on nights subtotal only, hourly sweep of stale holds, `/clean` protected, full-refund-only reversal with idempotency key, Clerk `user.created` webhook links owners and cleaners by email.
 1. Design system from the brand guide: tokens, type scale, buttons, cards, nav, charts palette. Replace current placeholder theme.
-2. Public site rebuild in the Wander layout: home, listings with filters, property detail with gallery, calendar and sticky booking panel.
-3. Availability: blocked_dates, iCal import cron, iCal export, calendar component shared by all four audiences.
-4. Owner portal: metrics views, overview charts, statements, settings.
-5. Admin: dashboard, master calendar, properties CRUD with photo upload, bookings, owners.
+2. Availability: iCal import cron creates channel stays as `bookings` (source airbnb/vrbo/booking_com) so turnovers and the calendar see them; iCal export per property; shared calendar component.
+3. Public site rebuild in the Wander layout: home, listings with filters, property detail with gallery, calendar and sticky booking panel. Booking confirmation email (Resend) ships here.
+4. Admin operations first: bookings list, manual and owner-stay entry, refund, properties CRUD with photo upload, owners. Statements are wrong until refunds flow.
+5. Owner portal: metrics views (prorated across month boundaries), overview charts, statements as printable HTML, settings.
 6. Cleaning: cleaning_jobs auto-created on booking confirm, admin board, cleaner portal, photos, maintenance tickets.
-7. Invoicing: Stripe Invoicing for owners, admin create and send, owner view and pay.
-8. Accounting trends and QuickBooks sync.
-9. Notifications: Resend templates, Twilio reminders, Seam codes.
+7. Invoicing: at launch, repairs net against the next payout and show on the statement; Stripe Invoicing for owners comes after.
+8. Accounting trends with CSV export. QuickBooks sync after launch.
+9. Notifications: Resend templates first; Twilio and Seam after launch (manual door code with date-gated reveal until then).
 
 Each step ships as its own PR with the build green and a Vercel preview.
 
-## 9. Open questions
+## 9. Decisions taken in code (change if wrong) and open questions
 
-- Fee model: flat percent per owner (current) or per-property? Any setup or minimum fees?
+Taken:
+- Fee is a percent of the nights subtotal only; cleaning fee and lodging tax are not owner revenue and not fee-bearing. `properties.fee_percent` overrides `owners.fee_percent`.
+- Lodging tax is a per-property rate (`tax_rate_bps`) charged to the guest as a line item. Stripe Tax is off.
+- Stripe processing fees are absorbed by the platform (they come out of the fee, not the owner's share).
+- Minimum nights per property exists now (default 2). Seasonal `pricing_rules` table exists; checkout does not apply it yet.
+- Guests stay email-only; no guest accounts.
+
+Open:
 - Cleaning cost: passed through to owners at cost, marked up, or included in the fee?
-- Who pays Stripe processing fees: owner, platform, or added to the guest total?
-- Minimum stay and seasonal pricing: needed at launch?
-- Should guests be able to create accounts, or stay email-only?
+- Refund policy wording (drives what the admin refund button does for partial refunds).
+- Who is the 1099 filer for owner rents: enable Stripe's Connect 1099 tool, or your accountant?

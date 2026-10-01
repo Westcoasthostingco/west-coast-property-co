@@ -41,6 +41,7 @@ export default async function PropertyPage({ params }: PageProps<"/properties/[s
             <input type="hidden" name="slug" value={p.slug} />
             <label className="block">Check-in<input required name="check_in" type="date" className="mt-1 w-full rounded-lg border border-line px-3 py-2" /></label>
             <label className="block">Check-out<input required name="check_out" type="date" className="mt-1 w-full rounded-lg border border-line px-3 py-2" /></label>
+            <label className="block">Guests<input required name="guests" type="number" min={1} max={p.guests} defaultValue={2} className="mt-1 w-full rounded-lg border border-line px-3 py-2" /></label>
             <label className="block">Name<input required name="guest_name" className="mt-1 w-full rounded-lg border border-line px-3 py-2" /></label>
             <label className="block">Email<input required name="guest_email" type="email" className="mt-1 w-full rounded-lg border border-line px-3 py-2" /></label>
             <button type="submit" className="mt-2 w-full rounded-full bg-accent py-2.5 font-medium text-white">Book and pay</button>

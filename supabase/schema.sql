@@ -2,19 +2,20 @@
 -- Auth is Clerk. Roles (admin/owner/cleaner) live in Clerk user publicMetadata.
 -- Add Clerk as a third-party auth provider in Supabase so RLS can read the
 -- Clerk user id from the session token: auth.jwt()->>'sub'.
+-- Money is stored in integer cents.
 
 create extension if not exists "pgcrypto";
 create extension if not exists btree_gist;
 
-create type booking_source as enum ('direct', 'airbnb', 'vrbo', 'booking_com');
-create type booking_status as enum ('pending', 'confirmed', 'completed', 'cancelled');
-create type payout_status as enum ('scheduled', 'paid', 'failed');
+create type booking_source as enum ('direct', 'airbnb', 'vrbo', 'booking_com', 'owner', 'manual');
+create type booking_status as enum ('pending', 'confirmed', 'cancelled');
+create type payout_status as enum ('scheduled', 'processing', 'paid', 'failed', 'reversed');
 
 create table owners (
   id uuid primary key default gen_random_uuid(),
-  clerk_user_id text unique,          -- set when the owner's Clerk account is linked
+  clerk_user_id text unique,          -- linked by the Clerk user.created webhook (email match) or in admin
   name text not null,
-  email text not null,
+  email text not null unique,
   stripe_account_id text unique,      -- Stripe Connect Express account
   payouts_enabled boolean not null default false,
   fee_percent numeric(5,2) not null default 18,
@@ -26,23 +27,63 @@ create table properties (
   owner_id uuid not null references owners(id),
   slug text unique not null,
   name text not null,
-  city text, region text,
-  bedrooms int, bathrooms numeric(3,1), max_guests int,
+  address text, city text, region text, postal_code text,
+  lat double precision, lng double precision,
+  timezone text not null default 'America/Los_Angeles',
+  bedrooms int, bathrooms numeric(3,1), max_guests int not null default 2,
   nightly_rate_cents int not null,
   cleaning_fee_cents int not null default 0,
+  tax_rate_bps int not null default 0,          -- lodging tax (TOT) in basis points, e.g. 1050 = 10.5%
+  fee_percent numeric(5,2),                     -- overrides owners.fee_percent when set
+  min_nights int not null default 2,
+  check_in_time time not null default '16:00',
+  check_out_time time not null default '11:00',
+  pets_allowed boolean not null default false,
+  house_rules text,
   summary text,
+  description text,
   amenities text[] not null default '{}',
-  ical_airbnb_url text, ical_vrbo_url text, ical_booking_url text,
-  seam_device_id text,
   published boolean not null default false,
   created_at timestamptz not null default now()
+);
+
+-- Secrets and device ids. No RLS policies: only the service role can read.
+create table property_integrations (
+  property_id uuid primary key references properties(id) on delete cascade,
+  seam_device_id text,
+  manual_door_code text,              -- used until Seam is connected
+  default_cleaner_id uuid,            -- fk added after cleaners table exists
+  updated_at timestamptz not null default now()
+);
+
+create table ical_feeds (
+  id uuid primary key default gen_random_uuid(),
+  property_id uuid not null references properties(id) on delete cascade,
+  source booking_source not null,
+  url text not null,                  -- contains a secret token; never expose
+  last_synced_at timestamptz,
+  last_error text,
+  unique (property_id, source)
 );
 
 create table property_photos (
   id uuid primary key default gen_random_uuid(),
   property_id uuid not null references properties(id) on delete cascade,
   storage_path text not null,          -- Supabase Storage bucket: property-photos
+  alt text,
   sort_order int not null default 0
+);
+
+create table pricing_rules (
+  id uuid primary key default gen_random_uuid(),
+  property_id uuid not null references properties(id) on delete cascade,
+  label text,
+  starts_on date not null,
+  ends_on date not null,
+  nightly_rate_cents int not null,
+  min_nights int,
+  check (ends_on >= starts_on),
+  exclude using gist (property_id with =, daterange(starts_on, ends_on, '[]') with &&)
 );
 
 create table bookings (
@@ -50,32 +91,44 @@ create table bookings (
   property_id uuid not null references properties(id),
   guest_name text not null,
   guest_email text,
+  guest_phone text,
+  guest_count int not null default 1,
   check_in date not null,
   check_out date not null,
   source booking_source not null default 'direct',
   status booking_status not null default 'pending',
-  total_cents int not null,
-  stripe_payment_intent_id text,
+  subtotal_cents int,                  -- nights x rate; null for channel bookings we only see via iCal
+  cleaning_fee_cents int not null default 0,
+  tax_cents int not null default 0,
+  total_cents int,
+  external_uid text,                   -- iCal event uid for channel bookings
   stripe_checkout_session_id text,
+  stripe_payment_intent_id text,
+  stripe_charge_id text,
+  notes text,
+  cancelled_at timestamptz,
   created_at timestamptz not null default now(),
   check (check_out > check_in),
+  unique (property_id, source, external_uid),
   -- prevent double-booking of active stays
   exclude using gist (
     property_id with =,
     daterange(check_in, check_out) with &&
   ) where (status in ('pending', 'confirmed'))
 );
+-- 'completed' is derived: status = 'confirmed' and check_out < current_date.
 
 create table payouts (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references owners(id),
   booking_id uuid not null unique references bookings(id),
-  gross_cents int not null,
+  gross_cents int not null,            -- owner-side gross: nights subtotal only
   fee_cents int not null,
   net_cents int not null,
-  release_on date not null,            -- typically check-in + 1 day
+  release_on date not null,            -- check-in + 1 day
   status payout_status not null default 'scheduled',
-  stripe_transfer_id text,            -- set by /api/cron/payouts
+  stripe_transfer_id text,
+  last_error text,
   created_at timestamptz not null default now()
 );
 
@@ -90,6 +143,59 @@ create table reviews (
   created_at timestamptz not null default now()
 );
 
+create table cleaners (
+  id uuid primary key default gen_random_uuid(),
+  clerk_user_id text unique,
+  name text not null,
+  email text unique,
+  phone text,
+  pay_rate_cents int not null default 0,
+  active boolean not null default true
+);
+alter table property_integrations
+  add constraint property_integrations_default_cleaner_fk
+  foreign key (default_cleaner_id) references cleaners(id);
+
+create type cleaning_status as enum ('unassigned', 'assigned', 'in_progress', 'done', 'skipped');
+
+create table cleaning_jobs (
+  id uuid primary key default gen_random_uuid(),
+  property_id uuid not null references properties(id),
+  booking_id uuid references bookings(id),     -- the stay that just ended
+  scheduled_date date not null,
+  window_start time, window_end time,
+  cleaner_id uuid references cleaners(id),
+  status cleaning_status not null default 'unassigned',
+  checklist jsonb not null default '[]',
+  notes text,
+  cost_cents int,
+  completed_at timestamptz,
+  created_at timestamptz not null default now(),
+  unique (booking_id)
+);
+
+create type ticket_status as enum ('open', 'in_progress', 'resolved');
+
+create table maintenance_tickets (
+  id uuid primary key default gen_random_uuid(),
+  property_id uuid not null references properties(id),
+  cleaning_job_id uuid references cleaning_jobs(id),
+  reported_by text,
+  title text not null,
+  detail text,
+  status ticket_status not null default 'open',
+  cost_cents int,
+  created_at timestamptz not null default now(),
+  resolved_at timestamptz
+);
+
+-- Stripe webhook idempotency: insert the event id first; a duplicate means skip.
+create table stripe_events (
+  id text primary key,
+  type text not null,
+  received_at timestamptz not null default now()
+);
+
 create table audit_log (
   id bigint generated always as identity primary key,
   actor text,
@@ -99,40 +205,75 @@ create table audit_log (
   created_at timestamptz not null default now()
 );
 
--- Listings with review aggregates, used by the public site and portals.
+-- Public listing view: explicit columns only, never secrets or internal ids.
 create view property_listings with (security_invoker = true) as
-select p.*,
+select p.id, p.owner_id, p.slug, p.name, p.city, p.region, p.lat, p.lng,
+  p.bedrooms, p.bathrooms, p.max_guests, p.nightly_rate_cents, p.cleaning_fee_cents,
+  p.tax_rate_bps, p.min_nights, p.check_in_time, p.check_out_time, p.pets_allowed,
+  p.summary, p.description, p.amenities, p.published,
   coalesce(round(avg(r.rating) filter (where r.published), 1), 0) as rating,
   count(r.id) filter (where r.published) as review_count
 from properties p
 left join reviews r on r.property_id = p.id
 group by p.id;
 
--- Row level security. Service-role (server only) bypasses RLS for admin tasks.
+-- Dates guests cannot book: active stays from any source. No guest details.
+create view property_unavailable_dates with (security_invoker = true) as
+select property_id, check_in, check_out from bookings where status in ('pending', 'confirmed');
+
+-- Row level security. The service role (server only) bypasses RLS.
 alter table owners enable row level security;
 alter table properties enable row level security;
+alter table property_integrations enable row level security;
+alter table ical_feeds enable row level security;
 alter table property_photos enable row level security;
+alter table pricing_rules enable row level security;
 alter table bookings enable row level security;
 alter table payouts enable row level security;
 alter table reviews enable row level security;
+alter table cleaners enable row level security;
+alter table cleaning_jobs enable row level security;
+alter table maintenance_tickets enable row level security;
+alter table stripe_events enable row level security;
 alter table audit_log enable row level security;
 
+-- security definer so the owners policy does not recurse through this function.
 create or replace function current_owner_id() returns uuid
-language sql stable as $$
+language sql stable security definer set search_path = public as $$
   select id from owners where clerk_user_id = (auth.jwt() ->> 'sub')
 $$;
+create or replace function current_cleaner_id() returns uuid
+language sql stable security definer set search_path = public as $$
+  select id from cleaners where clerk_user_id = (auth.jwt() ->> 'sub')
+$$;
 
--- Public can read published listings and published reviews.
+-- Public (anon) reads.
 create policy "public read published properties" on properties for select using (published);
 create policy "public read photos" on property_photos for select using (true);
+create policy "public read pricing" on pricing_rules for select using (true);
 create policy "public read published reviews" on reviews for select using (published);
+create policy "public read unavailable dates" on bookings for select using (status in ('pending', 'confirmed'));
+-- NOTE: the bookings policy above exposes guest columns to anon through the table itself.
+-- The app reads availability only through property_unavailable_dates; grant anon select on
+-- that view and revoke direct table select:
+revoke select on bookings from anon;
+grant select on property_unavailable_dates to anon, authenticated;
 
 -- Owners read only their own data.
-create policy "owner reads own owner row" on owners for select using (id = current_owner_id());
+create policy "owner reads own owner row" on owners for select using (clerk_user_id = (auth.jwt() ->> 'sub'));
 create policy "owner reads own properties" on properties for select using (owner_id = current_owner_id());
 create policy "owner reads own bookings" on bookings for select
   using (property_id in (select id from properties where owner_id = current_owner_id()));
 create policy "owner reads own payouts" on payouts for select using (owner_id = current_owner_id());
 create policy "owner reads own reviews" on reviews for select
   using (property_id in (select id from properties where owner_id = current_owner_id()));
--- Writes (bookings, payouts, moderation) happen server-side with the service role.
+create policy "owner reads own tickets" on maintenance_tickets for select
+  using (property_id in (select id from properties where owner_id = current_owner_id()));
+
+-- Cleaners read their own jobs and the property basics for them. Door codes are
+-- not in any readable table; a server action reveals them on the job day only.
+create policy "cleaner reads own row" on cleaners for select using (clerk_user_id = (auth.jwt() ->> 'sub'));
+create policy "cleaner reads own jobs" on cleaning_jobs for select using (cleaner_id = current_cleaner_id());
+create policy "cleaner reads job properties" on properties for select
+  using (id in (select property_id from cleaning_jobs where cleaner_id = current_cleaner_id()));
+-- Writes (bookings, payouts, job status, moderation) happen server-side with the service role.
