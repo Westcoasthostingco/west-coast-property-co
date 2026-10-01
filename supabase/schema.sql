@@ -5,7 +5,7 @@
 -- Money is stored in integer cents.
 
 create extension if not exists "pgcrypto";
-create extension if not exists btree_gist;
+create extension if not exists btree_gist with schema extensions;
 
 create type booking_source as enum ('direct', 'airbnb', 'vrbo', 'booking_com', 'owner', 'manual');
 create type booking_status as enum ('pending', 'confirmed', 'cancelled');
@@ -227,9 +227,9 @@ left join reviews r on r.property_id = p.id
 group by p.id;
 
 -- Dates guests cannot book: active stays from any source. No guest details.
--- Deliberately NOT security_invoker: anon cannot read bookings directly, so this
--- view runs with its owner's rights and exposes only the three date columns.
-create view property_unavailable_dates as
+-- Runs as the caller; anon gets a column-level grant on bookings (below) so only
+-- the three date columns of active stays are ever readable.
+create view property_unavailable_dates with (security_invoker = true) as
 select property_id, check_in, check_out from bookings where status in ('pending', 'confirmed');
 
 -- Row level security. The service role (server only) bypasses RLS.
@@ -264,9 +264,18 @@ create policy "public read published properties" on properties for select using 
 create policy "public read photos" on property_photos for select using (true);
 create policy "public read pricing" on pricing_rules for select using (true);
 create policy "public read published reviews" on reviews for select using (published);
--- Anonymous visitors never read bookings directly; availability comes through the view.
+-- Anonymous visitors may read only the dates of active stays (for the availability view).
 revoke all on bookings from anon;
+grant select (property_id, check_in, check_out) on bookings to anon;
+create policy "anon sees active stay dates" on bookings for select to anon
+  using (status in ('pending', 'confirmed'));
 grant select on property_unavailable_dates to anon, authenticated;
+
+-- Helper functions are only meaningful for signed-in users.
+revoke execute on function current_owner_id() from public, anon;
+revoke execute on function current_cleaner_id() from public, anon;
+grant execute on function current_owner_id() to authenticated;
+grant execute on function current_cleaner_id() to authenticated;
 
 -- Owners read only their own data.
 create policy "owner reads own owner row" on owners for select using (clerk_user_id = (auth.jwt() ->> 'sub'));
