@@ -39,6 +39,9 @@ export default async function PropertyPage({ params }: PageProps<"/properties/[s
   return (
     <main className="mx-auto max-w-7xl px-4 pb-20 pt-8 sm:px-6">
       <JsonLd data={vacationRentalJsonLd(p)} />
+      {/* Live conditions above the photos: tide for waterfront homes, snow for mountain homes */}
+      <TideWidget stationId={p.tideStationId} className="mb-6" />
+      <SnowWidget resort={p.skiResort} className="mb-6" />
       {/* Gallery: one large, four small (lightbox comes with real photos) */}
       <div className="grid gap-2 overflow-hidden rounded-3xl sm:grid-cols-4 sm:grid-rows-2">
         <PropertyImage slug={p.slug} name={`${p.name}, ${p.city}, Washington`} priority sizes="(min-width: 640px) 50vw, 100vw" className="aspect-[4/3] sm:col-span-2 sm:row-span-2 sm:aspect-auto" />
@@ -59,10 +62,6 @@ export default async function PropertyPage({ params }: PageProps<"/properties/[s
 
           <h2 className="caps mt-12 text-xs text-deep">Availability</h2>
           <div className="mt-4"><AvailabilityCalendar stays={taken} minNights={p.minNights ?? 2} /></div>
-
-          {/* Live conditions: tide for waterfront homes, snow for mountain homes */}
-          <TideWidget stationId={p.tideStationId} className="mt-12" />
-          <SnowWidget resort={p.skiResort} className="mt-12" />
 
           <h2 className="caps mt-12 text-xs text-deep">Good to know</h2>
           <dl className="ui mt-4 grid gap-3 text-sm sm:grid-cols-2">
