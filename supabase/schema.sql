@@ -278,22 +278,22 @@ grant execute on function current_owner_id() to authenticated;
 grant execute on function current_cleaner_id() to authenticated;
 
 -- Owners read only their own data.
-create policy "owner reads own owner row" on owners for select using (clerk_user_id = (auth.jwt() ->> 'sub'));
-create policy "owner reads own properties" on properties for select using (owner_id = current_owner_id());
-create policy "owner reads own bookings" on bookings for select
+create policy "owner reads own owner row" on owners for select to authenticated using (clerk_user_id = (auth.jwt() ->> 'sub'));
+create policy "owner reads own properties" on properties for select to authenticated using (owner_id = current_owner_id());
+create policy "owner reads own bookings" on bookings for select to authenticated
   using (property_id in (select id from properties where owner_id = current_owner_id()));
-create policy "owner reads own payouts" on payouts for select using (owner_id = current_owner_id());
-create policy "owner reads own reviews" on reviews for select
+create policy "owner reads own payouts" on payouts for select to authenticated using (owner_id = current_owner_id());
+create policy "owner reads own reviews" on reviews for select to authenticated
   using (property_id in (select id from properties where owner_id = current_owner_id()));
-create policy "owner reads own tickets" on maintenance_tickets for select
+create policy "owner reads own tickets" on maintenance_tickets for select to authenticated
   using (property_id in (select id from properties where owner_id = current_owner_id()));
 
 -- Cleaners read their own jobs and the property basics for them. Door codes are
 -- not in any readable table; a server action reveals them on the job day only.
-create policy "cleaner reads own row" on cleaners for select using (clerk_user_id = (auth.jwt() ->> 'sub'));
-create policy "cleaner reads own jobs" on cleaning_jobs for select using (cleaner_id = current_cleaner_id());
-create policy "cleaner reads own job photos" on cleaning_photos for select
+create policy "cleaner reads own row" on cleaners for select to authenticated using (clerk_user_id = (auth.jwt() ->> 'sub'));
+create policy "cleaner reads own jobs" on cleaning_jobs for select to authenticated using (cleaner_id = current_cleaner_id());
+create policy "cleaner reads own job photos" on cleaning_photos for select to authenticated
   using (job_id in (select id from cleaning_jobs where cleaner_id = current_cleaner_id()));
-create policy "cleaner reads job properties" on properties for select
+create policy "cleaner reads job properties" on properties for select to authenticated
   using (id in (select property_id from cleaning_jobs where cleaner_id = current_cleaner_id()));
 -- Writes (bookings, payouts, job status, moderation) happen server-side with the service role.
