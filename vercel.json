@@ -1,7 +1,7 @@
 {
   "crons": [
     { "path": "/api/cron/payouts", "schedule": "0 17 * * *" },
-    { "path": "/api/cron/sweep", "schedule": "30 * * * *" },
-    { "path": "/api/cron/ical", "schedule": "15 * * * *" }
+    { "path": "/api/cron/sweep", "schedule": "30 16 * * *" },
+    { "path": "/api/cron/ical", "schedule": "15 16 * * *" }
   ]
 }

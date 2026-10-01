@@ -6,7 +6,7 @@ Status key: [ ] todo, [x] done. Use one business email as the owner of every acc
 - [x] Domain: westcoasthostingco.com at Squarespace. Point DNS to Vercel (A @ 76.76.21.21, CNAME www cname.vercel-dns.com)
 - [ ] Google Workspace (admin@, billing@)
 - [x] GitHub repo: Westcoasthostingco/west-coast-property-co
-- [x] Vercel (Pro): link repo, add env vars from `.env.example`
+- [x] Vercel: linked, env vars from `.env.example`. Currently Hobby plan: crons run once a day. Upgrade to Pro and set `sweep` to `30 * * * *` and `ical` to `15 * * * *` in vercel.json for hourly calendar sync
 - [ ] Supabase (Pro for PITR): run `supabase/schema.sql` then `supabase/seed.sql`; create `property-photos` (public) and `cleaning-photos` (private) buckets; set each owner row's `clerk_user_id`
 - [ ] Clerk: production instance on the domain; set each user's publicMetadata `{"role":"admin"}` or `"owner"`; add Clerk as a third-party auth provider in Supabase (Authentication -> Sign In / Providers -> Third-party -> Clerk)
 - [ ] Stripe: enable Connect (Express); test and live keys; webhook endpoint; onboarding link flow
