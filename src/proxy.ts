@@ -1,6 +1,7 @@
 import { clerkClient, clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { previewRole } from "@/lib/auth";
+import { clerkConfigured } from "@/lib/clerk-config";
 
 // Routes that need a signed-in user. /admin additionally needs the admin role
 // here; the route layouts and pages re-check with requireRole() (a layout alone
@@ -12,7 +13,6 @@ const isAdmin = createRouteMatcher(["/admin(.*)"]);
 // without signing in; see previewRole() in src/lib/auth.ts for the env rules.
 const previewBypass = previewRole() !== null;
 
-const clerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY);
 
 // Roles live in Clerk publicMetadata.role. If the session token is customised to
 // include it (Clerk dashboard -> Sessions -> Customize session token, e.g.
