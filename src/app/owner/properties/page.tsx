@@ -43,7 +43,7 @@ export default async function OwnerProperties() {
                   <div><dt className="caps-tight text-[0.6rem] text-sky">Avg. rate</dt><dd className="mt-1 text-charcoal">{now.adr ? money(now.adr) : "—"}</dd></div>
                 </dl>
                 <div className="mt-4">
-                  <TimeSeries title={`${p.name} revenue by month`} height={120} points={trend.map((m) => ({ label: monthLabel(m.month), value: m.revenue }))} format={money} />
+                  <TimeSeries title={`${p.name} revenue by month`} height={120} points={trend.map((m) => ({ label: monthLabel(m.month), value: m.revenue }))} format="money" />
                 </div>
               </div>
             </Link>

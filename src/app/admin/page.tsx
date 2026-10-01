@@ -63,7 +63,7 @@ export default async function AdminHome() {
       </div>
 
       <Card title="Revenue, last 12 months">
-        <TimeSeries title="Portfolio revenue by month" points={metrics.map((m) => ({ label: monthLabel(m.month), value: m.revenue }))} format={money} height={200} />
+        <TimeSeries title="Portfolio revenue by month" points={metrics.map((m) => ({ label: monthLabel(m.month), value: m.revenue }))} format="money" height={200} />
       </Card>
 
       <div className="grid gap-4 lg:grid-cols-2">

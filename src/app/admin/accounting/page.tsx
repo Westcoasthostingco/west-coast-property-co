@@ -49,7 +49,7 @@ export default async function Accounting() {
               <span className="ui text-sm text-charcoal">{money(sum(s.points))} <span className="text-xs text-muted">12 mo</span></span>
             </div>
             <p className="ui text-[0.7rem] text-muted">{s.hint}</p>
-            <div className="mt-2"><TimeSeries title={`${s.title} by month`} points={s.points} format={money} height={160} /></div>
+            <div className="mt-2"><TimeSeries title={`${s.title} by month`} points={s.points} format="money" height={160} /></div>
           </Card>
         ))}
         <Card title="QuickBooks">
@@ -75,7 +75,7 @@ export default async function Accounting() {
                   <h3 className="ui text-sm font-medium text-charcoal">{p.name}</h3>
                   <span className="ui text-xs text-muted">{money(sum(pts))} · {occ}% occ.</span>
                 </div>
-                <div className="mt-2"><TimeSeries title={`${p.name} revenue by month`} points={pts} format={money} height={120} /></div>
+                <div className="mt-2"><TimeSeries title={`${p.name} revenue by month`} points={pts} format="money" height={120} /></div>
               </Card>
             );
           })}

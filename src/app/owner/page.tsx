@@ -45,10 +45,10 @@ export default async function OwnerOverview() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card title="Revenue by month" aside={<span className="ui text-xs text-muted">Last 12 months</span>}>
-          <TimeSeries title="Revenue by month, last 12 months" points={trend.map((m) => ({ label: monthLabel(m.month), value: m.revenue }))} format={money} />
+          <TimeSeries title="Revenue by month, last 12 months" points={trend.map((m) => ({ label: monthLabel(m.month), value: m.revenue }))} format="money" />
         </Card>
         <Card title="Occupancy by month" aside={<span className="ui text-xs text-muted">Last 12 months</span>}>
-          <TimeSeries kind="bar" title="Occupancy by month, last 12 months" points={trend.map((m) => ({ label: monthLabel(m.month), value: Math.round(m.occupancy * 100) }))} format={(v) => `${v}%`} />
+          <TimeSeries kind="bar" title="Occupancy by month, last 12 months" points={trend.map((m) => ({ label: monthLabel(m.month), value: Math.round(m.occupancy * 100) }))} format="percent" />
         </Card>
       </div>
 

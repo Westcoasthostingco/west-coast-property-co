@@ -4,10 +4,17 @@ import { useState } from "react";
 // Single-series line or bar chart for one measure over months. Brand teal only;
 // multi-series comparisons use small multiples (one chart per home) instead.
 type Point = { label: string; value: number };
-type Props = { points: Point[]; kind?: "line" | "bar"; format?: (v: number) => string; height?: number; title: string };
+type Format = "money" | "percent" | "number";
+type Props = { points: Point[]; kind?: "line" | "bar"; format?: Format; height?: number; title: string };
+const formatters: Record<Format, (v: number) => string> = {
+  money: (v) => v.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }),
+  percent: (v) => `${v}%`,
+  number: (v) => v.toLocaleString("en-US"),
+};
 
-export default function TimeSeries({ points, kind = "line", format = (v) => String(v), height = 180, title }: Props) {
+export default function TimeSeries({ points, kind = "line", format: fmt = "number", height = 180, title }: Props) {
   const [hover, setHover] = useState<number | null>(null);
+  const format = formatters[fmt];
   const w = 600, h = height, padL = 8, padR = 8, padT = 16, padB = 24;
   const max = Math.max(1, ...points.map((p) => p.value));
   const n = points.length;
