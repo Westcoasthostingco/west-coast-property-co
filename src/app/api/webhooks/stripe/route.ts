@@ -13,16 +13,25 @@ import { money } from "@/lib/mock";
 // of an unprocessed one (earlier attempt failed) is handled again. Any other failure
 // returns 500 so Stripe retries.
 export async function POST(req: Request) {
-  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  // Two destinations in the Stripe dashboard share this URL: one for "Your account"
+  // events (STRIPE_WEBHOOK_SECRET) and one for "Connected accounts" events such as
+  // account.updated (STRIPE_CONNECT_WEBHOOK_SECRET). Each has its own signing secret.
+  const secrets = [process.env.STRIPE_WEBHOOK_SECRET, process.env.STRIPE_CONNECT_WEBHOOK_SECRET].filter(Boolean) as string[];
   const sig = req.headers.get("stripe-signature");
-  if (!secret || !sig) return NextResponse.json({ error: "Webhook not configured" }, { status: 400 });
+  if (secrets.length === 0 || !sig) return NextResponse.json({ error: "Webhook not configured" }, { status: 400 });
 
-  let event: Stripe.Event;
-  try {
-    event = await stripe().webhooks.constructEventAsync(await req.text(), sig, secret);
-  } catch (e) {
-    return NextResponse.json({ error: `Bad signature: ${(e as Error).message}` }, { status: 400 });
+  const body = await req.text();
+  let event: Stripe.Event | null = null;
+  let lastError = "";
+  for (const secret of secrets) {
+    try {
+      event = await stripe().webhooks.constructEventAsync(body, sig, secret);
+      break;
+    } catch (e) {
+      lastError = (e as Error).message;
+    }
   }
+  if (!event) return NextResponse.json({ error: `Bad signature: ${lastError}` }, { status: 400 });
 
   const db = supabaseAdmin();
   const { error: ins } = await db.from("stripe_events").insert({ id: event.id, type: event.type });
