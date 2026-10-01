@@ -7,9 +7,12 @@ import { tideLevelAt, timeLabel, type TideEvent } from "@/lib/tides";
 // transition when the level prop changes. Everything is deterministic from
 // props, so it hydrates cleanly.
 
-type Props = { events: TideEvent[]; now: number; level: number; className?: string };
+type Props = { events: TideEvent[]; now: number; level: number; className?: string; compact?: boolean };
 
-const W = 480, H = 270, TOP = 56, BOTTOM = 238, HOUR = 3600_000;
+const W = 480, HOUR = 3600_000;
+// Full scene is 480x270. Compact (property cards) is 480x206, about 24% shorter,
+// with the same type sizes and the tide range squeezed into less height.
+const FULL = { H: 270, TOP: 56, BOTTOM: 238 }, COMPACT = { H: 206, TOP: 60, BOTTOM: 174 };
 const C = { deep: "#2f6f86", dusk: "#1e4b5c", teal: "#6ba8bc", sky: "#8fc0ce", wave: "#a8d0dc", mist: "#eef5f7", line: "#dde9ed", charcoal: "#3a4448", muted: "#6b777c", cream: "#fbfdfc", sand: "#e6eef1", pine: "#5a7580" };
 
 function wavePath(period: number, amp: number, width: number) {
@@ -18,7 +21,8 @@ function wavePath(period: number, amp: number, width: number) {
   return d + ` L${width},12 L0,12 Z`;
 }
 
-export default function TideScene({ events, now, level, className = "" }: Props) {
+export default function TideScene({ events, now, level, className = "", compact = false }: Props) {
+  const { H, TOP, BOTTOM } = compact ? COMPACT : FULL;
   const start = Math.floor((now - 4 * HOUR) / HOUR) * HOUR;
   const span = 24 * HOUR;
   const x = (t: number) => ((t - start) / span) * W;
@@ -74,7 +78,7 @@ export default function TideScene({ events, now, level, className = "" }: Props)
       <rect width={W} height={H} fill="url(#tw-sky)" />
 
       {/* hour grid (recessive) + labels along the top */}
-      {hours.map((t) => (
+      {hours.filter((t) => x(t) > 22).map((t) => (
         <g key={t}>
           <line x1={x(t)} x2={x(t)} y1={40} y2={BOTTOM} stroke={C.line} strokeWidth={1} />
           <text x={x(t)} y={30} textAnchor="middle" fontSize={11} fill={C.muted} fontFamily="var(--font-poppins)">{hourText(t)}</text>
@@ -136,9 +140,9 @@ export default function TideScene({ events, now, level, className = "" }: Props)
         );
       })}
       {/* now */}
-      <line x1={x(now)} x2={x(now)} y1={42} y2={surfaceY} stroke={C.deep} strokeWidth={1} strokeDasharray="2 3" />
+      <line x1={x(now)} x2={x(now)} y1={20} y2={surfaceY} stroke={C.deep} strokeWidth={1} strokeDasharray="2 3" />
       <circle cx={x(now)} cy={surfaceY} r={5} fill={C.deep} stroke={C.cream} strokeWidth={2} />
-      <text x={x(now)} y={50} textAnchor="middle" fontSize={10} fontWeight={500} fill={C.deep} fontFamily="var(--font-poppins)" style={{ textTransform: "uppercase", letterSpacing: "0.14em" }}>now {timeLabel(now)}</text>
+      <text x={x(now)} y={14} textAnchor="middle" fontSize={10} fontWeight={500} fill={C.deep} fontFamily="var(--font-poppins)" style={{ textTransform: "uppercase", letterSpacing: "0.14em" }}>now {timeLabel(now)}</text>
     </svg>
   );
 }
