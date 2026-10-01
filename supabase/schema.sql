@@ -227,7 +227,9 @@ left join reviews r on r.property_id = p.id
 group by p.id;
 
 -- Dates guests cannot book: active stays from any source. No guest details.
-create view property_unavailable_dates with (security_invoker = true) as
+-- Deliberately NOT security_invoker: anon cannot read bookings directly, so this
+-- view runs with its owner's rights and exposes only the three date columns.
+create view property_unavailable_dates as
 select property_id, check_in, check_out from bookings where status in ('pending', 'confirmed');
 
 -- Row level security. The service role (server only) bypasses RLS.
@@ -262,11 +264,8 @@ create policy "public read published properties" on properties for select using 
 create policy "public read photos" on property_photos for select using (true);
 create policy "public read pricing" on pricing_rules for select using (true);
 create policy "public read published reviews" on reviews for select using (published);
-create policy "public read unavailable dates" on bookings for select using (status in ('pending', 'confirmed'));
--- NOTE: the bookings policy above exposes guest columns to anon through the table itself.
--- The app reads availability only through property_unavailable_dates; grant anon select on
--- that view and revoke direct table select:
-revoke select on bookings from anon;
+-- Anonymous visitors never read bookings directly; availability comes through the view.
+revoke all on bookings from anon;
 grant select on property_unavailable_dates to anon, authenticated;
 
 -- Owners read only their own data.
