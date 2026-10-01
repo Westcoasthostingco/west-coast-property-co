@@ -4,10 +4,12 @@ import { Notice, PageHeader } from "@/components/admin/ui";
 import { savePropertyAction } from "@/app/admin/actions";
 import { getOwners } from "@/lib/data";
 import { getCleaners } from "@/lib/cleaning";
+import { requireRole } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "New property" };
 
 export default async function NewProperty({ searchParams }: PageProps<"/admin/properties/new">) {
+  await requireRole("admin"); // S1: pages must not rely on the layout for auth
   const sp = await searchParams;
   const [owners, cleaners] = await Promise.all([getOwners(), getCleaners()]);
   return (

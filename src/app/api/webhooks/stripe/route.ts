@@ -8,7 +8,10 @@ import { money } from "@/lib/mock";
 // POST /api/webhooks/stripe
 // Register this URL in the Stripe dashboard with events:
 //   checkout.session.completed, checkout.session.expired, account.updated, charge.refunded
-// Every event id is recorded in stripe_events first; a replay is acknowledged and skipped.
+// Every event id is recorded in stripe_events first and processed_at is set once the
+// handler succeeds. A replay of a processed event is acknowledged and skipped; a replay
+// of an unprocessed one (earlier attempt failed) is handled again. Any other failure
+// returns 500 so Stripe retries.
 export async function POST(req: Request) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   const sig = req.headers.get("stripe-signature");
@@ -22,9 +25,26 @@ export async function POST(req: Request) {
   }
 
   const db = supabaseAdmin();
-  const { error: dup } = await db.from("stripe_events").insert({ id: event.id, type: event.type });
-  if (dup) return NextResponse.json({ received: true, duplicate: true }); // 23505 unique violation = replay
+  const { error: ins } = await db.from("stripe_events").insert({ id: event.id, type: event.type });
+  if (ins && ins.code !== "23505") return NextResponse.json({ error: "Could not record event" }, { status: 500 });
+  if (ins?.code === "23505") {
+    const { data: prior } = await db.from("stripe_events").select("processed_at").eq("id", event.id).maybeSingle();
+    if (prior?.processed_at) return NextResponse.json({ received: true, duplicate: true });
+  }
 
+  try {
+    await handleEvent(db, event);
+  } catch (e) {
+    await db.from("audit_log").insert({ actor: "stripe", action: "handler_failed", entity: "stripe_event", entity_id: event.id, detail: { type: event.type, error: (e as Error).message } });
+    return NextResponse.json({ error: "Handler failed" }, { status: 500 });
+  }
+
+  await db.from("stripe_events").update({ processed_at: new Date().toISOString() }).eq("id", event.id);
+  await db.from("audit_log").insert({ actor: "stripe", action: event.type, entity: "stripe_event", entity_id: event.id });
+  return NextResponse.json({ received: true });
+}
+
+async function handleEvent(db: ReturnType<typeof supabaseAdmin>, event: Stripe.Event) {
   switch (event.type) {
     case "checkout.session.completed": {
       const s = event.data.object;
@@ -100,7 +120,4 @@ export async function POST(req: Request) {
       break;
     }
   }
-
-  await db.from("audit_log").insert({ actor: "stripe", action: event.type, entity: "stripe_event", entity_id: event.id });
-  return NextResponse.json({ received: true });
 }

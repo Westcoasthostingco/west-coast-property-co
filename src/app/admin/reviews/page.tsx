@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import { DataTable, Notice, PageHeader, Pill, buttonClass, ghostButtonClass } from "@/components/admin/ui";
 import { setReviewPublishedAction } from "@/app/admin/actions";
 import { getAllProperties, getReviews, nameMap } from "@/lib/data";
+import { requireRole } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Reviews" };
 
 export default async function AdminReviews({ searchParams }: PageProps<"/admin/reviews">) {
+  await requireRole("admin"); // S1: pages must not rely on the layout for auth
   const sp = await searchParams;
   const [reviews, props] = await Promise.all([getReviews(), getAllProperties()]);
   const propertyName = nameMap(props);

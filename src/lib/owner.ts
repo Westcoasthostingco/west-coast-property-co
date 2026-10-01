@@ -104,11 +104,12 @@ export function headline(bookings: Booking[], properties: Property[]): Headline 
 
 export const percent = (v: number) => `${Math.round(v * 100)}%`;
 
-// Stays that have not started yet, soonest first.
+// Active stays that have not ended yet (in house now or arriving later), soonest first.
+// 'completed' is derived from the check-out date, so it never appears here.
 export function upcomingStays(bookings: Booking[], limit = 10): Booking[] {
   const today = todayIso();
   return bookings
-    .filter((b) => b.checkIn >= today && b.status !== "cancelled")
+    .filter((b) => b.checkOut > today && (b.status === "confirmed" || b.status === "pending"))
     .sort((a, b) => a.checkIn.localeCompare(b.checkIn))
     .slice(0, limit);
 }
@@ -142,25 +143,30 @@ export type Statement = {
   net: number;
 };
 
-export function statementFor(month: string, data: OwnerData, owner: Owner): Statement {
+// Money on a statement comes only from payout rows, which are written with the same
+// fee logic everywhere (property fee override, cents math). A stay with no payout yet
+// shows $0 and "no payout yet" rather than a recomputed guess. Owner stays are not
+// revenue and are left off; channel stays appear with whatever payout row exists.
+export function statementFor(month: string, data: OwnerData): Statement {
   const names = new Map(data.properties.map((p) => [p.id, p.name]));
   const payoutByBooking = new Map(data.payouts.map((x) => [x.bookingId, x]));
   const lines: StatementLine[] = data.bookings
-    .filter((b) => b.checkIn.startsWith(month) && b.status !== "cancelled" && b.status !== "pending")
+    .filter((b) => b.checkIn.startsWith(month) && b.status !== "cancelled" && b.status !== "pending" && b.source !== "Owner stay")
     .sort((a, b) => a.checkIn.localeCompare(b.checkIn))
     .map((b) => {
       const payout = payoutByBooking.get(b.id);
-      const gross = payout?.gross ?? b.subtotal ?? b.total;
-      const fee = payout?.fee ?? Math.round((gross * owner.feePercent) / 100);
+      const live = payout && payout.status !== "reversed" ? payout : undefined;
+      const gross = live?.gross ?? 0;
+      const fee = live?.fee ?? 0;
       const cleaning = b.subtotal != null ? Math.max(0, b.total - b.subtotal) : 0;
-      return { booking: b, propertyName: names.get(b.propertyId) ?? b.propertyId, nights: nightsBetween(b.checkIn, b.checkOut), gross, fee, cleaning, net: payout?.net ?? gross - fee, payout };
+      return { booking: b, propertyName: names.get(b.propertyId) ?? b.propertyId, nights: nightsBetween(b.checkIn, b.checkOut), gross, fee, cleaning, net: live?.net ?? 0, payout };
     });
   const sum = (k: "gross" | "fee" | "cleaning" | "net") => lines.reduce((s, l) => s + l[k], 0);
   return { month, lines, stays: lines.length, gross: sum("gross"), fee: sum("fee"), cleaning: sum("cleaning"), net: sum("net") };
 }
 
-export const statements = (data: OwnerData, owner: Owner, months = lastMonths(12)) =>
-  months.map((m) => statementFor(m, data, owner)).reverse(); // newest first
+export const statements = (data: OwnerData, months = lastMonths(12)) =>
+  months.map((m) => statementFor(m, data)).reverse(); // newest first
 
 // ---- Invoices ----
 // There is no invoices table yet (architecture step 7). At launch, repairs and

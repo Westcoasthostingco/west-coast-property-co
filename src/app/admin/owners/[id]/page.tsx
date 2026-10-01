@@ -6,10 +6,12 @@ import { Card, DataTable, Notice, PageHeader, Pill } from "@/components/admin/ui
 import { saveOwnerAction } from "@/app/admin/actions";
 import { getAllProperties, getBookings, money, nameMap } from "@/lib/data";
 import { fmtDate, getOwnerDetail, getPayoutsDetailed } from "@/lib/admin";
+import { requireRole } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Owner" };
 
 export default async function OwnerPage({ params, searchParams }: PageProps<"/admin/owners/[id]">) {
+  await requireRole("admin"); // S1: pages must not rely on the layout for auth
   const [{ id }, sp] = await Promise.all([params, searchParams]);
   const [o, props, payouts, bookings] = await Promise.all([getOwnerDetail(id), getAllProperties(), getPayoutsDetailed(), getBookings()]);
   if (!o) notFound();

@@ -2,6 +2,7 @@
 import { supabaseAdmin, supabaseConfigured } from "@/lib/supabase";
 import { appUrl, nightsBetween, stripe, taxCents, todayISO } from "@/lib/stripe";
 import { POLICY_VERSION } from "@/lib/legal";
+import { clientIp, rateLimited } from "@/lib/rate-limit";
 
 export type CheckoutInput = {
   slug: string; checkIn: string; checkOut: string; guests: number;
@@ -37,6 +38,8 @@ export async function createCheckout(i: CheckoutInput): Promise<CheckoutResult> 
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(i.guestEmail)) return bad("That email doesn't look right.", "guest_email");
   if (!i.acceptedPolicies) return bad("Please accept the booking policies to continue.", "accept_policies");
   if (!supabaseConfigured) return bad("Online booking isn't switched on yet. Email hello@westcoasthostingco.com and we'll book you in.", undefined, 503);
+  // Each attempt below holds dates and opens a Stripe session, so cap attempts per IP.
+  if (rateLimited(`checkout:${await clientIp()}`)) return bad("Too many booking attempts from your network. Wait a few minutes and try again, or email us.", undefined, 429);
 
   const db = supabaseAdmin();
   const { data: property } = await db
@@ -65,6 +68,8 @@ export async function createCheckout(i: CheckoutInput): Promise<CheckoutResult> 
   if (error || !booking) {
     // 23P01 = exclusion_violation: dates overlap another stay
     if (error?.code === "23P01") return bad("Those dates were just taken. Pick different dates and try again.", "check_in", 409);
+    // Log the raw database error server-side only; the client gets a generic message.
+    console.error("checkout: booking insert failed", error?.code, error?.message);
     return bad("We couldn't hold those dates. Try again in a moment or email us.", undefined, 500);
   }
 

@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { auth } from "@clerk/nextjs/server";
+import { clerkConfigured } from "@/lib/auth";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -10,8 +11,11 @@ export const supabaseConfigured = Boolean(url && anonKey);
 // Per-request client that forwards the Clerk session token, so Supabase row
 // level security sees the signed-in user (auth.jwt()->>'sub' = Clerk user id).
 // Requires Clerk to be added as a third-party auth provider in Supabase.
+// Without Clerk keys auth() throws (no clerkMiddleware ran), so public reads
+// fall back to a plain anon client.
 export function supabaseForUser(): SupabaseClient {
   if (!url || !anonKey) throw new Error("Supabase env vars are not set");
+  if (!clerkConfigured) return createClient(url, anonKey, { auth: { persistSession: false } });
   return createClient(url, anonKey, {
     accessToken: async () => (await auth()).getToken(),
   });

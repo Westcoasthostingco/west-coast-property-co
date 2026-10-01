@@ -8,10 +8,12 @@ import { getOwners, money } from "@/lib/data";
 import { getCleaners } from "@/lib/cleaning";
 import { getPropertyDetail } from "@/lib/admin";
 import { supabaseConfigured } from "@/lib/supabase";
+import { requireRole } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Edit property" };
 
 export default async function EditProperty({ params, searchParams }: PageProps<"/admin/properties/[id]">) {
+  await requireRole("admin"); // S1: pages must not rely on the layout for auth
   const [{ id }, sp] = await Promise.all([params, searchParams]);
   const [p, owners, cleaners] = await Promise.all([getPropertyDetail(id), getOwners(), getCleaners()]);
   if (!p) notFound();
@@ -38,7 +40,7 @@ export default async function EditProperty({ params, searchParams }: PageProps<"
               {p.photos.map((ph) => (
                 <li key={ph.id} className="group relative overflow-hidden rounded-lg border border-line">
                   {/* eslint-disable-next-line @next/next/no-img-element -- remote Storage URL; next/image needs a configured host */}
-                  <img src={ph.url} alt={ph.alt ?? p.name} className="aspect-[4/3] w-full object-cover" />
+                  <img src={ph.url} alt={ph.alt ?? p.name} loading="lazy" decoding="async" className="aspect-[4/3] w-full object-cover" />
                   <form action={deletePhotoAction.bind(null, p.id, ph.id)} className="absolute right-1 top-1">
                     <button type="submit" aria-label="Remove photo" className="ui rounded-full bg-white/90 px-2 py-0.5 text-[0.65rem] text-charcoal opacity-0 transition group-hover:opacity-100 focus:opacity-100">Remove</button>
                   </form>

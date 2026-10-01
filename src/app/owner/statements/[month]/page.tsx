@@ -24,7 +24,7 @@ export default async function OwnerStatement({ params }: Props) {
   const owner = await loadOwner();
   if (!owner) return <AlmostThere />;
   const data = await getOwnerData(owner);
-  const s = statementFor(month, data, owner);
+  const s = statementFor(month, data);
   const transfer = (l: (typeof s.lines)[number]) =>
     l.payout ? (
       <span className="inline-flex items-center gap-2">
@@ -64,7 +64,7 @@ export default async function OwnerStatement({ params }: Props) {
       </div>
 
       <DataTable
-        columns={[{ label: "Home" }, { label: "Dates" }, { label: "Guest" }, { label: "Source" }, { label: "Nights", align: "right" }, { label: "Gross", align: "right" }, { label: "Fee", align: "right" }, { label: "Net", align: "right" }, { label: "Transfer" }]}
+        columns={[{ label: "Home", wrap: true }, { label: "Dates" }, { label: "Guest", wrap: true }, { label: "Source" }, { label: "Nights", align: "right" }, { label: "Gross", align: "right" }, { label: "Fee", align: "right" }, { label: "Net", align: "right" }, { label: "Transfer" }]}
         empty="No stays checked in this month."
         rows={s.lines.map((l) => [
           l.propertyName, fmtRange(l.booking.checkIn, l.booking.checkOut), l.booking.guest, l.booking.source,

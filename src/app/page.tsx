@@ -60,7 +60,6 @@ const pillars = [
 
 export default async function Home() {
   const properties = await getProperties();
-  const hero = properties[0];
   const questions = faqs(properties);
   return (
     <main>

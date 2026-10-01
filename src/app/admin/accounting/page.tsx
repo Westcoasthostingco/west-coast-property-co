@@ -5,10 +5,12 @@ import { getAllProperties, money } from "@/lib/data";
 import { getAllJobs } from "@/lib/cleaning";
 import { getBookingsDetailed, getPayoutsDetailed } from "@/lib/admin";
 import { lastMonths, monthLabel, monthlyMetrics } from "@/lib/metrics";
+import { requireRole } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Accounting" };
 
 export default async function Accounting() {
+  await requireRole("admin"); // S1: pages must not rely on the layout for auth
   const [props, bookings, payouts, jobs] = await Promise.all([getAllProperties(), getBookingsDetailed(), getPayoutsDetailed(), getAllJobs()]);
   const months = lastMonths(12);
   const metrics = monthlyMetrics(bookings, props, months);

@@ -31,7 +31,7 @@ export default function PropertyForm({ property: p, owners, cleaners, action }: 
           <Field label="Description" className="sm:col-span-2"><textarea name="description" rows={5} defaultValue={p?.description} className={inputClass} /></Field>
           <Field label="Amenities" hint="Comma separated" className="sm:col-span-2"><input name="amenities" defaultValue={p?.amenities.join(", ")} className={inputClass} /></Field>
           <label className="ui flex items-center gap-2 text-sm text-charcoal">
-            <input type="checkbox" name="published" defaultChecked={p?.published ?? false} className="h-4 w-4 accent-[#6ba8bc]" /> Published on the public site
+            <input type="checkbox" name="published" defaultChecked={p?.published ?? false} className="h-4 w-4 accent-[#2f6f86]" /> Published on the public site
           </label>
         </div>
       </Card>
@@ -44,7 +44,7 @@ export default function PropertyForm({ property: p, owners, cleaners, action }: 
           <Field label="Minimum nights"><input name="minNights" type="number" min={1} defaultValue={p?.minNights ?? 2} className={inputClass} /></Field>
           <Field label="Nightly rate ($)"><input name="nightlyRate" type="number" min={0} step={1} required defaultValue={p?.nightlyRate} className={inputClass} /></Field>
           <Field label="Cleaning fee ($)"><input name="cleaningFee" type="number" min={0} step={1} defaultValue={p?.cleaningFee ?? 0} className={inputClass} /></Field>
-          <Field label="Lodging tax (%)" hint="e.g. 10.5"><input name="taxRatePercent" type="number" min={0} step={0.01} defaultValue={p ? p.taxRateBps / 100 : 0} className={inputClass} /></Field>
+          <Field label="Lodging tax (%)" hint="e.g. 10.50; saved as basis points"><input name="taxRatePercent" type="number" min={0} max={100} step={0.01} inputMode="decimal" defaultValue={p ? (p.taxRateBps / 100).toFixed(2) : "0.00"} className={inputClass} /></Field>
           <Field label="Fee override (%)" hint="Blank uses the owner's rate"><input name="feePercentOverride" type="number" min={0} max={100} step={0.5} defaultValue={p?.feePercentOverride ?? ""} className={inputClass} /></Field>
         </div>
       </Card>
@@ -64,6 +64,23 @@ export default function PropertyForm({ property: p, owners, cleaners, action }: 
               {cleaners.filter((c) => c.active).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </Field>
+        </div>
+      </Card>
+
+      <Card title="Local conditions">
+        <p className="ui mb-3 text-xs text-muted">Optional. Fill in whichever applies and the listing page shows a live tide or snow widget; leave blank to show neither.</p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="NOAA tide station" hint="e.g. 9446484 Tacoma. Station id from tidesandcurrents.noaa.gov; waterfront homes only" className="sm:col-span-2">
+            <input name="tideStationId" inputMode="numeric" pattern="[0-9]*" defaultValue={p?.tideStationId ?? ""} placeholder="9446484" className={inputClass} />
+          </Field>
+          <fieldset className="sm:col-span-2">
+            <legend className="caps-tight mb-2 block text-[0.62rem] text-muted">Mountain conditions</legend>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <Field label="Ski resort name" hint="e.g. White Pass"><input name="skiResortName" defaultValue={p?.skiResort?.name ?? ""} className={inputClass} /></Field>
+              <Field label="Latitude" hint="Decimal degrees"><input name="skiLat" type="number" step="any" min={-90} max={90} inputMode="decimal" defaultValue={p?.skiResort?.lat ?? ""} placeholder="46.6367" className={inputClass} /></Field>
+              <Field label="Longitude" hint="Decimal degrees, negative for west"><input name="skiLng" type="number" step="any" min={-180} max={180} inputMode="decimal" defaultValue={p?.skiResort?.lng ?? ""} placeholder="-121.3911" className={inputClass} /></Field>
+            </div>
+          </fieldset>
         </div>
       </Card>
 

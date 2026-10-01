@@ -3,10 +3,12 @@ import { Card, Field, Notice, PageHeader, buttonClass, inputClass } from "@/comp
 import { createBookingAction } from "@/app/admin/actions";
 import { getAllProperties, money } from "@/lib/data";
 import { BOOKING_SOURCES, sourceLabel, todayISO } from "@/lib/admin";
+import { requireRole } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Manual booking" };
 
 export default async function NewBooking({ searchParams }: PageProps<"/admin/bookings/new">) {
+  await requireRole("admin"); // S1: pages must not rely on the layout for auth
   const sp = await searchParams;
   const props = await getAllProperties();
   const preset = typeof sp.property === "string" ? sp.property : "";

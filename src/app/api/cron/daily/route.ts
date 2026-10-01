@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { cronAuthorized } from "@/lib/cron-auth";
 import { GET as ical } from "../ical/route";
 import { GET as sweep } from "../sweep/route";
 import { GET as payouts } from "../payouts/route";
@@ -8,9 +9,7 @@ import { GET as payouts } from "../payouts/route";
 // route runs all scheduled work in order. On Pro, schedule the three routes
 // separately in vercel.json (sweep and ical hourly) and drop this one.
 export async function GET(req: Request) {
-  if (req.headers.get("authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!cronAuthorized(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const results: Record<string, unknown> = {};
   for (const [name, handler] of [["ical", ical], ["sweep", sweep], ["payouts", payouts]] as const) {
     try {

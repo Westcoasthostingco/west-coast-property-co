@@ -3,12 +3,14 @@ import Link from "next/link";
 import { DataTable, LinkButton, Notice, PageHeader, Pill, inputClass } from "@/components/admin/ui";
 import { getAllProperties, getBookings, money, nameMap } from "@/lib/data";
 import { fmtDate, nightsBetween, todayISO } from "@/lib/admin";
+import { requireRole } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Bookings" };
 
 const statuses = ["confirmed", "pending", "completed", "cancelled"];
 
 export default async function AdminBookings({ searchParams }: PageProps<"/admin/bookings">) {
+  await requireRole("admin"); // S1: pages must not rely on the layout for auth
   const sp = await searchParams;
   const status = typeof sp.status === "string" ? sp.status : "";
   const propertyId = typeof sp.property === "string" ? sp.property : "";

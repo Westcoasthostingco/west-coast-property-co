@@ -7,6 +7,7 @@ import { addNoteAction, cancelBookingAction, refundBookingAction } from "@/app/a
 import { getAllProperties, getOwners, money, nameMap } from "@/lib/data";
 import { getAllJobs, getCleaners } from "@/lib/cleaning";
 import { cleanerName, fmtDate, fmtDateTime, getBookingDetail, getPayoutsDetailed, nightsBetween } from "@/lib/admin";
+import { requireRole } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Booking" };
 
@@ -15,6 +16,7 @@ const Row = ({ k, v, strong = false }: { k: string; v: React.ReactNode; strong?:
 );
 
 export default async function BookingDetailPage({ params, searchParams }: PageProps<"/admin/bookings/[id]">) {
+  await requireRole("admin"); // S1: pages must not rely on the layout for auth
   const [{ id }, sp] = await Promise.all([params, searchParams]);
   const [b, props, owners, payouts, jobs, cleaners] = await Promise.all([getBookingDetail(id), getAllProperties(), getOwners(), getPayoutsDetailed(), getAllJobs(), getCleaners()]);
   if (!b) notFound();

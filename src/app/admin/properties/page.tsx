@@ -4,10 +4,12 @@ import PropertyImage from "@/components/PropertyImage";
 import { DataTable, LinkButton, Notice, PageHeader, Pill } from "@/components/admin/ui";
 import { getAllProperties, getBookings, getOwners, money, nameMap } from "@/lib/data";
 import { todayISO } from "@/lib/admin";
+import { requireRole } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Properties" };
 
 export default async function AdminProperties({ searchParams }: PageProps<"/admin/properties">) {
+  await requireRole("admin"); // S1: pages must not rely on the layout for auth
   const sp = await searchParams;
   const [props, owners, bookings] = await Promise.all([getAllProperties(), getOwners(), getBookings()]);
   const ownerName = nameMap(owners);

@@ -9,7 +9,9 @@ create extension if not exists btree_gist with schema extensions;
 
 create type booking_source as enum ('direct', 'airbnb', 'vrbo', 'booking_com', 'owner', 'manual');
 create type booking_status as enum ('pending', 'confirmed', 'cancelled');
-create type payout_status as enum ('scheduled', 'processing', 'paid', 'failed', 'reversed');
+-- 'offline': the guest paid a channel (Airbnb/Vrbo) that pays the owner directly; recorded
+-- for statements, never transferred by the payout cron.
+create type payout_status as enum ('scheduled', 'processing', 'paid', 'failed', 'reversed', 'offline');
 
 create table owners (
   id uuid primary key default gen_random_uuid(),
@@ -134,6 +136,8 @@ create table payouts (
   status payout_status not null default 'scheduled',
   stripe_transfer_id text,
   last_error text,
+  attempts int not null default 0,     -- bumped by trigger each time the cron claims the row; part of the Stripe idempotency key
+  updated_at timestamptz not null default now(),
   created_at timestamptz not null default now()
 );
 
@@ -205,7 +209,8 @@ create table maintenance_tickets (
 create table stripe_events (
   id text primary key,
   type text not null,
-  received_at timestamptz not null default now()
+  received_at timestamptz not null default now(),
+  processed_at timestamptz                 -- null until the webhook handler succeeded
 );
 
 create table audit_log (
@@ -216,6 +221,42 @@ create table audit_log (
   detail jsonb,
   created_at timestamptz not null default now()
 );
+
+-- Triggers that keep derived rows consistent regardless of which code path writes.
+
+-- payouts: track updated_at (the payout cron reclaims rows stuck in 'processing' for
+-- over two hours) and count claims so each Stripe attempt gets a fresh idempotency key.
+create or replace function payouts_touch() returns trigger language plpgsql as $$
+begin
+  new.updated_at := now();
+  if new.status = 'processing' and old.status is distinct from 'processing' then
+    new.attempts := old.attempts + 1;
+  end if;
+  return new;
+end $$;
+create trigger payouts_touch before update on payouts
+  for each row execute function payouts_touch();
+
+-- bookings -> cleaning_jobs: every confirmed stay (direct, manual or imported from a
+-- channel feed) has a turnover on its check-out day; a cancelled stay (admin, channel
+-- feed removal or full Stripe refund) has its open turnover skipped. App code does the
+-- same inline; this makes it hold for any path that forgets.
+create or replace function sync_cleaning_job() returns trigger language plpgsql as $$
+begin
+  if new.status = 'confirmed' then
+    insert into cleaning_jobs (property_id, booking_id, scheduled_date, window_start, window_end, cleaner_id, status)
+    select new.property_id, new.id, new.check_out, '11:00', '16:00', pi.default_cleaner_id,
+           case when pi.default_cleaner_id is null then 'unassigned'::cleaning_status else 'assigned'::cleaning_status end
+    from (select 1) x left join property_integrations pi on pi.property_id = new.property_id
+    on conflict (booking_id) do update set scheduled_date = excluded.scheduled_date
+      where cleaning_jobs.status in ('unassigned', 'assigned');
+  elsif new.status = 'cancelled' then
+    update cleaning_jobs set status = 'skipped' where booking_id = new.id and status in ('unassigned', 'assigned');
+  end if;
+  return new;
+end $$;
+create trigger bookings_sync_cleaning after insert or update of status, check_out on bookings
+  for each row execute function sync_cleaning_job();
 
 -- Public listing view: explicit columns only, never secrets or internal ids.
 create view property_listings with (security_invoker = true) as

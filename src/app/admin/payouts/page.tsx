@@ -7,12 +7,16 @@ import { retryPayoutAction, runPayoutsAction } from "@/app/admin/actions";
 import { getAllProperties, getBookings, getOwners, money, nameMap } from "@/lib/data";
 import { fmtDate, getPayoutsDetailed, todayISO } from "@/lib/admin";
 import { supabaseConfigured } from "@/lib/supabase";
+import { requireRole } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Payouts" };
 
 export default async function AdminPayouts({ searchParams }: PageProps<"/admin/payouts">) {
+  await requireRole("admin"); // S1: pages must not rely on the layout for auth
   const sp = await searchParams;
   const status = typeof sp.status === "string" ? sp.status : "";
+  const PAGE_SIZE = 50;
+  const page = Math.max(1, Number(typeof sp.page === "string" ? sp.page : 1) || 1);
   const [payouts, owners, props, bookings] = await Promise.all([getPayoutsDetailed(), getOwners(), getAllProperties(), getBookings()]);
   const ownerName = nameMap(owners);
   const propertyOf = (bookingId: string) => nameMap(props)(bookings.find((b) => b.id === bookingId)?.propertyId ?? "");
@@ -21,7 +25,11 @@ export default async function AdminPayouts({ searchParams }: PageProps<"/admin/p
   const scheduled = payouts.filter((x) => x.status === "scheduled" && x.releaseOn > today);
   const failed = payouts.filter((x) => x.status === "failed");
   const paidThisMonth = payouts.filter((x) => x.status === "paid" && x.releaseOn.startsWith(today.slice(0, 7)));
-  const list = status ? payouts.filter((x) => x.status === status) : payouts;
+  const filtered = (status ? payouts.filter((x) => x.status === status) : payouts).slice().sort((a, b) => (a.releaseOn < b.releaseOn ? 1 : a.releaseOn > b.releaseOn ? -1 : 0));
+  const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const current = Math.min(page, pages);
+  const list = filtered.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
+  const pageHref = (n: number) => `/admin/payouts?${new URLSearchParams({ ...(status ? { status } : {}), ...(n > 1 ? { page: String(n) } : {}) }).toString()}`.replace(/\?$/, "");
   const canRun = supabaseConfigured && Boolean(process.env.CRON_SECRET);
 
   return (
@@ -71,6 +79,16 @@ export default async function AdminPayouts({ searchParams }: PageProps<"/admin/p
           <span key="s"><Pill value={x.status} />{x.lastError && x.status !== "failed" && <span className="ml-2 text-xs text-muted" title={x.lastError}>held</span>}</span>,
           x.transferId ? <span key="t" className="text-xs text-muted">{x.transferId}</span> : "—",
         ])} />
+      {filtered.length > PAGE_SIZE && (
+        <nav aria-label="Payout pages" className="ui flex flex-wrap items-center justify-between gap-3 text-xs text-muted">
+          <span>Showing {(current - 1) * PAGE_SIZE + 1}–{Math.min(current * PAGE_SIZE, filtered.length)} of {filtered.length}, newest release first</span>
+          <span className="flex gap-2">
+            {current > 1 ? <Link href={pageHref(current - 1)} className={ghostButtonClass}>← Newer</Link> : <span className={`${ghostButtonClass} opacity-50`} aria-disabled>← Newer</span>}
+            <span className="self-center">Page {current} of {pages}</span>
+            {current < pages ? <Link href={pageHref(current + 1)} className={ghostButtonClass}>Older →</Link> : <span className={`${ghostButtonClass} opacity-50`} aria-disabled>Older →</span>}
+          </span>
+        </nav>
+      )}
     </>
   );
 }

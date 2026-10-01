@@ -4,10 +4,12 @@ import { Card, DataTable, PageHeader, Pill } from "@/components/admin/ui";
 import { getAllProperties, nameMap } from "@/lib/data";
 import { fmtDateTime, getAllIcalFeeds, integrationStatuses, sourceLabel } from "@/lib/admin";
 import { supabaseConfigured } from "@/lib/supabase";
+import { requireRole } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Integrations" };
 
 export default async function Integrations() {
+  await requireRole("admin"); // S1: pages must not rely on the layout for auth
   const [props, feeds] = await Promise.all([getAllProperties(), getAllIcalFeeds()]);
   const propertyName = nameMap(props);
   const statuses = integrationStatuses();
@@ -41,7 +43,7 @@ export default async function Integrations() {
       <section className="space-y-2">
         <div className="flex items-baseline justify-between">
           <h2 className="caps-tight text-[0.68rem] text-deep">iCal feeds</h2>
-          <p className="ui text-xs text-muted">Edit URLs on each home&apos;s page. Synced hourly by cron.</p>
+          <p className="ui text-xs text-muted">Edit URLs on each home&apos;s page. Synced once a day by cron.</p>
         </div>
         {!supabaseConfigured && <p className="ui text-xs text-muted">Sample mode: feeds are stored in Supabase, so none are listed.</p>}
         <DataTable head={["Home", "Channel", "Last sync", "Last error", "Export feed"]} empty="No channel feeds yet."

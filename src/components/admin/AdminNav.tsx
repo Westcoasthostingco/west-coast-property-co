@@ -18,12 +18,12 @@ const nav: [string, string][] = [
 export default function AdminNav() {
   const path = usePathname();
   return (
-    <nav aria-label="Admin" className="-mx-4 flex gap-1 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-col md:overflow-visible md:px-0">
+    <nav aria-label="Admin" className="flex min-w-0 flex-wrap gap-1 pb-1 md:flex-col md:flex-nowrap">
       {nav.map(([href, label]) => {
         const active = href === "/admin" ? path === "/admin" : path.startsWith(href);
         return (
           <Link key={href} href={href} aria-current={active ? "page" : undefined}
-            className={`caps-tight shrink-0 rounded-full px-3 py-1.5 text-[0.68rem] transition md:rounded-lg ${active ? "bg-deep text-white" : "text-muted hover:bg-mist hover:text-charcoal"}`}>
+            className={`caps-tight rounded-full px-3 py-1.5 text-[0.68rem] transition md:rounded-lg ${active ? "bg-deep text-white" : "text-muted hover:bg-mist hover:text-charcoal"}`}>
             {label}
           </Link>
         );

@@ -41,7 +41,7 @@ export type Booking = {
 
 export type Review = { id: string; propertyId: string; guest: string; rating: number; body: string; status: "published" | "pending" };
 
-export type Payout = { id: string; ownerId: string; bookingId: string; gross: number; fee: number; net: number; status: "scheduled" | "processing" | "paid" | "failed" | "reversed"; releaseOn: string };
+export type Payout = { id: string; ownerId: string; bookingId: string; gross: number; fee: number; net: number; status: "scheduled" | "processing" | "paid" | "failed" | "reversed" | "offline"; releaseOn: string };
 
 export const owners: Owner[] = [
   { id: "o1", name: "Dana Whitfield", email: "dana@example.com", payoutsReady: true, feePercent: 18 },
@@ -73,12 +73,16 @@ function sampleBookings(): Booking[] {
         const checkIn = new Date(Date.UTC(base.getUTCFullYear(), month, day));
         const checkOut = new Date(Date.UTC(base.getUTCFullYear(), month, day + nights));
         const iso = (d: Date) => d.toISOString().slice(0, 10);
-        const future = checkIn > today;
+        // Same rule as the database mapper: a stay is completed once its check-out date has
+        // passed; a guest who checked in today (or is mid-stay) is still "confirmed".
+        const todayIso = today.toISOString().slice(0, 10);
+        const ended = iso(checkOut) < todayIso;
+        const future = iso(checkIn) > todayIso;
         const subtotal = nights * p.nightlyRate;
         out.push({
           id: `b${pi}${m + 2}${k}`, propertyId: p.id, guest: guests[Math.floor(rnd() * guests.length)],
           checkIn: iso(checkIn), checkOut: iso(checkOut), source: sources[Math.floor(rnd() * sources.length)],
-          status: future ? (rnd() < 0.15 ? "pending" : "confirmed") : "completed",
+          status: ended ? "completed" : future && rnd() < 0.15 ? "pending" : "confirmed",
           subtotal, total: subtotal + p.cleaningFee,
         });
         day += nights + 1 + Math.floor(rnd() * 3);

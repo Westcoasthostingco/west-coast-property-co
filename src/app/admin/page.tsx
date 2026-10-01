@@ -6,8 +6,10 @@ import { getAllProperties, getBookings, getPayouts, money, nameMap } from "@/lib
 import { getAllJobs } from "@/lib/cleaning";
 import { addDays, fmtDate, getOpenMaintenanceCount, todayISO } from "@/lib/admin";
 import { lastMonths, monthLabel, monthlyMetrics } from "@/lib/metrics";
+import { requireRole } from "@/lib/auth";
 
 export default async function AdminHome() {
+  await requireRole("admin"); // S1: pages must not rely on the layout for auth
   const [props, bookings, payouts, jobs, openMaintenance] = await Promise.all([
     getAllProperties(), getBookings(), getPayouts(), getAllJobs(), getOpenMaintenanceCount(),
   ]);
@@ -26,7 +28,9 @@ export default async function AdminHome() {
 
   const active = bookings.filter((b) => b.status === "confirmed" || b.status === "pending");
   const checkIns = active.filter((b) => b.checkIn >= today && b.checkIn <= weekEnd).sort((a, b) => a.checkIn.localeCompare(b.checkIn));
-  const checkOuts = active.filter((b) => b.checkOut >= today && b.checkOut <= weekEnd).sort((a, b) => a.checkOut.localeCompare(b.checkOut));
+  // Turnovers: every non-cancelled stay checking out in the window, including ones the
+  // date rule has already marked completed, so the tile matches the cleaning board.
+  const checkOuts = bookings.filter((b) => b.status !== "cancelled" && b.status !== "pending" && b.checkOut >= today && b.checkOut <= weekEnd).sort((a, b) => a.checkOut.localeCompare(b.checkOut));
   const unassigned = jobs.filter((j) => j.status === "unassigned" && j.scheduledDate >= today && j.scheduledDate <= addDays(today, 14));
 
   const stayRow = (kind: "in" | "out") => (b: (typeof bookings)[number]) => [

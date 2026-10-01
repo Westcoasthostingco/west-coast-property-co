@@ -6,6 +6,7 @@ import { assignCleanerAction, setJobStatusAction } from "@/app/admin/actions";
 import { getAllProperties, money, nameMap } from "@/lib/data";
 import { getAllJobs, getCleaners, type CleaningJob, type CleaningStatus } from "@/lib/cleaning";
 import { addDays, fmtDate, jobsInRange, todayISO } from "@/lib/admin";
+import { requireRole } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Cleaning" };
 
@@ -17,6 +18,7 @@ const fmtTime = (t?: string | null) => {
 };
 
 export default async function CleaningBoard({ searchParams }: PageProps<"/admin/cleaning">) {
+  await requireRole("admin"); // S1: pages must not rely on the layout for auth
   const sp = await searchParams;
   const tab = sp.tab === "past" ? "past" : "upcoming";
   const cleanerFilter = typeof sp.cleaner === "string" ? sp.cleaner : "";
