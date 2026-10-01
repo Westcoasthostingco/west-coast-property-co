@@ -1,11 +1,12 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { clerkConfigured } from "@/lib/clerk-config";
 
 export type Role = "admin" | "owner" | "cleaner";
 
 // True once both Clerk keys are present. Without them the public site still
 // works; the portals show a "not set up yet" page instead of crashing.
-export const clerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY);
+export { clerkConfigured };
 
 // Preview-only bypass so Vercel Preview deployments can show the portals before
 // Clerk is configured. Honoured only on a Vercel preview/development deployment
