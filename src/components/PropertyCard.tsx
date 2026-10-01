@@ -1,11 +1,14 @@
 import Link from "next/link";
 import PropertyImage from "./PropertyImage";
 import { money, type Property } from "@/lib/data";
+import ConditionsCard from "./widgets/ConditionsCard";
 
 export default function PropertyCard({ p, wide = false }: { p: Property; wide?: boolean }) {
   return (
     <Link href={`/properties/${p.slug}`} className="group block">
       <PropertyImage slug={p.slug} name={p.name} className={`rounded-2xl transition group-hover:opacity-95 ${wide ? "aspect-[4/3]" : "aspect-[5/4]"}`} />
+      {/* Live tide or snow conditions for this home, under the photo */}
+      <ConditionsCard tideStationId={p.tideStationId} skiResort={p.skiResort} className="mt-3" />
       <div className="mt-3 flex items-start justify-between gap-3">
         <div>
           <p className="caps-tight text-[0.65rem] text-deep">{p.city}, {p.region}</p>
