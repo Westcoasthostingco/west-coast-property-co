@@ -29,7 +29,7 @@ export default async function OwnerInvoice({ params }: Props) {
     <>
       <PageHeader eyebrow="Invoice" title={invoice.id.toUpperCase()}
         intro={`Issued ${fmtDate(invoice.issuedOn, long)}, due ${fmtDate(invoice.dueOn, long)}.`}
-        actions={<Link href="/owner/invoices" className="caps-tight rounded-full border border-line px-4 py-2 text-[0.65rem] text-muted transition hover:border-teal hover:text-teal">All invoices</Link>} />
+        actions={<Link href="/owner/invoices" className="caps-tight rounded-full border border-line px-4 py-2 text-[0.65rem] text-muted transition hover:border-deep hover:text-deep">All invoices</Link>} />
 
       <div className="grid gap-4 lg:grid-cols-[1fr_280px]">
         <DataTable
@@ -43,7 +43,7 @@ export default async function OwnerInvoice({ params }: Props) {
             <Pill tone={invoiceTone(invoice.status)}>{invoice.status}</Pill>
           </div>
           <button type="button" disabled aria-describedby="pay-hint"
-            className="caps-tight mt-4 w-full cursor-not-allowed rounded-full bg-teal/40 px-5 py-2 text-[0.7rem] text-white">
+            className="caps-tight mt-4 w-full cursor-not-allowed rounded-full bg-deep/40 px-5 py-2 text-[0.7rem] text-white">
             Pay
           </button>
           <p id="pay-hint" className="ui mt-2 text-xs leading-relaxed text-muted">

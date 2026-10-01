@@ -13,14 +13,14 @@ const photos: Record<string, string[]> = {
   hero: ["/photos/the-grand-view-1.webp"],
 };
 
-export default function PropertyImage({ slug, name, className = "", crop = 0, priority = false }: { slug: string; name: string; className?: string; crop?: number; priority?: boolean }) {
+export default function PropertyImage({ slug, name, className = "", crop = 0, priority = false, sizes = "(min-width: 1024px) 33vw, 100vw" }: { slug: string; name: string; className?: string; crop?: number; priority?: boolean; sizes?: string }) {
   const scene = scenes[slug as keyof typeof scenes] ?? "harbor";
   const src = photos[slug]?.[crop];
   const position = /\babsolute\b|\bfixed\b/.test(className) ? "" : "relative";
   return (
     <div className={`overflow-hidden ${position} ${className}`}>
       {src ? (
-        <Image src={src} alt={name} fill priority={priority} sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" />
+        <Image src={src} alt={name} fill priority={priority} sizes={sizes} className="object-cover" />
       ) : (
         <Horizon scene={scene} align={crops[crop % crops.length]} label={`${name} illustration`} className="absolute inset-0 h-full w-full" />
       )}

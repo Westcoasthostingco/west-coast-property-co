@@ -5,10 +5,12 @@ import { getAllProperties, money } from "@/lib/data";
 import { getAllJobs } from "@/lib/cleaning";
 import { getBookingsDetailed, getPayoutsDetailed } from "@/lib/admin";
 import { lastMonths, monthLabel, monthlyMetrics } from "@/lib/metrics";
+import { requireRole } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Accounting" };
 
 export default async function Accounting() {
+  await requireRole("admin"); // S1: pages must not rely on the layout for auth
   const [props, bookings, payouts, jobs] = await Promise.all([getAllProperties(), getBookingsDetailed(), getPayoutsDetailed(), getAllJobs()]);
   const months = lastMonths(12);
   const metrics = monthlyMetrics(bookings, props, months);
@@ -45,7 +47,7 @@ export default async function Accounting() {
         {series.map((s) => (
           <Card key={s.title}>
             <div className="flex items-baseline justify-between">
-              <h2 className="caps-tight text-[0.68rem] text-sky">{s.title}</h2>
+              <h2 className="caps-tight text-[0.68rem] text-deep">{s.title}</h2>
               <span className="ui text-sm text-charcoal">{money(sum(s.points))} <span className="text-xs text-muted">12 mo</span></span>
             </div>
             <p className="ui text-[0.7rem] text-muted">{s.hint}</p>
@@ -61,7 +63,7 @@ export default async function Accounting() {
 
       <section className="space-y-3">
         <div>
-          <h2 className="caps-tight text-[0.68rem] text-sky">Revenue by home</h2>
+          <h2 className="caps-tight text-[0.68rem] text-deep">Revenue by home</h2>
           <p className="ui text-[0.7rem] text-muted">Same scale per chart; compare shape, read totals.</p>
         </div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

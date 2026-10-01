@@ -12,7 +12,7 @@ export default async function OwnerStatements() {
   const owner = await loadOwner();
   if (!owner) return <AlmostThere />;
   const data = await getOwnerData(owner);
-  const rows = statements(data, owner);
+  const rows = statements(data);
   const sum = (k: "gross" | "fee" | "cleaning" | "net" | "stays") => rows.reduce((s, r) => s + r[k], 0);
 
   return (
@@ -20,12 +20,12 @@ export default async function OwnerStatements() {
       <PageHeader eyebrow="Monthly statements" title="Statements"
         intro={`One statement per month. A stay lands on the month it checks in, which is when its payout releases. Our fee is ${owner.feePercent}% of the nights subtotal; cleaning fees pass straight through to cover the turnover.`} />
       <DataTable
-        columns={[{ label: "Month" }, { label: "Stays", align: "right" }, { label: "Nights revenue", align: "right" }, { label: "Management fee", align: "right" }, { label: "Cleaning passed through", align: "right" }, { label: "Net to you", align: "right" }]}
+        columns={[{ label: "Month" }, { label: "Net to you", align: "right" }, { label: "Stays", align: "right" }, { label: "Nights revenue", align: "right" }, { label: "Management fee", align: "right" }, { label: "Cleaning passed through", align: "right" }]}
         rows={rows.map((s) => [
-          <Link key="m" href={`/owner/statements/${s.month}`} className="text-teal-dark hover:underline">{monthTitle(s.month)}</Link>,
-          s.stays, money(s.gross), money(s.fee), money(s.cleaning), <span key="n" className="font-medium">{money(s.net)}</span>,
+          <Link key="m" href={`/owner/statements/${s.month}`} className="text-deep hover:underline">{monthTitle(s.month)}</Link>,
+          <span key="n" className="font-medium">{money(s.net)}</span>, s.stays, money(s.gross), money(s.fee), money(s.cleaning),
         ])}
-        footer={["Last 12 months", sum("stays"), money(sum("gross")), money(sum("fee")), money(sum("cleaning")), money(sum("net"))]}
+        footer={["Last 12 months", money(sum("net")), sum("stays"), money(sum("gross")), money(sum("fee")), money(sum("cleaning"))]}
       />
       <p className="ui text-xs text-muted">Open a month to see each stay and print or save it as a PDF.</p>
     </>

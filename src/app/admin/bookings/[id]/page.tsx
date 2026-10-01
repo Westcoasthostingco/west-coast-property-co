@@ -7,6 +7,7 @@ import { addNoteAction, cancelBookingAction, refundBookingAction } from "@/app/a
 import { getAllProperties, getOwners, money, nameMap } from "@/lib/data";
 import { getAllJobs, getCleaners } from "@/lib/cleaning";
 import { cleanerName, fmtDate, fmtDateTime, getBookingDetail, getPayoutsDetailed, nightsBetween } from "@/lib/admin";
+import { requireRole } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Booking" };
 
@@ -15,6 +16,7 @@ const Row = ({ k, v, strong = false }: { k: string; v: React.ReactNode; strong?:
 );
 
 export default async function BookingDetailPage({ params, searchParams }: PageProps<"/admin/bookings/[id]">) {
+  await requireRole("admin"); // S1: pages must not rely on the layout for auth
   const [{ id }, sp] = await Promise.all([params, searchParams]);
   const [b, props, owners, payouts, jobs, cleaners] = await Promise.all([getBookingDetail(id), getAllProperties(), getOwners(), getPayoutsDetailed(), getAllJobs(), getCleaners()]);
   if (!b) notFound();
@@ -29,15 +31,15 @@ export default async function BookingDetailPage({ params, searchParams }: PagePr
     <>
       <PageHeader eyebrow={property?.name ?? "Booking"} title={b.guest}
         intro={`${fmtDate(b.checkIn, { weekday: "short", month: "short", day: "numeric" })} → ${fmtDate(b.checkOut, { weekday: "short", month: "short", day: "numeric", year: "numeric" })} · ${nights} night${nights === 1 ? "" : "s"} · ${b.source}`}
-        actions={<><Pill value={b.status} /><Link href="/admin/bookings" className="ui text-sm text-teal hover:underline">All bookings</Link></>} />
+        actions={<><Pill value={b.status} /><Link href="/admin/bookings" className="ui text-sm text-deep hover:underline">All bookings</Link></>} />
       <Notice searchParams={sp} />
 
       <div className="grid gap-4 lg:grid-cols-3">
         <Card title="Guest">
           <dl className="ui space-y-1 text-sm">
             <div><dt className="text-muted">Name</dt><dd className="font-medium">{b.guest}</dd></div>
-            <div><dt className="text-muted">Email</dt><dd>{b.guestEmail ? <a href={`mailto:${b.guestEmail}`} className="text-teal hover:underline">{b.guestEmail}</a> : "—"}</dd></div>
-            <div><dt className="text-muted">Phone</dt><dd>{b.guestPhone ? <a href={`tel:${b.guestPhone}`} className="text-teal hover:underline">{b.guestPhone}</a> : "—"}</dd></div>
+            <div><dt className="text-muted">Email</dt><dd>{b.guestEmail ? <a href={`mailto:${b.guestEmail}`} className="text-deep hover:underline">{b.guestEmail}</a> : "—"}</dd></div>
+            <div><dt className="text-muted">Phone</dt><dd>{b.guestPhone ? <a href={`tel:${b.guestPhone}`} className="text-deep hover:underline">{b.guestPhone}</a> : "—"}</dd></div>
             <div><dt className="text-muted">Guests</dt><dd>{b.guestCount}</dd></div>
             <div><dt className="text-muted">Booked</dt><dd>{b.createdAt ? fmtDateTime(b.createdAt) : "—"}{b.cancelledAt && <> · cancelled {fmtDateTime(b.cancelledAt)}</>}</dd></div>
           </dl>
@@ -66,7 +68,7 @@ export default async function BookingDetailPage({ params, searchParams }: PagePr
           ) : <p className="ui text-sm text-muted">No payout row. {b.source === "Owner stay" ? "Owner stays carry no payout." : "A payout is created when payment is confirmed."}</p>}
           {job && (
             <p className="ui mt-3 border-t border-line pt-2 text-xs text-muted">
-              Turnover {fmtDate(job.scheduledDate)} · {cleanerName(job.cleanerId, cleaners)} · <Pill value={job.status} /> · <Link href="/admin/cleaning" className="text-teal hover:underline">board</Link>
+              Turnover {fmtDate(job.scheduledDate)} · {cleanerName(job.cleanerId, cleaners)} · <Pill value={job.status} /> · <Link href="/admin/cleaning" className="text-deep hover:underline">board</Link>
             </p>
           )}
         </Card>

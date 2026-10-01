@@ -10,7 +10,7 @@ import { formatDay, formatTime, relativeDay } from "./dates";
 type Props = { job: CleaningJob; property: PropertyInfo; photos: string[]; isToday: boolean; sampleMode: boolean };
 
 const btn = "ui inline-flex min-h-[48px] items-center justify-center rounded-full px-6 text-base font-medium transition-colors disabled:opacity-50";
-const btnPrimary = `${btn} bg-teal text-white hover:bg-teal-dark active:bg-teal-dark`;
+const btnPrimary = `${btn} bg-deep text-white hover:bg-dusk active:bg-dusk`;
 const btnQuiet = `${btn} border border-line bg-white text-charcoal hover:bg-mist active:bg-mist`;
 
 export default function JobView({ job, property, photos, isToday, sampleMode }: Props) {
@@ -103,21 +103,21 @@ export default function JobView({ job, property, photos, isToday, sampleMode }: 
     <>
       <header className="rounded-2xl border border-line bg-white p-5">
         <div className="flex items-start justify-between gap-3">
-          <p className="caps-tight text-xs text-sky">{relativeDay(job.scheduledDate)} · {formatDay(job.scheduledDate, { year: true })}</p>
+          <p className="caps-tight text-xs text-deep">{relativeDay(job.scheduledDate)} · {formatDay(job.scheduledDate, { year: true })}</p>
           <StatusChip status={status} />
         </div>
         <h1 className="display mt-2 text-4xl leading-tight">{property.name}</h1>
         <p className="mt-1 text-lg text-muted">{property.address ? `${property.address}, ${property.city}` : property.city}</p>
         {property.address && (
-          <a href={`https://maps.apple.com/?q=${encodeURIComponent(`${property.address}, ${property.city}`)}`} target="_blank" rel="noreferrer" className="ui mt-2 inline-flex min-h-[44px] items-center text-base text-teal-dark underline decoration-wave underline-offset-4">Open in Maps</a>
+          <a href={`https://maps.apple.com/?q=${encodeURIComponent(`${property.address}, ${property.city}`)}`} target="_blank" rel="noreferrer" className="ui mt-2 inline-flex min-h-[44px] items-center text-base text-deep underline decoration-wave underline-offset-4">Open in Maps</a>
         )}
         <dl className="mt-4 grid grid-cols-2 gap-4 border-t border-line pt-4 text-base">
           <div>
-            <dt className="caps-tight text-[11px] text-sky">Clean window</dt>
+            <dt className="caps-tight text-[11px] text-deep">Clean window</dt>
             <dd className="mt-0.5 font-medium">{job.windowStart ? `${formatTime(job.windowStart)} – ${formatTime(job.windowEnd) || "whenever"}` : "Flexible"}</dd>
           </div>
           <div>
-            <dt className="caps-tight text-[11px] text-sky">Next check-in</dt>
+            <dt className="caps-tight text-[11px] text-deep">Next check-in</dt>
             <dd className="mt-0.5 font-medium">{job.nextCheckIn ? `${formatDay(job.nextCheckIn)} · ${formatTime(property.checkInTime)}` : "Nobody yet"}</dd>
           </div>
         </dl>
@@ -125,7 +125,7 @@ export default function JobView({ job, property, photos, isToday, sampleMode }: 
 
       {/* Door code: fetched on tap, only released on the day of the clean. */}
       <section className="rounded-2xl border border-line bg-white p-5">
-        <h2 className="caps text-xs text-sky">Door code</h2>
+        <h2 className="caps text-xs text-deep">Door code</h2>
         {door?.code ? (
           <div className="mt-3">
             <p className="display text-5xl tracking-[0.2em] text-charcoal">{door.code}</p>
@@ -142,7 +142,7 @@ export default function JobView({ job, property, photos, isToday, sampleMode }: 
 
       <section className="rounded-2xl border border-line bg-white p-5">
         <div className="flex items-baseline justify-between">
-          <h2 className="caps text-xs text-sky">Checklist</h2>
+          <h2 className="caps text-xs text-deep">Checklist</h2>
           <p className="text-sm text-muted">{remaining === 0 ? "All ticked" : `${remaining} to go`}</p>
         </div>
         <ul className="mt-3 divide-y divide-line">
@@ -155,7 +155,7 @@ export default function JobView({ job, property, photos, isToday, sampleMode }: 
                 aria-pressed={c.done}
                 className="flex min-h-[56px] w-full items-center gap-4 py-2 text-left disabled:cursor-default"
               >
-                <span aria-hidden className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${c.done ? "border-teal bg-teal text-white" : "border-line bg-white"}`}>
+                <span aria-hidden className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${c.done ? "border-deep bg-deep text-white" : "border-line bg-white"}`}>
                   {c.done && <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M4 10l4 4 8-8" /></svg>}
                 </span>
                 <span className={`text-lg ${c.done ? "text-muted line-through" : "text-charcoal"}`}>{c.label}</span>
@@ -167,7 +167,7 @@ export default function JobView({ job, property, photos, isToday, sampleMode }: 
       </section>
 
       <section className="rounded-2xl border border-line bg-white p-5">
-        <h2 className="caps text-xs text-sky">Photos</h2>
+        <h2 className="caps text-xs text-deep">Photos</h2>
         <p className="mt-2 text-base text-muted">{photoCount === 0 ? "A few shots of each room when you're done helps the team and the owner." : `${photoCount} ${photoCount === 1 ? "photo" : "photos"} on this job.`}</p>
         {photos.length > 0 && (
           <div className="mt-3 grid grid-cols-3 gap-2">
@@ -187,14 +187,14 @@ export default function JobView({ job, property, photos, isToday, sampleMode }: 
       </section>
 
       <section className="rounded-2xl border border-line bg-white p-5">
-        <label htmlFor="notes" className="caps text-xs text-sky">Notes</label>
+        <label htmlFor="notes" className="caps text-xs text-deep">Notes</label>
         <textarea
           id="notes"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={4}
           placeholder="Anything the team or the next cleaner should know."
-          className="mt-3 w-full rounded-xl border border-line bg-cream p-3 text-lg leading-relaxed text-charcoal placeholder:text-muted/70 focus:border-teal focus:outline-none"
+          className="mt-3 w-full rounded-xl border border-line bg-cream p-3 text-lg leading-relaxed text-charcoal placeholder:text-muted/70 focus:border-deep focus:outline-none"
         />
         <div className="mt-3 flex items-center justify-between gap-3">
           <p className="text-sm text-muted">{notesState ?? (notes !== (job.notes ?? "") ? "Unsaved changes" : "")}</p>
@@ -203,7 +203,7 @@ export default function JobView({ job, property, photos, isToday, sampleMode }: 
       </section>
 
       <section className="rounded-2xl border border-line bg-white p-5">
-        <h2 className="caps text-xs text-sky">Something off?</h2>
+        <h2 className="caps text-xs text-deep">Something off?</h2>
         {!issueOpen ? (
           <>
             <p className="mt-2 text-base text-muted">Broken, missing, or damaged? Let the team know and they&apos;ll sort it.</p>
@@ -212,14 +212,14 @@ export default function JobView({ job, property, photos, isToday, sampleMode }: 
         ) : (
           <form ref={issueForm} action={onIssue} className="mt-3 space-y-3">
             <div>
-              <label htmlFor="issue-title" className="caps-tight text-[11px] text-sky">What is it?</label>
-              <input id="issue-title" name="title" required maxLength={200} placeholder="e.g. Hot tub cover torn" className="mt-1 min-h-[48px] w-full rounded-xl border border-line bg-cream px-3 text-lg text-charcoal placeholder:text-muted/70 focus:border-teal focus:outline-none" />
+              <label htmlFor="issue-title" className="caps-tight text-[11px] text-deep">What is it?</label>
+              <input id="issue-title" name="title" required maxLength={200} placeholder="e.g. Hot tub cover torn" className="mt-1 min-h-[48px] w-full rounded-xl border border-line bg-cream px-3 text-lg text-charcoal placeholder:text-muted/70 focus:border-deep focus:outline-none" />
             </div>
             <div>
-              <label htmlFor="issue-detail" className="caps-tight text-[11px] text-sky">Details</label>
-              <textarea id="issue-detail" name="detail" rows={3} maxLength={4000} placeholder="Where it is, how bad, anything else." className="mt-1 w-full rounded-xl border border-line bg-cream p-3 text-lg leading-relaxed text-charcoal placeholder:text-muted/70 focus:border-teal focus:outline-none" />
+              <label htmlFor="issue-detail" className="caps-tight text-[11px] text-deep">Details</label>
+              <textarea id="issue-detail" name="detail" rows={3} maxLength={4000} placeholder="Where it is, how bad, anything else." className="mt-1 w-full rounded-xl border border-line bg-cream p-3 text-lg leading-relaxed text-charcoal placeholder:text-muted/70 focus:border-deep focus:outline-none" />
             </div>
-            {issueMsg && <p className="text-base text-teal-dark">{issueMsg}</p>}
+            {issueMsg && <p className="text-base text-deep">{issueMsg}</p>}
             <div className="flex gap-3">
               <button type="button" onClick={() => { setIssueOpen(false); setIssueMsg(null); }} className={`${btnQuiet} flex-1`}>Cancel</button>
               <button type="submit" disabled={pending} className={`${btnPrimary} flex-1`}>Send to team</button>
@@ -235,11 +235,11 @@ export default function JobView({ job, property, photos, isToday, sampleMode }: 
       {/* Sticky action bar */}
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-cream/95 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur">
         <div className="mx-auto max-w-xl">
-          {toast && <p role="status" className="mb-2 text-center text-sm text-teal-dark">{toast}</p>}
+          {toast && <p role="status" className="mb-2 text-center text-sm text-deep">{toast}</p>}
           {status === "in_progress" ? (
             <button type="button" onClick={onDone} disabled={pending} className={`${btnPrimary} min-h-[56px] w-full text-lg`}>{pending ? "Saving…" : "Mark done"}</button>
           ) : done ? (
-            <div className={`${btn} min-h-[56px] w-full border border-wave bg-mist text-lg text-teal-dark`}>Done. Thank you!</div>
+            <div className={`${btn} min-h-[56px] w-full border border-wave bg-mist text-lg text-deep`}>Done. Thank you!</div>
           ) : (
             <button type="button" onClick={onStart} disabled={pending} className={`${btnPrimary} min-h-[56px] w-full text-lg`}>{pending ? "Starting…" : "Start job"}</button>
           )}

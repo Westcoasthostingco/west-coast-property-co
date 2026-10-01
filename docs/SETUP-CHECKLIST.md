@@ -8,8 +8,11 @@ Status key: [ ] todo, [x] done. Use one business email as the owner of every acc
 - [x] GitHub repo: Westcoasthostingco/west-coast-property-co
 - [x] Vercel: linked, env vars from `.env.example`. Currently Hobby plan (max 2 cron jobs, daily): a single `/api/cron/daily` runs iCal sync, hold sweep and payouts at 17:00 UTC. On Pro, schedule `/api/cron/ical` and `/api/cron/sweep` hourly and `/api/cron/payouts` daily in vercel.json
 - [ ] Supabase (Pro for PITR): run `supabase/schema.sql` then `supabase/seed.sql`; create `property-photos` (public) and `cleaning-photos` (private) buckets; set each owner row's `clerk_user_id`
-- [ ] Clerk: production instance on the domain; set each user's publicMetadata `{"role":"admin"}` or `"owner"`; add Clerk as a third-party auth provider in Supabase (Authentication -> Sign In / Providers -> Third-party -> Clerk)
-- [ ] Stripe: enable Connect (Express); test and live keys; webhook endpoint; onboarding link flow
+- [ ] Clerk: production instance on the domain; add Clerk as a third-party auth provider in Supabase (Authentication -> Sign In / Providers -> Third-party -> Clerk)
+- [ ] Clerk admin role: in the Clerk dashboard open Users -> the business owner's account -> Metadata -> Public, and set `{"role": "admin"}`. Repeat with `"owner"` or `"cleaner"` for each owner and cleaner (the `user.created` webhook sets these automatically when the email matches an `owners` or `cleaners` row). Without the role, `/admin` returns the unauthorized page.
+- [ ] Stripe: enable Connect (Express); test and live keys; onboarding link flow
+- [ ] Stripe webhook endpoint: Developers -> Webhooks -> Add endpoint, URL `https://<domain>/api/webhooks/stripe`, events `checkout.session.completed`, `checkout.session.expired`, `account.updated`, `charge.refunded`; copy the signing secret into `STRIPE_WEBHOOK_SECRET` in Vercel. Do this for test and live mode separately.
+- [ ] `CRON_SECRET` (required): set any long random string in Vercel for every environment. Vercel sends it as a bearer token to `/api/cron/daily`; the admin "Run payouts now" button and the payout job refuse to run without it.
 - [ ] Resend: verify domain (SPF/DKIM)
 - [ ] QuickBooks Online: developer app for API sync (keep behind an accounting interface)
 - [ ] Sentry

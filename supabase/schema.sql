@@ -5,11 +5,13 @@
 -- Money is stored in integer cents.
 
 create extension if not exists "pgcrypto";
-create extension if not exists btree_gist;
+create extension if not exists btree_gist with schema extensions;
 
 create type booking_source as enum ('direct', 'airbnb', 'vrbo', 'booking_com', 'owner', 'manual');
 create type booking_status as enum ('pending', 'confirmed', 'cancelled');
-create type payout_status as enum ('scheduled', 'processing', 'paid', 'failed', 'reversed');
+-- 'offline': the guest paid a channel (Airbnb/Vrbo) that pays the owner directly; recorded
+-- for statements, never transferred by the payout cron.
+create type payout_status as enum ('scheduled', 'processing', 'paid', 'failed', 'reversed', 'offline');
 
 create table owners (
   id uuid primary key default gen_random_uuid(),
@@ -45,6 +47,8 @@ create table properties (
   amenities text[] not null default '{}',
   airbnb_url text,                              -- public listing page, shown on the property page
   vrbo_url text,
+  tide_station_id text,                         -- NOAA CO-OPS station for the tide widget (waterfront homes)
+  ski_resort_name text, ski_lat double precision, ski_lng double precision,  -- snow widget (mountain homes)
   published boolean not null default false,
   created_at timestamptz not null default now()
 );
@@ -107,6 +111,7 @@ create table bookings (
   stripe_checkout_session_id text,
   stripe_payment_intent_id text,
   stripe_charge_id text,
+  accepted_policy_version text,        -- which /legal/policies version the guest accepted at checkout
   notes text,
   cancelled_at timestamptz,
   created_at timestamptz not null default now(),
@@ -131,6 +136,8 @@ create table payouts (
   status payout_status not null default 'scheduled',
   stripe_transfer_id text,
   last_error text,
+  attempts int not null default 0,     -- bumped by trigger each time the cron claims the row; part of the Stripe idempotency key
+  updated_at timestamptz not null default now(),
   created_at timestamptz not null default now()
 );
 
@@ -202,7 +209,8 @@ create table maintenance_tickets (
 create table stripe_events (
   id text primary key,
   type text not null,
-  received_at timestamptz not null default now()
+  received_at timestamptz not null default now(),
+  processed_at timestamptz                 -- null until the webhook handler succeeded
 );
 
 create table audit_log (
@@ -214,12 +222,49 @@ create table audit_log (
   created_at timestamptz not null default now()
 );
 
+-- Triggers that keep derived rows consistent regardless of which code path writes.
+
+-- payouts: track updated_at (the payout cron reclaims rows stuck in 'processing' for
+-- over two hours) and count claims so each Stripe attempt gets a fresh idempotency key.
+create or replace function payouts_touch() returns trigger language plpgsql as $$
+begin
+  new.updated_at := now();
+  if new.status = 'processing' and old.status is distinct from 'processing' then
+    new.attempts := old.attempts + 1;
+  end if;
+  return new;
+end $$;
+create trigger payouts_touch before update on payouts
+  for each row execute function payouts_touch();
+
+-- bookings -> cleaning_jobs: every confirmed stay (direct, manual or imported from a
+-- channel feed) has a turnover on its check-out day; a cancelled stay (admin, channel
+-- feed removal or full Stripe refund) has its open turnover skipped. App code does the
+-- same inline; this makes it hold for any path that forgets.
+create or replace function sync_cleaning_job() returns trigger language plpgsql as $$
+begin
+  if new.status = 'confirmed' then
+    insert into cleaning_jobs (property_id, booking_id, scheduled_date, window_start, window_end, cleaner_id, status)
+    select new.property_id, new.id, new.check_out, '11:00', '16:00', pi.default_cleaner_id,
+           case when pi.default_cleaner_id is null then 'unassigned'::cleaning_status else 'assigned'::cleaning_status end
+    from (select 1) x left join property_integrations pi on pi.property_id = new.property_id
+    on conflict (booking_id) do update set scheduled_date = excluded.scheduled_date
+      where cleaning_jobs.status in ('unassigned', 'assigned');
+  elsif new.status = 'cancelled' then
+    update cleaning_jobs set status = 'skipped' where booking_id = new.id and status in ('unassigned', 'assigned');
+  end if;
+  return new;
+end $$;
+create trigger bookings_sync_cleaning after insert or update of status, check_out on bookings
+  for each row execute function sync_cleaning_job();
+
 -- Public listing view: explicit columns only, never secrets or internal ids.
 create view property_listings with (security_invoker = true) as
 select p.id, p.owner_id, p.slug, p.name, p.city, p.region, p.lat, p.lng,
   p.bedrooms, p.bathrooms, p.max_guests, p.nightly_rate_cents, p.cleaning_fee_cents,
   p.tax_rate_bps, p.min_nights, p.check_in_time, p.check_out_time, p.pets_allowed,
   p.summary, p.description, p.amenities, p.published, p.airbnb_url, p.vrbo_url,
+  p.tide_station_id, p.ski_resort_name, p.ski_lat, p.ski_lng,
   coalesce(round(avg(r.rating) filter (where r.published), 1), 0) as rating,
   count(r.id) filter (where r.published) as review_count
 from properties p
@@ -227,8 +272,22 @@ left join reviews r on r.property_id = p.id
 group by p.id;
 
 -- Dates guests cannot book: active stays from any source. No guest details.
+-- Runs as the caller; anon gets a column-level grant on bookings (below) so only
+-- the three date columns of active stays are ever readable.
 create view property_unavailable_dates with (security_invoker = true) as
 select property_id, check_in, check_out from bookings where status in ('pending', 'confirmed');
+
+-- Privileges. New Supabase projects grant nothing to the API roles by default,
+-- so RLS alone is not enough: each role also needs explicit GRANTs.
+grant usage on schema public to anon, authenticated, service_role;
+grant all on all tables in schema public to service_role;
+grant all on all sequences in schema public to service_role;
+grant all on all routines in schema public to service_role;
+grant select on all tables in schema public to authenticated;
+grant select on properties, property_photos, pricing_rules, reviews, property_listings, property_unavailable_dates to anon;
+alter default privileges in schema public grant all on tables to service_role;
+alter default privileges in schema public grant all on sequences to service_role;
+alter default privileges in schema public grant select on tables to authenticated;
 
 -- Row level security. The service role (server only) bypasses RLS.
 alter table owners enable row level security;
@@ -262,30 +321,35 @@ create policy "public read published properties" on properties for select using 
 create policy "public read photos" on property_photos for select using (true);
 create policy "public read pricing" on pricing_rules for select using (true);
 create policy "public read published reviews" on reviews for select using (published);
-create policy "public read unavailable dates" on bookings for select using (status in ('pending', 'confirmed'));
--- NOTE: the bookings policy above exposes guest columns to anon through the table itself.
--- The app reads availability only through property_unavailable_dates; grant anon select on
--- that view and revoke direct table select:
-revoke select on bookings from anon;
+-- Anonymous visitors may read only the dates of active stays (for the availability view).
+grant select (property_id, check_in, check_out, status) on bookings to anon;
+create policy "anon sees active stay dates" on bookings for select to anon
+  using (status in ('pending', 'confirmed'));
 grant select on property_unavailable_dates to anon, authenticated;
 
+-- Helper functions are only meaningful for signed-in users.
+revoke execute on function current_owner_id() from public, anon;
+revoke execute on function current_cleaner_id() from public, anon;
+grant execute on function current_owner_id() to authenticated;
+grant execute on function current_cleaner_id() to authenticated;
+
 -- Owners read only their own data.
-create policy "owner reads own owner row" on owners for select using (clerk_user_id = (auth.jwt() ->> 'sub'));
-create policy "owner reads own properties" on properties for select using (owner_id = current_owner_id());
-create policy "owner reads own bookings" on bookings for select
+create policy "owner reads own owner row" on owners for select to authenticated using (clerk_user_id = (auth.jwt() ->> 'sub'));
+create policy "owner reads own properties" on properties for select to authenticated using (owner_id = current_owner_id());
+create policy "owner reads own bookings" on bookings for select to authenticated
   using (property_id in (select id from properties where owner_id = current_owner_id()));
-create policy "owner reads own payouts" on payouts for select using (owner_id = current_owner_id());
-create policy "owner reads own reviews" on reviews for select
+create policy "owner reads own payouts" on payouts for select to authenticated using (owner_id = current_owner_id());
+create policy "owner reads own reviews" on reviews for select to authenticated
   using (property_id in (select id from properties where owner_id = current_owner_id()));
-create policy "owner reads own tickets" on maintenance_tickets for select
+create policy "owner reads own tickets" on maintenance_tickets for select to authenticated
   using (property_id in (select id from properties where owner_id = current_owner_id()));
 
 -- Cleaners read their own jobs and the property basics for them. Door codes are
 -- not in any readable table; a server action reveals them on the job day only.
-create policy "cleaner reads own row" on cleaners for select using (clerk_user_id = (auth.jwt() ->> 'sub'));
-create policy "cleaner reads own jobs" on cleaning_jobs for select using (cleaner_id = current_cleaner_id());
-create policy "cleaner reads own job photos" on cleaning_photos for select
+create policy "cleaner reads own row" on cleaners for select to authenticated using (clerk_user_id = (auth.jwt() ->> 'sub'));
+create policy "cleaner reads own jobs" on cleaning_jobs for select to authenticated using (cleaner_id = current_cleaner_id());
+create policy "cleaner reads own job photos" on cleaning_photos for select to authenticated
   using (job_id in (select id from cleaning_jobs where cleaner_id = current_cleaner_id()));
-create policy "cleaner reads job properties" on properties for select
+create policy "cleaner reads job properties" on properties for select to authenticated
   using (id in (select property_id from cleaning_jobs where cleaner_id = current_cleaner_id()));
 -- Writes (bookings, payouts, job status, moderation) happen server-side with the service role.

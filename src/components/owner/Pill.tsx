@@ -1,6 +1,6 @@
 // Small status label. Teal for good news, mist for neutral, charcoal for attention.
 const tones = {
-  good: "bg-teal/15 text-teal-dark",
+  good: "bg-deep/15 text-deep",
   neutral: "bg-mist text-muted",
   attention: "bg-charcoal/10 text-charcoal",
 } as const;

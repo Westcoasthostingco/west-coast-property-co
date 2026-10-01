@@ -7,6 +7,7 @@ import type { Booking, Owner, Payout, Property } from "./mock";
 import { getAllProperties, getBookings, getOwners, getPayouts } from "./data";
 import { mockCleaners, mockJobs, type CleaningJob, type CleaningStatus } from "./cleaning";
 import { supabaseAdmin, supabaseConfigured } from "./supabase";
+import { payoutSplit } from "./metrics";
 import { appUrl, feeCents, nightsBetween, releaseDate, stripe, taxCents, todayISO } from "./stripe";
 
 type Row = Record<string, unknown>;
@@ -87,6 +88,8 @@ export async function getPropertyDetail(id: string): Promise<PropertyDetail | un
     address: (r.address as string) ?? "", postalCode: (r.postal_code as string) ?? "", description: (r.description as string) ?? "",
     taxRateBps: (r.tax_rate_bps as number) ?? 0, feePercentOverride: r.fee_percent == null ? null : Number(r.fee_percent),
     minNights: (r.min_nights as number) ?? 2, published: Boolean(r.published),
+    tideStationId: (r.tide_station_id as string | null) ?? null,
+    skiResort: r.ski_resort_name && r.ski_lat != null && r.ski_lng != null ? { name: r.ski_resort_name as string, lat: Number(r.ski_lat), lng: Number(r.ski_lng) } : null,
     doorCode: ((integ as Row | null)?.manual_door_code as string) ?? "", seamDeviceId: ((integ as Row | null)?.seam_device_id as string) ?? "",
     defaultCleanerId: ((integ as Row | null)?.default_cleaner_id as string | null) ?? null,
     icalFeeds: ((feeds ?? []) as Row[]).map(toFeed),
@@ -110,6 +113,7 @@ export type PropertyInput = {
   bedrooms: number; bathrooms: number; maxGuests: number; nightlyRate: number; cleaningFee: number; taxRatePercent: number;
   minNights: number; feePercentOverride: number | null; amenities: string[]; summary: string; description: string; published: boolean; airbnbUrl: string;
   icalUrls: Partial<Record<BookingSourceKey, string>>; doorCode: string; seamDeviceId: string; defaultCleanerId: string | null;
+  tideStationId: string; skiResortName: string; skiLat: number | null; skiLng: number | null;
 };
 
 const num = (v: FormDataEntryValue | null, fallback = 0) => {
@@ -134,6 +138,8 @@ export function propertyInputFromForm(fd: FormData): PropertyInput {
     summary: str(fd.get("summary")), description: str(fd.get("description")), published: fd.get("published") === "on", airbnbUrl: str(fd.get("airbnb_url")),
     icalUrls, doorCode: str(fd.get("doorCode")), seamDeviceId: str(fd.get("seamDeviceId")),
     defaultCleanerId: str(fd.get("defaultCleanerId")) || null,
+    tideStationId: str(fd.get("tideStationId")), skiResortName: str(fd.get("skiResortName")),
+    skiLat: str(fd.get("skiLat")) === "" ? null : num(fd.get("skiLat")), skiLng: str(fd.get("skiLng")) === "" ? null : num(fd.get("skiLng")),
   };
 }
 
@@ -142,6 +148,8 @@ export function validateProperty(i: PropertyInput): string | null {
   if (!i.slug) return "Slug is required.";
   if (!i.ownerId) return "Pick an owner.";
   if (i.nightlyRate <= 0) return "Nightly rate must be above zero.";
+  const ski = [i.skiResortName !== "", i.skiLat != null, i.skiLng != null];
+  if (ski.some(Boolean) && !ski.every(Boolean)) return "Mountain conditions needs the resort name, latitude and longitude together (or leave all three blank).";
   return null;
 }
 
@@ -156,6 +164,7 @@ export async function saveProperty(actor: string, id: string | null, input: Prop
     nightly_rate_cents: Math.round(input.nightlyRate * 100), cleaning_fee_cents: Math.round(input.cleaningFee * 100),
     tax_rate_bps: Math.round(input.taxRatePercent * 100), min_nights: input.minNights, fee_percent: input.feePercentOverride,
     amenities: input.amenities, summary: input.summary || null, description: input.description || null, published: input.published, airbnb_url: input.airbnbUrl || null,
+    tide_station_id: input.tideStationId || null, ski_resort_name: input.skiResortName || null, ski_lat: input.skiLat, ski_lng: input.skiLng,
   };
   let propertyId = id;
   if (propertyId) {
@@ -327,13 +336,15 @@ export async function createManualBooking(actor: string, input: ManualBookingInp
   const nights = nightsBetween(input.checkIn, input.checkOut);
   if (!supabaseConfigured) return SAMPLE_MODE;
   const db = supabaseAdmin();
-  const { data: p } = await db.from("properties").select("nightly_rate_cents, cleaning_fee_cents, tax_rate_bps").eq("id", input.propertyId).maybeSingle();
+  const { data: p } = await db.from("properties").select("owner_id, nightly_rate_cents, cleaning_fee_cents, tax_rate_bps, fee_percent, owners(fee_percent)")
+    .eq("id", input.propertyId).maybeSingle();
   if (!p) return { ok: false, message: "That home no longer exists." };
   const ownerStay = input.source === "owner";
   const rateCents = ownerStay ? 0 : Math.round((input.nightlyRate ?? (p.nightly_rate_cents as number) / 100) * 100);
   const subtotal = rateCents * nights;
   const cleaning = ownerStay ? 0 : (p.cleaning_fee_cents as number);
-  const tax = ownerStay ? 0 : taxCents(subtotal, p.tax_rate_bps as number);
+  // Same tax base as checkout (src/lib/checkout.ts): nights subtotal plus cleaning fee.
+  const tax = ownerStay ? 0 : taxCents(subtotal + cleaning, p.tax_rate_bps as number);
   const { data: b, error } = await db.from("bookings").insert({
     property_id: input.propertyId, guest_name: input.guest, guest_email: input.guestEmail || null, guest_phone: input.guestPhone || null,
     guest_count: input.guestCount, check_in: input.checkIn, check_out: input.checkOut, source: input.source, status: "confirmed",
@@ -343,13 +354,25 @@ export async function createManualBooking(actor: string, input: ManualBookingInp
     if (error?.code === "23P01") return { ok: false, message: "Those dates overlap another stay at this home. Check the calendar and try again." };
     return dbError(error, "Could not create the booking");
   }
+  // Owner's share, with the same fee logic as the Stripe webhook (property override over
+  // owners.fee_percent, cents math). Channel stays entered by hand were paid to the channel,
+  // which pays the owner directly, so the row is recorded as 'offline' and never transferred.
+  if (!ownerStay) {
+    const ownerFee = (p.owners as unknown as { fee_percent: number } | null)?.fee_percent ?? 0;
+    const split = payoutSplit(subtotal, p.fee_percent as number | null, Number(ownerFee));
+    const status = ICAL_SOURCES.includes(input.source) ? "offline" : "scheduled";
+    await db.from("payouts").upsert(
+      { owner_id: p.owner_id, booking_id: b.id, gross_cents: split.grossCents, fee_cents: split.feeCents, net_cents: split.netCents, release_on: releaseDate(input.checkIn), status },
+      { onConflict: "booking_id", ignoreDuplicates: true },
+    );
+  }
   // Turnover on the check-out day, pre-assigned to the home's default cleaner when one is set.
   const { data: integ } = await db.from("property_integrations").select("default_cleaner_id").eq("property_id", input.propertyId).maybeSingle();
   const cleanerId = (integ?.default_cleaner_id as string | null) ?? null;
-  await db.from("cleaning_jobs").insert({
+  await db.from("cleaning_jobs").upsert({
     property_id: input.propertyId, booking_id: b.id, scheduled_date: input.checkOut, window_start: "11:00", window_end: "16:00",
     cleaner_id: cleanerId, status: cleanerId ? "assigned" : "unassigned", checklist: [],
-  });
+  }, { onConflict: "booking_id", ignoreDuplicates: true });
   await audit(actor, "booking.create_manual", "booking", b.id as string, { source: input.source, check_in: input.checkIn, check_out: input.checkOut });
   return { ok: true, message: "Booking added.", id: b.id as string };
 }
@@ -500,7 +523,7 @@ export function integrationStatuses(): IntegrationStatus[] {
     ["Mapbox", "Maps on listings", ["NEXT_PUBLIC_MAPBOX_TOKEN"]],
     ["Turnstile", "Contact form spam protection", ["NEXT_PUBLIC_TURNSTILE_SITE_KEY", "TURNSTILE_SECRET_KEY"]],
     ["QuickBooks", "Accounting sync (after launch)", ["QUICKBOOKS_CLIENT_ID", "QUICKBOOKS_CLIENT_SECRET"]],
-    ["Vercel Cron", "Daily payouts and hourly sweep", ["CRON_SECRET"]],
+    ["Vercel Cron", "Daily payouts, hold sweep and iCal sync", ["CRON_SECRET"]],
   ];
   return def.map(([name, purpose, vars]) => {
     const v = vars.map((n) => ({ name: n, present: present(n) }));

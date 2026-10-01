@@ -33,15 +33,15 @@ export default function TimeSeries({ points, kind = "line", format: fmt = "numbe
         <line x1={padL} x2={w - padR} y1={y(0)} y2={y(0)} stroke="#dde9ed" strokeWidth={1} />
         {kind === "line" ? (
           <>
-            <path d={path} fill="none" stroke="#6ba8bc" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+            <path d={path} fill="none" stroke="#2f6f86" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
             {points.map((p, i) => (
-              <circle key={i} cx={x(i)} cy={y(p.value)} r={hover === i || i === last ? 4 : 0} fill="#6ba8bc" stroke="#fbfdfc" strokeWidth={2} />
+              <circle key={i} cx={x(i)} cy={y(p.value)} r={hover === i || i === last ? 4 : 0} fill="#2f6f86" stroke="#fbfdfc" strokeWidth={2} />
             ))}
           </>
         ) : (
           points.map((p, i) => {
             const bh = y(0) - y(p.value);
-            return <rect key={i} x={x(i) - barW / 2} y={y(p.value)} width={barW} height={bh} rx={4} fill={hover === i ? "#5a93a6" : "#6ba8bc"} />;
+            return <rect key={i} x={x(i) - barW / 2} y={y(p.value)} width={barW} height={bh} rx={4} fill={hover === i ? "#1e4b5c" : "#2f6f86"} />;
           })
         )}
         {/* hit targets larger than marks */}

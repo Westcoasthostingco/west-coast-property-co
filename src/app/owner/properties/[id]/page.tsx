@@ -43,7 +43,7 @@ export default async function OwnerProperty({ params }: Props) {
     <>
       <PageHeader eyebrow={`${property.city}, ${property.region}`} title={property.name}
         intro={`${property.bedrooms} bed, ${property.bathrooms} bath, sleeps ${property.guests}. Listed at ${money(property.nightlyRate)} a night plus a ${money(property.cleaningFee)} cleaning fee.`}
-        actions={<Link href={`/properties/${property.slug}`} className="caps-tight rounded-full border border-teal px-4 py-2 text-[0.65rem] text-teal transition hover:bg-teal hover:text-white">View public listing</Link>} />
+        actions={<Link href={`/properties/${property.slug}`} className="caps-tight rounded-full border border-deep px-4 py-2 text-[0.65rem] text-deep transition hover:bg-deep hover:text-white">View public listing</Link>} />
 
       <PropertyImage slug={property.slug} name={property.name} className="h-40 rounded-2xl sm:h-56" />
 
@@ -64,7 +64,7 @@ export default async function OwnerProperty({ params }: Props) {
 
       <section>
         <div className="mb-3 flex items-baseline justify-between">
-          <h2 className="caps-tight text-[0.65rem] text-sky">Stays</h2>
+          <h2 className="caps-tight text-[0.65rem] text-deep">Stays</h2>
           <span className="ui text-xs text-muted">{stays.length} total</span>
         </div>
         <DataTable
@@ -80,7 +80,7 @@ export default async function OwnerProperty({ params }: Props) {
 
       <section>
         <div className="mb-3 flex items-baseline justify-between">
-          <h2 className="caps-tight text-[0.65rem] text-sky">Published reviews</h2>
+          <h2 className="caps-tight text-[0.65rem] text-deep">Published reviews</h2>
           <span className="ui text-xs text-muted">{property.rating ? `${property.rating.toFixed(1)} average` : ""}</span>
         </div>
         {reviews.length === 0 ? (
@@ -89,7 +89,7 @@ export default async function OwnerProperty({ params }: Props) {
           <div className="grid gap-4 md:grid-cols-2">
             {reviews.map((r) => (
               <blockquote key={r.id} className="rounded-2xl border border-line bg-white p-5">
-                <p className="ui text-xs text-teal" aria-label={`${r.rating} out of 5`}>{"★".repeat(r.rating)}<span className="text-line">{"★".repeat(5 - r.rating)}</span></p>
+                <p className="ui text-xs text-deep" aria-label={`${r.rating} out of 5`}>{"★".repeat(r.rating)}<span className="text-line">{"★".repeat(5 - r.rating)}</span></p>
                 <p className="mt-2 leading-relaxed text-charcoal">{r.body}</p>
                 <footer className="ui mt-3 text-xs text-muted">{r.guest}</footer>
               </blockquote>

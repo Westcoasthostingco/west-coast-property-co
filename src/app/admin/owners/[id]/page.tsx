@@ -6,10 +6,12 @@ import { Card, DataTable, Notice, PageHeader, Pill } from "@/components/admin/ui
 import { saveOwnerAction } from "@/app/admin/actions";
 import { getAllProperties, getBookings, money, nameMap } from "@/lib/data";
 import { fmtDate, getOwnerDetail, getPayoutsDetailed } from "@/lib/admin";
+import { requireRole } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Owner" };
 
 export default async function OwnerPage({ params, searchParams }: PageProps<"/admin/owners/[id]">) {
+  await requireRole("admin"); // S1: pages must not rely on the layout for auth
   const [{ id }, sp] = await Promise.all([params, searchParams]);
   const [o, props, payouts, bookings] = await Promise.all([getOwnerDetail(id), getAllProperties(), getPayoutsDetailed(), getBookings()]);
   if (!o) notFound();
@@ -22,17 +24,17 @@ export default async function OwnerPage({ params, searchParams }: PageProps<"/ad
   return (
     <>
       <PageHeader eyebrow="Owner" title={o.name} intro={`${o.email} · ${o.feePercent}% fee · ${homes.length} home${homes.length === 1 ? "" : "s"}`}
-        actions={<Link href="/admin/owners" className="ui text-sm text-teal hover:underline">All owners</Link>} />
+        actions={<Link href="/admin/owners" className="ui text-sm text-deep hover:underline">All owners</Link>} />
       <Notice searchParams={sp} />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-4">
           <OwnerForm owner={o} action={saveOwnerAction.bind(null, o.id)} />
           <section className="space-y-2">
-            <h2 className="caps-tight text-[0.68rem] text-sky">Recent payouts</h2>
+            <h2 className="caps-tight text-[0.68rem] text-deep">Recent payouts</h2>
             <DataTable head={["Release", "Home", "Gross", "Fee", "Net", "Status"]} empty="No payouts yet."
               rows={mine.slice(0, 15).map((x) => [
-                <Link key="b" href={`/admin/bookings/${x.bookingId}`} className="hover:text-teal">{fmtDate(x.releaseOn, { month: "short", day: "numeric", year: "numeric" })}</Link>,
+                <Link key="b" href={`/admin/bookings/${x.bookingId}`} className="hover:text-deep">{fmtDate(x.releaseOn, { month: "short", day: "numeric", year: "numeric" })}</Link>,
                 propertyOf(x.bookingId), money(x.gross), money(x.fee), money(x.net),
                 <span key="s"><Pill value={x.status} />{x.lastError && <span className="ml-2 text-xs text-[#b6633a]">{x.lastError}</span>}</span>,
               ])} />
@@ -58,12 +60,12 @@ export default async function OwnerPage({ params, searchParams }: PageProps<"/ad
             <ul className="ui divide-y divide-line text-sm">
               {homes.map((p) => (
                 <li key={p.id} className="flex items-center justify-between py-2">
-                  <Link href={`/admin/properties/${p.id}`} className="font-medium text-charcoal hover:text-teal">{p.name}</Link>
+                  <Link href={`/admin/properties/${p.id}`} className="font-medium text-charcoal hover:text-deep">{p.name}</Link>
                   <span className="text-muted">{money(p.nightlyRate)}/nt</span>
                 </li>
               ))}
             </ul>
-            <Link href="/admin/properties/new" className="ui mt-3 inline-block text-sm text-teal hover:underline">+ Add a home</Link>
+            <Link href="/admin/properties/new" className="ui mt-3 inline-block text-sm text-deep hover:underline">+ Add a home</Link>
           </Card>
         </div>
       </div>

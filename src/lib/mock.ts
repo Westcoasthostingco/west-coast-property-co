@@ -17,6 +17,12 @@ export type Property = {
   rating: number;
   reviewCount: number;
   airbnbUrl?: string | null;
+  /** NOAA CO-OPS tide station id for waterfront homes (null = no tide widget). */
+  taxRateBps?: number;      // lodging tax, basis points
+  minNights?: number;
+  tideStationId?: string | null;
+  /** Nearest ski area for mountain homes (null = no snow widget). */
+  skiResort?: { name: string; lat: number; lng: number } | null;
 };
 
 export type Owner = { id: string; name: string; email: string; payoutsReady: boolean; feePercent: number };
@@ -35,7 +41,7 @@ export type Booking = {
 
 export type Review = { id: string; propertyId: string; guest: string; rating: number; body: string; status: "published" | "pending" };
 
-export type Payout = { id: string; ownerId: string; bookingId: string; gross: number; fee: number; net: number; status: "scheduled" | "processing" | "paid" | "failed" | "reversed"; releaseOn: string };
+export type Payout = { id: string; ownerId: string; bookingId: string; gross: number; fee: number; net: number; status: "scheduled" | "processing" | "paid" | "failed" | "reversed" | "offline"; releaseOn: string };
 
 export const owners: Owner[] = [
   { id: "o1", name: "Dana Whitfield", email: "dana@example.com", payoutsReady: true, feePercent: 18 },
@@ -43,9 +49,9 @@ export const owners: Owner[] = [
 ];
 
 export const properties: Property[] = [
-  { id: "p1", slug: "the-grand-view", name: "The Grand View", city: "Gig Harbor", region: "WA", bedrooms: 3, bathrooms: 2, guests: 6, nightlyRate: 325, cleaningFee: 150, summary: "Just steps from the shops, restaurants, and waterfront of downtown Gig Harbor, The Grand View offers stunning views of Puget Sound, Mount Rainier, and Gig Harbor itself.", amenities: ["Puget Sound views", "Walk to downtown", "Wi-Fi", "Full kitchen", "Deck", "Parking"], ownerId: "o1", rating: 4.9, reviewCount: 48, airbnbUrl: "https://www.airbnb.com/rooms/1669272090087857131" },
-  { id: "p2", slug: "the-leonora-by-the-sea", name: "The Leonora by the Sea", city: "Hood Canal", region: "WA", bedrooms: 2, bathrooms: 2, guests: 5, nightlyRate: 285, cleaningFee: 135, summary: "Set on the shores of Hood Canal, The Leonora greets you with Olympic Mountain views, known for its oysters, and access to trails in Olympic National Park and the wider Olympic Peninsula.", amenities: ["Waterfront", "Olympic Mountain views", "Oyster beach", "Fire pit", "Wi-Fi", "Pet friendly"], ownerId: "o1", rating: 5.0, reviewCount: 36, airbnbUrl: "https://www.airbnb.com/rooms/1250729879856529802" },
-  { id: "p3", slug: "the-bedrock", name: "The Bedrock", city: "Randle", region: "WA", bedrooms: 3, bathrooms: 2, guests: 7, nightlyRate: 240, cleaningFee: 140, summary: "Located in Randle and just minutes from Packwood, The Bedrock offers mountain air, quiet forest, and easy access to some of the best adventures the Cascades have to offer.", amenities: ["Mountain air", "Near Mount Rainier", "Hot tub", "Wood stove", "Wi-Fi", "EV charger"], ownerId: "o2", rating: 4.8, reviewCount: 22, airbnbUrl: "https://www.airbnb.com/rooms/1780528394795968142" },
+  { id: "p1", slug: "the-grand-view", name: "The Grand View", city: "Gig Harbor", region: "WA", bedrooms: 3, bathrooms: 2, guests: 6, nightlyRate: 325, cleaningFee: 150, summary: "Just steps from the shops, restaurants, and waterfront of downtown Gig Harbor, The Grand View offers stunning views of Puget Sound, Mount Rainier, and Gig Harbor itself.", amenities: ["Puget Sound views", "Walk to downtown", "Wi-Fi", "Full kitchen", "Deck", "Parking"], ownerId: "o1", rating: 4.9, reviewCount: 48, airbnbUrl: "https://www.airbnb.com/rooms/1669272090087857131", tideStationId: "9446484" },
+  { id: "p2", slug: "the-leonora-by-the-sea", name: "The Leonora by the Sea", city: "Hood Canal", region: "WA", bedrooms: 2, bathrooms: 2, guests: 5, nightlyRate: 285, cleaningFee: 135, summary: "Set on the shores of Hood Canal, The Leonora greets you with Olympic Mountain views, known for its oysters, and access to trails in Olympic National Park and the wider Olympic Peninsula.", amenities: ["Waterfront", "Olympic Mountain views", "Oyster beach", "Fire pit", "Wi-Fi", "Pet friendly"], ownerId: "o1", rating: 5.0, reviewCount: 36, airbnbUrl: "https://www.airbnb.com/rooms/1250729879856529802", tideStationId: "9445478" },
+  { id: "p3", slug: "the-bedrock", name: "The Bedrock", city: "Randle", region: "WA", bedrooms: 3, bathrooms: 2, guests: 7, nightlyRate: 240, cleaningFee: 140, summary: "Located in Randle and just minutes from Packwood, The Bedrock offers mountain air, quiet forest, and easy access to some of the best adventures the Cascades have to offer.", amenities: ["Mountain air", "Near Mount Rainier", "Hot tub", "Wood stove", "Wi-Fi", "EV charger"], ownerId: "o2", rating: 4.8, reviewCount: 22, airbnbUrl: "https://www.airbnb.com/rooms/1780528394795968142", skiResort: { name: "White Pass", lat: 46.6367, lng: -121.3911 } },
 ];
 
 // ~12 months of sample stays so trends have shape. Generated deterministically.
@@ -67,12 +73,16 @@ function sampleBookings(): Booking[] {
         const checkIn = new Date(Date.UTC(base.getUTCFullYear(), month, day));
         const checkOut = new Date(Date.UTC(base.getUTCFullYear(), month, day + nights));
         const iso = (d: Date) => d.toISOString().slice(0, 10);
-        const future = checkIn > today;
+        // Same rule as the database mapper: a stay is completed once its check-out date has
+        // passed; a guest who checked in today (or is mid-stay) is still "confirmed".
+        const todayIso = today.toISOString().slice(0, 10);
+        const ended = iso(checkOut) < todayIso;
+        const future = iso(checkIn) > todayIso;
         const subtotal = nights * p.nightlyRate;
         out.push({
           id: `b${pi}${m + 2}${k}`, propertyId: p.id, guest: guests[Math.floor(rnd() * guests.length)],
           checkIn: iso(checkIn), checkOut: iso(checkOut), source: sources[Math.floor(rnd() * sources.length)],
-          status: future ? (rnd() < 0.15 ? "pending" : "confirmed") : "completed",
+          status: ended ? "completed" : future && rnd() < 0.15 ? "pending" : "confirmed",
           subtotal, total: subtotal + p.cleaningFee,
         });
         day += nights + 1 + Math.floor(rnd() * 3);

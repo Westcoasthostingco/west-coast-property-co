@@ -13,7 +13,7 @@ Status: audited 2026-10-01; step 0 fixes applied in code and schema. Four audien
 
 One header component switches by role: public nav for guests, a portal nav for signed-in users with links only to the areas their role allows.
 
-## 2. Public site (Wander-style layout, WCPC brand)
+## 2. Public site (Wander-style layout, West Coast Hosting Co brand)
 
 Routes:
 - `/` Hero (full-bleed photo, short headline, search: where / dates / guests), featured properties row, "How we host" strip, owner call to action, reviews strip, footer.
@@ -21,6 +21,13 @@ Routes:
 - `/properties/[slug]` Gallery (grid of 5, lightbox), title + location, facts (beds, baths, sleeps), description, amenities grid, availability calendar (blocked dates from bookings and iCal feeds), map, reviews, sticky booking panel (dates, guests, price breakdown, Book and pay).
 - `/book/success`, `/book/cancelled`
 - `/services` (for owners: what management includes, fee structure), `/about`, `/contact`.
+- `/legal/terms`, `/legal/privacy`, `/legal/policies` (booking, cancellation and house policies). Copy lives in `src/lib/legal.ts`, rendered by `src/components/legal/LegalLayout.tsx`, linked from the footer and the booking panel.
+
+Shipped pieces that live outside the route tree:
+- **Booking panel and checkout lib.** `src/app/properties/[slug]/BookingPanel.tsx` posts to a server action; `src/lib/checkout.ts` validates dates, guests and `min_nights`, prices nights + cleaning fee + lodging tax (`tax_rate_bps`), creates the Stripe Checkout session and a `pending` booking hold.
+- **Conditions widgets.** `src/components/widgets` (`TideWidget`, `SnowWidget`, `ConditionsBadge`, scenes) read `src/lib/tides.ts` (NOAA CO-OPS, keyed by `properties.tide_station_id`) and `src/lib/weather.ts` (Open-Meteo, keyed by `ski_resort_name`, `ski_lat`, `ski_lng`). Both APIs are keyless; `CONDITIONS_SAMPLE=1` forces sample data. The admin property form sets these columns under "Local conditions".
+- **SEO files.** `src/app/robots.ts`, `src/app/sitemap.ts`, `src/app/opengraph-image.tsx`, `src/app/llms.txt`, and schema.org JSON-LD (`LodgingBusiness`, `VacationRental`, breadcrumbs) from `src/lib/seo.ts` via `src/components/seo/JsonLd.tsx`. Street addresses stop at locality.
+- **Hardening.** Security headers (HSTS, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, frame-ancestors) are set centrally in `next.config.ts` `headers()`; public POST surfaces (`/api/checkout`, contact form) are rate limited per IP, and the contact form is behind Cloudflare Turnstile. Cron and webhook routes authenticate with `CRON_SECRET` and the Stripe/Clerk signing secrets respectively.
 
 Data needed beyond today: `property_photos` (exists), `blocked_dates` (from iCal sync), `property_rules` (check-in time, pets, minimum nights), `pricing_rules` (seasonal rates, weekend uplift, minimum stay). Pricing stays simple at launch: nightly rate + cleaning fee + seasonal overrides.
 

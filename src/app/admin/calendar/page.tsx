@@ -3,10 +3,12 @@ import Link from "next/link";
 import { LinkButton, PageHeader } from "@/components/admin/ui";
 import { getAllProperties, getBookings } from "@/lib/data";
 import { todayISO } from "@/lib/admin";
+import { requireRole } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Calendar" };
 
-const DAY_PX = 44, LABEL_PX = 168;
+// Day columns flex between DAY_MIN_PX and the container width so a 31-day month fits at >= 1280px; narrower screens scroll.
+const DAY_MIN_PX = 28, LABEL_PX = 150;
 const pad = (n: number) => String(n).padStart(2, "0");
 const shiftMonth = (ym: string, by: number) => {
   const [y, m] = ym.split("-").map(Number);
@@ -15,6 +17,7 @@ const shiftMonth = (ym: string, by: number) => {
 };
 
 export default async function MasterCalendar({ searchParams }: PageProps<"/admin/calendar">) {
+  await requireRole("admin"); // S1: pages must not rely on the layout for auth
   const sp = await searchParams;
   const today = todayISO();
   const month = typeof sp.month === "string" && /^\d{4}-\d{2}$/.test(sp.month) ? sp.month : today.slice(0, 7);
@@ -29,7 +32,7 @@ export default async function MasterCalendar({ searchParams }: PageProps<"/admin
   const dayIndex = (iso: string) => Number(iso.slice(8, 10)); // 1-based within this month
 
   const title = new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
-  const gridCols = `${LABEL_PX}px repeat(${days}, ${DAY_PX}px)`;
+  const gridCols = `${LABEL_PX}px repeat(${days}, minmax(${DAY_MIN_PX}px, 1fr))`;
 
   return (
     <>
@@ -43,8 +46,9 @@ export default async function MasterCalendar({ searchParams }: PageProps<"/admin
           </>
         } />
 
+      <div className="relative">
       <div className="overflow-x-auto rounded-2xl border border-line bg-white">
-        <div style={{ minWidth: LABEL_PX + days * DAY_PX }}>
+        <div style={{ minWidth: LABEL_PX + days * DAY_MIN_PX }}>
           {/* header row */}
           <div className="ui grid border-b border-line" style={{ gridTemplateColumns: gridCols }}>
             <div className="sticky left-0 z-10 bg-white px-4 py-2 text-xs text-muted">Home</div>
@@ -53,7 +57,7 @@ export default async function MasterCalendar({ searchParams }: PageProps<"/admin
               return (
                 <div key={d} className={`flex flex-col items-center py-1.5 text-[0.65rem] ${weekend ? "bg-mist/50" : ""}`}>
                   <span className="text-muted">{["S", "M", "T", "W", "T", "F", "S"][dayOfWeek(d)]}</span>
-                  <span className={`mt-0.5 flex h-6 w-6 items-center justify-center rounded-full ${isToday ? "bg-teal font-medium text-white" : "text-charcoal"}`}>{d}</span>
+                  <span className={`mt-0.5 flex h-6 w-6 items-center justify-center rounded-full ${isToday ? "bg-deep font-medium text-white" : "text-charcoal"}`}>{d}</span>
                 </div>
               );
             })}
@@ -66,14 +70,14 @@ export default async function MasterCalendar({ searchParams }: PageProps<"/admin
             return (
               <div key={p.id} className="relative grid h-14 border-b border-line/70 last:border-b-0" style={{ gridTemplateColumns: gridCols }}>
                 <div style={{ gridColumn: 1, gridRow: 1 }} className="sticky left-0 z-10 flex flex-col justify-center border-r border-line/70 bg-white px-4">
-                  <Link href={`/admin/properties/${p.id}`} className="ui truncate text-sm font-medium text-charcoal hover:text-teal">{p.name}</Link>
+                  <Link href={`/admin/properties/${p.id}`} className="ui truncate text-sm font-medium text-charcoal hover:text-deep">{p.name}</Link>
                   <span className="ui truncate text-[0.65rem] text-muted">{p.city}</span>
                 </div>
                 {/* day cells */}
                 {Array.from({ length: days }, (_, i) => i + 1).map((d) => {
                   const iso = dayIso(d), weekend = dayOfWeek(d) === 0 || dayOfWeek(d) === 6;
                   return (
-                    <div key={d} style={{ gridColumn: d + 1, gridRow: 1 }} className={`relative border-l border-line/40 ${iso === today ? "bg-teal/10" : weekend ? "bg-mist/40" : ""}`}>
+                    <div key={d} style={{ gridColumn: d + 1, gridRow: 1 }} className={`relative border-l border-line/40 ${iso === today ? "bg-deep/10" : weekend ? "bg-mist/40" : ""}`}>
                       {outs.has(iso) && <span title={turnovers.has(iso) ? "Same-day turnover" : "Check-out, cleaning due"}
                         className={`absolute bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full ${turnovers.has(iso) ? "bg-[#b6633a]" : "bg-sky"}`} />}
                     </div>
@@ -89,8 +93,8 @@ export default async function MasterCalendar({ searchParams }: PageProps<"/admin
                   return (
                     <Link key={b.id} href={`/admin/bookings/${b.id}`} title={`${b.guest} · ${b.source} · ${b.checkIn} to ${b.checkOut}`}
                       style={{ gridColumn: `${start + 1} / ${endExclusive + 1}`, gridRow: 1 }}
-                      className={`ui z-[5] my-2.5 ml-[2px] mr-[2px] flex min-w-0 items-center gap-1.5 overflow-hidden px-2 text-[0.7rem] leading-tight text-white transition hover:bg-teal-dark
-                        ${pending ? "bg-sky" : "bg-teal"} ${clippedStart ? "rounded-l-none" : "rounded-l-full"} ${clippedEnd ? "rounded-r-none" : "rounded-r-full"}`}>
+                      className={`ui z-[5] my-2.5 ml-[2px] mr-[2px] flex min-w-0 items-center gap-1.5 overflow-hidden px-2 text-[0.7rem] leading-tight transition
+                        ${pending ? "bg-mist text-deep ring-1 ring-inset ring-deep/50 hover:bg-wave" : "bg-deep text-white hover:bg-dusk"} ${clippedStart ? "rounded-l-none" : "rounded-l-full"} ${clippedEnd ? "rounded-r-none" : "rounded-r-full"}`}>
                       <span className="truncate font-medium">{b.guest}</span>
                       <span className="hidden truncate opacity-80 sm:inline">· {b.source}</span>
                     </Link>
@@ -101,10 +105,13 @@ export default async function MasterCalendar({ searchParams }: PageProps<"/admin
           })}
         </div>
       </div>
+      <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 rounded-r-2xl bg-gradient-to-l from-white to-transparent lg:hidden" />
+      </div>
+      <p className="ui -mt-4 text-right text-[0.7rem] text-muted lg:hidden">Scroll sideways for the rest of the month →</p>
 
       <div className="ui flex flex-wrap gap-4 text-[0.7rem] text-muted">
-        <span className="flex items-center gap-1.5"><i className="inline-block h-3 w-6 rounded-full bg-teal" />Confirmed stay</span>
-        <span className="flex items-center gap-1.5"><i className="inline-block h-3 w-6 rounded-full bg-sky" />Pending payment</span>
+        <span className="flex items-center gap-1.5"><i className="inline-block h-3 w-6 rounded-full bg-deep" />Confirmed stay</span>
+        <span className="flex items-center gap-1.5"><i className="inline-block h-3 w-6 rounded-full bg-mist ring-1 ring-inset ring-deep/50" />Pending payment</span>
         <span className="flex items-center gap-1.5"><i className="inline-block h-1.5 w-1.5 rounded-full bg-sky" />Check-out, cleaning due</span>
         <span className="flex items-center gap-1.5"><i className="inline-block h-1.5 w-1.5 rounded-full bg-[#b6633a]" />Same-day turnover</span>
       </div>

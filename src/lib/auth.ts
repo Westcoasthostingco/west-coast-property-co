@@ -8,9 +8,18 @@ export type Role = "admin" | "owner" | "cleaner";
 export const clerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY);
 
 // Preview-only bypass so Vercel Preview deployments can show the portals before
-// Clerk is configured. Never active in production, whatever the env says.
+// Clerk is configured. Honoured only on a Vercel preview/development deployment
+// or a non-production local build; never when VERCEL_ENV is "production", and
+// never for a production build outside Vercel (NODE_ENV=production, VERCEL_ENV unset).
+export function previewAllowed(): boolean {
+  const vercelEnv = process.env.VERCEL_ENV;
+  if (vercelEnv === "production") return false;
+  if (vercelEnv === "preview" || vercelEnv === "development") return true;
+  return process.env.NODE_ENV !== "production";
+}
+
 export function previewRole(): Role | null {
-  if (process.env.VERCEL_ENV === "production") return null;
+  if (!previewAllowed()) return null;
   const r = process.env.PREVIEW_ROLE;
   return r === "admin" || r === "owner" || r === "cleaner" ? r : null;
 }

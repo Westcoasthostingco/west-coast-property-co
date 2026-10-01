@@ -3,12 +3,12 @@ import { useActionState } from "react";
 import { sendContact, type ContactState } from "./actions";
 
 const field = "ui mt-1 w-full rounded-lg border border-line bg-white px-3 py-2.5 text-sm";
-const label = "caps-tight block text-[0.6rem] text-sky";
+const label = "caps-tight block text-[0.6rem] text-deep";
 
 export default function ContactForm({ turnstileSiteKey }: { turnstileSiteKey?: string }) {
   const [state, action, pending] = useActionState<ContactState, FormData>(sendContact, {});
   if (state.ok && !state.error) {
-    return <div className="rounded-3xl border border-line bg-white p-8"><p className="display text-3xl text-teal">Got it.</p><p className="mt-2 text-muted">We&apos;ll be in touch soon, usually the same day.</p></div>;
+    return <div className="rounded-3xl border border-line bg-white p-8"><p className="display text-3xl text-deep">Got it.</p><p className="mt-2 text-muted">We&apos;ll be in touch soon, usually the same day.</p></div>;
   }
   return (
     <form action={action} className="rounded-3xl border border-line bg-white p-8 shadow-lg shadow-teal/10">
@@ -27,7 +27,7 @@ export default function ContactForm({ turnstileSiteKey }: { turnstileSiteKey?: s
       <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
       {turnstileSiteKey && <div className="cf-turnstile mt-4" data-sitekey={turnstileSiteKey} />}
       {state.error && <p className="ui mt-4 text-sm text-charcoal">{state.error}</p>}
-      <button type="submit" disabled={pending} className="caps-tight mt-6 rounded-full bg-teal px-6 py-3 text-[0.7rem] text-white hover:bg-teal-dark disabled:opacity-60">{pending ? "Sending" : "Send"}</button>
+      <button type="submit" disabled={pending} className="caps-tight mt-6 rounded-full bg-deep px-6 py-3 text-[0.7rem] text-white hover:bg-dusk disabled:opacity-60">{pending ? "Sending" : "Send"}</button>
     </form>
   );
 }

@@ -8,10 +8,12 @@ import { getOwners, money } from "@/lib/data";
 import { getCleaners } from "@/lib/cleaning";
 import { getPropertyDetail } from "@/lib/admin";
 import { supabaseConfigured } from "@/lib/supabase";
+import { requireRole } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Edit property" };
 
 export default async function EditProperty({ params, searchParams }: PageProps<"/admin/properties/[id]">) {
+  await requireRole("admin"); // S1: pages must not rely on the layout for auth
   const [{ id }, sp] = await Promise.all([params, searchParams]);
   const [p, owners, cleaners] = await Promise.all([getPropertyDetail(id), getOwners(), getCleaners()]);
   if (!p) notFound();
@@ -22,8 +24,8 @@ export default async function EditProperty({ params, searchParams }: PageProps<"
         actions={
           <>
             <Pill value={p.published ? "published" : "pending"} />
-            <Link href={`/properties/${p.slug}`} className="ui text-sm text-teal hover:underline" target="_blank">View listing ↗</Link>
-            <Link href={`/admin/calendar`} className="ui text-sm text-teal hover:underline">Calendar</Link>
+            <Link href={`/properties/${p.slug}`} className="ui text-sm text-deep hover:underline" target="_blank">View listing ↗</Link>
+            <Link href={`/admin/calendar`} className="ui text-sm text-deep hover:underline">Calendar</Link>
           </>
         } />
       <Notice searchParams={sp} />
@@ -38,7 +40,7 @@ export default async function EditProperty({ params, searchParams }: PageProps<"
               {p.photos.map((ph) => (
                 <li key={ph.id} className="group relative overflow-hidden rounded-lg border border-line">
                   {/* eslint-disable-next-line @next/next/no-img-element -- remote Storage URL; next/image needs a configured host */}
-                  <img src={ph.url} alt={ph.alt ?? p.name} className="aspect-[4/3] w-full object-cover" />
+                  <img src={ph.url} alt={ph.alt ?? p.name} loading="lazy" decoding="async" className="aspect-[4/3] w-full object-cover" />
                   <form action={deletePhotoAction.bind(null, p.id, ph.id)} className="absolute right-1 top-1">
                     <button type="submit" aria-label="Remove photo" className="ui rounded-full bg-white/90 px-2 py-0.5 text-[0.65rem] text-charcoal opacity-0 transition group-hover:opacity-100 focus:opacity-100">Remove</button>
                   </form>
@@ -47,7 +49,7 @@ export default async function EditProperty({ params, searchParams }: PageProps<"
             </ul>
             <form action={uploadPhotoAction.bind(null, p.id)} className="mt-3 space-y-3" encType="multipart/form-data">
               <Field label="Add a photo" hint={supabaseConfigured ? "JPG or PNG, under 1 MB each (see deployer notes to raise)" : "Sample mode: uploads are disabled"}>
-                <input type="file" name="photo" accept="image/*" required className="ui block w-full text-sm text-charcoal file:mr-3 file:rounded-full file:border-0 file:bg-mist file:px-3 file:py-1.5 file:text-xs file:text-teal-dark" />
+                <input type="file" name="photo" accept="image/*" required className="ui block w-full text-sm text-charcoal file:mr-3 file:rounded-full file:border-0 file:bg-mist file:px-3 file:py-1.5 file:text-xs file:text-deep" />
               </Field>
               <Field label="Alt text"><input name="alt" placeholder="Living room with harbor view" className={inputClass} /></Field>
               <button type="submit" className={buttonClass} disabled={!supabaseConfigured}>Upload</button>

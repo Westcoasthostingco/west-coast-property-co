@@ -61,8 +61,25 @@ const toJob = (r: Row): CleaningJob => ({
   cleanerId: r.cleaner_id as string | null, status: r.status as CleaningStatus,
   checklist: (r.checklist as ChecklistItem[]) ?? [], notes: r.notes as string | null,
   cost: r.cost_cents != null ? (r.cost_cents as number) / 100 : null, completedAt: r.completed_at as string | null,
-  nextCheckIn: (r.next_check_in as string | null) ?? null,
+  nextCheckIn: null, // filled in by withNextCheckIn
 });
+
+// cleaning_jobs has no next_check_in column. The next guest's arrival is the earliest
+// active stay at the same home on or after the turnover date; it is looked up with the
+// service role (dates only, nothing about the guest) so cleaners never need bookings access.
+async function withNextCheckIn(jobs: CleaningJob[]): Promise<CleaningJob[]> {
+  const open = jobs.filter((j) => j.status !== "done" && j.status !== "skipped");
+  if (!open.length) return jobs;
+  const from = open.map((j) => j.scheduledDate).sort()[0];
+  const { data } = await supabaseAdmin().from("bookings").select("property_id, check_in")
+    .in("property_id", [...new Set(open.map((j) => j.propertyId))]).in("status", ["pending", "confirmed"]).gte("check_in", from).order("check_in");
+  const arrivals = (data ?? []) as { property_id: string; check_in: string }[];
+  return jobs.map((j) => {
+    if (j.status === "done" || j.status === "skipped") return j;
+    const next = arrivals.find((a) => a.property_id === j.propertyId && a.check_in >= j.scheduledDate);
+    return { ...j, nextCheckIn: next?.check_in ?? null };
+  });
+}
 const toCleaner = (r: Row): Cleaner => ({
   id: r.id as string, clerkUserId: r.clerk_user_id as string | null, name: r.name as string, email: r.email as string | null,
   phone: r.phone as string | null, payRate: ((r.pay_rate_cents as number) ?? 0) / 100, active: Boolean(r.active),
@@ -79,7 +96,7 @@ export async function getAllJobs(): Promise<CleaningJob[]> {
   if (!supabaseConfigured) return mockJobs;
   const { data, error } = await supabaseAdmin().from("cleaning_jobs").select("*").order("scheduled_date");
   if (error) throw new Error(error.message);
-  return (data ?? []).map(toJob);
+  return withNextCheckIn((data ?? []).map(toJob));
 }
 
 // Cleaner portal (user client; RLS scopes to the signed-in cleaner)
@@ -92,12 +109,12 @@ export async function getJobsForCleaner(cleanerId: string): Promise<CleaningJob[
   if (!supabaseConfigured) return mockJobs.filter((j) => j.cleanerId === cleanerId);
   const { data, error } = await supabaseForUser().from("cleaning_jobs").select("*").eq("cleaner_id", cleanerId).order("scheduled_date");
   if (error) throw new Error(error.message);
-  return (data ?? []).map(toJob);
+  return withNextCheckIn((data ?? []).map(toJob));
 }
 export async function getJob(id: string): Promise<CleaningJob | undefined> {
   if (!supabaseConfigured) return mockJobs.find((j) => j.id === id);
   const { data } = await supabaseForUser().from("cleaning_jobs").select("*").eq("id", id).maybeSingle();
-  return data ? toJob(data) : undefined;
+  return data ? (await withNextCheckIn([toJob(data)]))[0] : undefined;
 }
 
 export const propertyBasics = (id: string) => {

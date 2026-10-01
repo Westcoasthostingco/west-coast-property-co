@@ -18,7 +18,7 @@ export default function AvailabilityCalendar({ stays, months = 3, minNights }: {
           const offset = first.getUTCDay();
           return (
             <div key={m}>
-              <p className="caps-tight mb-3 text-[0.65rem] text-sky">{first.toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" })}</p>
+              <p className="caps-tight mb-3 text-[0.65rem] text-deep">{first.toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" })}</p>
               <div className="ui grid grid-cols-7 gap-1 text-center text-xs">
                 {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => <span key={i} className="text-muted">{d}</span>)}
                 {Array.from({ length: offset }, (_, i) => <span key={`o${i}`} />)}
