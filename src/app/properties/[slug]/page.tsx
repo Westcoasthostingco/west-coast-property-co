@@ -25,7 +25,7 @@ export default async function PropertyPage({ params }: PageProps<"/properties/[s
     <main className="mx-auto max-w-7xl px-4 pb-20 pt-8 sm:px-6">
       {/* Gallery: one large, four small (lightbox comes with real photos) */}
       <div className="grid gap-2 overflow-hidden rounded-3xl sm:grid-cols-4 sm:grid-rows-2">
-        <PropertyImage slug={p.slug} name={p.name} className="aspect-[4/3] sm:col-span-2 sm:row-span-2 sm:aspect-auto" />
+        <PropertyImage slug={p.slug} name={p.name} priority className="aspect-[4/3] sm:col-span-2 sm:row-span-2 sm:aspect-auto" />
         {[1, 2, 3, 4].map((i) => <PropertyImage key={i} slug={p.slug} name={`${p.name} ${i}`} crop={i} className="hidden aspect-[4/3] sm:block" />)}
       </div>
 
