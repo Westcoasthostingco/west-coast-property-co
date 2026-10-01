@@ -18,3 +18,8 @@ Roles live in Clerk user **publicMetadata**: `{"role": "admin"}`, `"owner"` or `
 - `docs/SETUP-CHECKLIST.md`: accounts to create and build status
 - `supabase/schema.sql`: database schema and row level security
 - `.env.example`: environment variables
+
+## Payments (Stripe Connect)
+Guests pay the platform through Stripe Checkout (`/api/checkout`). Owners onboard as Connect Express accounts from the owner portal (`/api/stripe/connect/onboard`). A daily cron (`/api/cron/payouts`, see `vercel.json`) transfers each owner's share the day after check-in; the management fee stays on the platform. Webhooks at `/api/webhooks/stripe` confirm bookings, track onboarding and reverse transfers on refunds.
+
+Stripe dashboard setup: enable Connect with Express accounts, enable Stripe Tax, and add a webhook endpoint for the four events listed in `docs/SETUP-CHECKLIST.md`.

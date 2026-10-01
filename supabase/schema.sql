@@ -56,6 +56,7 @@ create table bookings (
   status booking_status not null default 'pending',
   total_cents int not null,
   stripe_payment_intent_id text,
+  stripe_checkout_session_id text,
   created_at timestamptz not null default now(),
   check (check_out > check_in),
   -- prevent double-booking of active stays
@@ -68,13 +69,13 @@ create table bookings (
 create table payouts (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references owners(id),
-  booking_id uuid not null references bookings(id),
+  booking_id uuid not null unique references bookings(id),
   gross_cents int not null,
   fee_cents int not null,
   net_cents int not null,
   release_on date not null,            -- typically check-in + 1 day
   status payout_status not null default 'scheduled',
-  stripe_transfer_id text,
+  stripe_transfer_id text,            -- set by /api/cron/payouts
   created_at timestamptz not null default now()
 );
 

@@ -29,9 +29,10 @@ export default async function OwnerPortal() {
       <div>
         <h1 className="text-3xl font-semibold">Welcome, {owner.name}</h1>
         {!owner.payoutsReady && (
-          <p className="mt-2 rounded-lg border border-accent/40 bg-accent/10 px-3 py-2 text-sm">
-            Payouts are not set up yet. TODO: Stripe Connect onboarding link.
-          </p>
+          <form action="/api/stripe/connect/onboard" method="post" className="mt-2 flex flex-wrap items-center gap-3 rounded-lg border border-accent/40 bg-accent/10 px-3 py-2 text-sm">
+            <span>Payouts are not set up yet. Add your bank details with Stripe to receive your share of each booking.</span>
+            <button type="submit" className="rounded-full bg-brand px-4 py-1.5 text-white">Set up payouts</button>
+          </form>
         )}
       </div>
       <div className="grid gap-4 sm:grid-cols-3">

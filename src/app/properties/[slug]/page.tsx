@@ -37,12 +37,15 @@ export default async function PropertyPage({ params }: PageProps<"/properties/[s
         <aside className="h-fit rounded-2xl border border-line bg-white p-5">
           <p className="text-2xl font-semibold">{money(p.nightlyRate)} <span className="text-sm font-normal text-muted">/ night</span></p>
           <p className="text-sm text-muted">+ {money(p.cleaningFee)} cleaning fee</p>
-          <div className="mt-4 space-y-2 text-sm">
-            <label className="block">Check-in<input type="date" className="mt-1 w-full rounded-lg border border-line px-3 py-2" /></label>
-            <label className="block">Check-out<input type="date" className="mt-1 w-full rounded-lg border border-line px-3 py-2" /></label>
-          </div>
-          <button type="button" className="mt-4 w-full rounded-full bg-accent py-2.5 font-medium text-white">Check availability</button>
-          <p className="mt-2 text-xs text-muted">TODO: availability calendar + Stripe Checkout.</p>
+          <form action="/api/checkout" method="post" className="mt-4 space-y-2 text-sm">
+            <input type="hidden" name="slug" value={p.slug} />
+            <label className="block">Check-in<input required name="check_in" type="date" className="mt-1 w-full rounded-lg border border-line px-3 py-2" /></label>
+            <label className="block">Check-out<input required name="check_out" type="date" className="mt-1 w-full rounded-lg border border-line px-3 py-2" /></label>
+            <label className="block">Name<input required name="guest_name" className="mt-1 w-full rounded-lg border border-line px-3 py-2" /></label>
+            <label className="block">Email<input required name="guest_email" type="email" className="mt-1 w-full rounded-lg border border-line px-3 py-2" /></label>
+            <button type="submit" className="mt-2 w-full rounded-full bg-accent py-2.5 font-medium text-white">Book and pay</button>
+            <p className="text-xs text-muted">Taxes calculated at checkout. Secure payment by Stripe.</p>
+          </form>
         </aside>
       </div>
     </main>

@@ -24,7 +24,8 @@ Status key: [ ] todo, [x] done. Use one business email as the owner of every acc
 - [x] Clerk auth + role-protected /owner and /admin
 - [x] Supabase data layer (`src/lib/data.ts`, falls back to sample data without keys)
 - [ ] Availability calendar + iCal import/export
-- [ ] Stripe Checkout + Connect payouts (separate charges and transfers, release after check-in)
+- [x] Stripe Checkout + Connect Express payouts (separate charges and transfers, released day after check-in by daily cron)
+- [ ] Stripe dashboard: enable Connect (Express), enable Stripe Tax, add webhook endpoint `/api/webhooks/stripe` (checkout.session.completed, checkout.session.expired, account.updated, charge.refunded), set `STRIPE_WEBHOOK_SECRET` and `CRON_SECRET` in Vercel
 - [ ] Contact form + transactional emails
 - [ ] Reviews: collection + moderation
 - [ ] Photo upload in admin
