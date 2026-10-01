@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import PropertyImage from "@/components/PropertyImage";
+import CoastToCascades from "@/components/art/CoastToCascades";
 
 export const metadata: Metadata = { title: "About" };
 
@@ -18,7 +18,7 @@ export default function About() {
           </div>
           <p className="display mt-10 text-3xl text-teal">Coast to Cascades, we have you covered.</p>
         </div>
-        <PropertyImage slug="the-leonora-by-the-sea" name="Hood Canal" className="aspect-[4/5] rounded-3xl" />
+        <CoastToCascades className="w-full rounded-3xl shadow-lg shadow-teal/10" />
       </section>
       <section className="bg-mist">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">

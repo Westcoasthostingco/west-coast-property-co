@@ -1,16 +1,17 @@
-// Placeholder until photos are uploaded: a sea-to-sky gradient per home.
-// Replace with next/image from Supabase Storage (property_photos) in step 4.
-const tints: Record<string, string> = {
-  "the-grand-view": "from-[#5a93a6] via-[#8fc0ce] to-[#dbe9ee]",
-  "the-leonora-by-the-sea": "from-[#4f8aa0] via-[#6ba8bc] to-[#a8d0dc]",
-  "the-bedrock": "from-[#3a4448] via-[#5a7580] to-[#a8ccd8]",
-  hero: "from-[#3f7f95] via-[#6ba8bc] to-[#c9e2ea]",
-};
-export default function PropertyImage({ slug, name, className = "" }: { slug: string; name: string; className?: string }) {
-  const tint = tints[slug] ?? "from-teal via-sky to-wave";
+import Horizon from "./art/Horizon";
+
+// Placeholder scenes until photos are uploaded (property_photos in Supabase Storage).
+// `crop` shifts the framing so a gallery of placeholders does not repeat exactly.
+const scenes = { "the-grand-view": "harbor", "the-leonora-by-the-sea": "canal", "the-bedrock": "forest", hero: "hero" } as const;
+const crops = ["xMidYMid", "xMinYMin", "xMaxYMid", "xMinYMax", "xMaxYMax"] as const;
+
+export default function PropertyImage({ slug, name, className = "", crop = 0 }: { slug: string; name: string; className?: string; crop?: number }) {
+  const scene = scenes[slug as keyof typeof scenes] ?? "harbor";
+  // Keep caller-supplied positioning (e.g. absolute inset-0) instead of forcing relative.
+  const position = /\babsolute\b|\bfixed\b/.test(className) ? "" : "relative";
   return (
-    <div role="img" aria-label={`${name} photo`} className={`relative overflow-hidden bg-gradient-to-br ${tint} ${className}`}>
-      <span className="caps absolute bottom-3 left-3 text-[0.6rem] text-white/70">Photo coming soon</span>
+    <div className={`overflow-hidden ${position} ${className}`}>
+      <Horizon scene={scene} align={crops[crop % crops.length]} label={`${name} illustration`} className="absolute inset-0 h-full w-full" />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import PropertyCard from "@/components/PropertyCard";
 import PropertyImage from "@/components/PropertyImage";
 import SearchBar from "@/components/SearchBar";
 import SectionHeading from "@/components/SectionHeading";
+import CoastToCascades from "@/components/art/CoastToCascades";
 import { getProperties } from "@/lib/data";
 
 const pillars = [
@@ -19,7 +20,7 @@ export default async function Home() {
       {/* Hero: full-bleed, short headline, search strip (Wander layout) */}
       <section className="relative isolate">
         <PropertyImage slug="hero" name={hero?.name ?? "West Coast Hosting Co"} className="absolute inset-0 -z-10" />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-charcoal/20 via-transparent to-charcoal/55" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-charcoal/10 via-transparent to-charcoal/50" />
         <div className="mx-auto flex min-h-[86vh] max-w-7xl flex-col justify-end px-4 pb-14 pt-32 text-white sm:px-6">
           <p className="caps text-xs text-white/80">Short-term rental management &amp; co-hosting</p>
           <h1 className="display mt-3 max-w-4xl text-5xl leading-[1.05] sm:text-7xl">
@@ -45,15 +46,18 @@ export default async function Home() {
 
       {/* How we host */}
       <section className="bg-mist">
-        <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6">
-          <SectionHeading eyebrow="How we host" title="Two friends, real homes, no faceless platform" align="center" />
-          <div className="mt-14 grid gap-10 md:grid-cols-3">
+        <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[1fr_1.1fr]">
+          <CoastToCascades className="w-full rounded-3xl shadow-lg shadow-teal/10" />
+          <div>
+          <SectionHeading eyebrow="How we host" title="Two friends, real homes, no faceless platform" />
+          <div className="mt-10 grid gap-8 sm:grid-cols-3 lg:grid-cols-1">
             {pillars.map(([t, d]) => (
-              <div key={t} className="text-center">
+              <div key={t}>
                 <h3 className="display text-2xl text-teal">{t}</h3>
-                <p className="mt-3 leading-relaxed text-muted">{d}</p>
+                <p className="mt-2 leading-relaxed text-muted">{d}</p>
               </div>
             ))}
+          </div>
           </div>
         </div>
       </section>
