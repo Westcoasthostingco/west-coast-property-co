@@ -3,6 +3,10 @@ import { redirect } from "next/navigation";
 
 export type Role = "admin" | "owner" | "cleaner";
 
+// True once both Clerk keys are present. Without them the public site still
+// works; the portals show a "not set up yet" page instead of crashing.
+export const clerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY);
+
 // Preview-only bypass so Vercel Preview deployments can show the portals before
 // Clerk is configured. Never active in production, whatever the env says.
 export function previewRole(): Role | null {
@@ -16,6 +20,7 @@ export function previewRole(): Role | null {
 export async function getRole(): Promise<Role | null> {
   const preview = previewRole();
   if (preview) return preview;
+  if (!clerkConfigured) return null;
   const user = await currentUser();
   const role = user?.publicMetadata?.role;
   return role === "admin" || role === "owner" || role === "cleaner" ? role : null;
@@ -29,6 +34,7 @@ export async function requireRole(...allowed: Role[]) {
     if (preview !== "admin" && !allowed.includes(preview)) redirect("/unauthorized");
     return { userId: `preview_${preview}`, role: preview };
   }
+  if (!clerkConfigured) redirect("/unauthorized?reason=setup");
   const { userId, redirectToSignIn } = await auth();
   if (!userId) return redirectToSignIn();
   const role = await getRole();
