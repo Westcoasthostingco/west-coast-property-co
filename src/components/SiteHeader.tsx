@@ -35,8 +35,10 @@ export default async function SiteHeader() {
                 <UserButton />
               </Show>
             </>
+          ) : portal ? (
+            <Link href={portal.href} className="rounded-full bg-teal px-4 py-1.5 text-white hover:bg-teal-dark">{portal.label}</Link>
           ) : (
-            portal && <Link href={portal.href} className="rounded-full bg-teal px-4 py-1.5 text-white hover:bg-teal-dark">{portal.label}</Link>
+            <Link href="/sign-in" className="rounded-full border border-teal px-4 py-1.5 text-teal transition hover:bg-teal hover:text-white">Sign in</Link>
           )}
         </nav>
       </div>
