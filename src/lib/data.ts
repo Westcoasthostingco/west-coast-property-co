@@ -1,76 +1,155 @@
-// Mock data layer. Replace each function body with a Supabase query
-// (see supabase/schema.sql) without changing the signatures.
+// Data layer. Reads from Supabase when configured, otherwise from the sample
+// data in mock.ts so the site runs locally and in previews without keys.
+import * as mock from "./mock";
+import { supabaseAdmin, supabaseConfigured, supabaseForUser } from "./supabase";
 
-export type Property = {
-  id: string;
-  slug: string;
-  name: string;
-  city: string;
-  region: string;
-  bedrooms: number;
-  bathrooms: number;
-  guests: number;
-  nightlyRate: number; // USD
-  cleaningFee: number;
-  summary: string;
-  amenities: string[];
-  ownerId: string;
-  rating: number;
-  reviewCount: number;
+export type { Property, Owner, Booking, Review, Payout } from "./mock";
+export { money } from "./mock";
+import type { Property, Owner, Booking, Review, Payout } from "./mock";
+
+type Client = ReturnType<typeof supabaseAdmin>;
+
+// Row mappers: the database stores money in cents and snake_case columns.
+const toProperty = (r: Record<string, unknown>): Property => ({
+  id: r.id as string,
+  slug: r.slug as string,
+  name: r.name as string,
+  city: (r.city as string) ?? "",
+  region: (r.region as string) ?? "",
+  bedrooms: (r.bedrooms as number) ?? 0,
+  bathrooms: Number(r.bathrooms ?? 0),
+  guests: (r.max_guests as number) ?? 0,
+  nightlyRate: (r.nightly_rate_cents as number) / 100,
+  cleaningFee: (r.cleaning_fee_cents as number) / 100,
+  summary: (r.summary as string) ?? "",
+  amenities: (r.amenities as string[]) ?? [],
+  ownerId: r.owner_id as string,
+  rating: Number(r.rating ?? 0),
+  reviewCount: (r.review_count as number) ?? 0,
+});
+
+const toOwner = (r: Record<string, unknown>): Owner => ({
+  id: r.id as string,
+  name: r.name as string,
+  email: r.email as string,
+  payoutsReady: Boolean(r.payouts_enabled),
+  feePercent: Number(r.fee_percent),
+});
+
+const sources: Record<string, Booking["source"]> = {
+  direct: "Direct", airbnb: "Airbnb", vrbo: "Vrbo", booking_com: "Booking.com",
 };
 
-export type Owner = { id: string; name: string; email: string; payoutsReady: boolean; feePercent: number };
+const toBooking = (r: Record<string, unknown>): Booking => ({
+  id: r.id as string,
+  propertyId: r.property_id as string,
+  guest: r.guest_name as string,
+  checkIn: r.check_in as string,
+  checkOut: r.check_out as string,
+  source: sources[r.source as string] ?? "Direct",
+  status: r.status as Booking["status"],
+  total: (r.total_cents as number) / 100,
+});
 
-export type Booking = {
-  id: string;
-  propertyId: string;
-  guest: string;
-  checkIn: string;
-  checkOut: string;
-  source: "Direct" | "Airbnb" | "Vrbo" | "Booking.com";
-  status: "confirmed" | "pending" | "completed" | "cancelled";
-  total: number;
-};
+const toReview = (r: Record<string, unknown>): Review => ({
+  id: r.id as string,
+  propertyId: r.property_id as string,
+  guest: r.guest_name as string,
+  rating: r.rating as number,
+  body: (r.body as string) ?? "",
+  status: r.published ? "published" : "pending",
+});
 
-export type Review = { id: string; propertyId: string; guest: string; rating: number; body: string; status: "published" | "pending" };
+const toPayout = (r: Record<string, unknown>): Payout => ({
+  id: r.id as string,
+  ownerId: r.owner_id as string,
+  bookingId: r.booking_id as string,
+  gross: (r.gross_cents as number) / 100,
+  fee: (r.fee_cents as number) / 100,
+  net: (r.net_cents as number) / 100,
+  status: r.status === "paid" ? "paid" : "scheduled",
+  releaseOn: r.release_on as string,
+});
 
-export type Payout = { id: string; ownerId: string; bookingId: string; gross: number; fee: number; net: number; status: "scheduled" | "paid"; releaseOn: string };
+type Query = ReturnType<ReturnType<Client["from"]>["select"]>;
 
-export const owners: Owner[] = [
-  { id: "o1", name: "Dana Whitfield", email: "dana@example.com", payoutsReady: true, feePercent: 18 },
-  { id: "o2", name: "Marcus Lee", email: "marcus@example.com", payoutsReady: false, feePercent: 20 },
-];
+async function rows(client: Client, table: string, filter?: (q: Query) => Query) {
+  let q = client.from(table).select("*");
+  if (filter) q = filter(q);
+  const { data, error } = await q;
+  if (error) throw new Error(`${table}: ${error.message}`);
+  return (data ?? []) as Record<string, unknown>[];
+}
 
-export const properties: Property[] = [
-  { id: "p1", slug: "pacific-bluff-cottage", name: "Pacific Bluff Cottage", city: "Pismo Beach", region: "CA", bedrooms: 2, bathrooms: 2, guests: 5, nightlyRate: 285, cleaningFee: 120, summary: "Ocean-view cottage a short walk from the sand, with a fire pit and outdoor shower.", amenities: ["Ocean view", "Fire pit", "Wi-Fi", "Pet friendly", "Smart lock"], ownerId: "o1", rating: 4.9, reviewCount: 42 },
-  { id: "p2", slug: "harbor-loft", name: "Harbor Loft", city: "San Diego", region: "CA", bedrooms: 1, bathrooms: 1, guests: 3, nightlyRate: 210, cleaningFee: 85, summary: "Bright downtown loft steps from the waterfront, dining and transit.", amenities: ["Walkable", "Wi-Fi", "Washer/dryer", "Smart lock"], ownerId: "o1", rating: 4.7, reviewCount: 28 },
-  { id: "p3", slug: "redwood-retreat", name: "Redwood Retreat", city: "Santa Cruz", region: "CA", bedrooms: 3, bathrooms: 2, guests: 7, nightlyRate: 340, cleaningFee: 150, summary: "Family-sized cabin among the redwoods with a hot tub and game room.", amenities: ["Hot tub", "Game room", "Wi-Fi", "EV charger"], ownerId: "o2", rating: 4.8, reviewCount: 19 },
-];
+// ---- Public (anon client; RLS limits to published rows) ----
 
-export const bookings: Booking[] = [
-  { id: "b1", propertyId: "p1", guest: "A. Rivera", checkIn: "2026-10-09", checkOut: "2026-10-13", source: "Direct", status: "confirmed", total: 1260 },
-  { id: "b2", propertyId: "p2", guest: "J. Chen", checkIn: "2026-10-04", checkOut: "2026-10-07", source: "Airbnb", status: "confirmed", total: 715 },
-  { id: "b3", propertyId: "p3", guest: "S. Patel", checkIn: "2026-09-20", checkOut: "2026-09-25", source: "Vrbo", status: "completed", total: 1850 },
-  { id: "b4", propertyId: "p1", guest: "K. Morgan", checkIn: "2026-11-02", checkOut: "2026-11-05", source: "Direct", status: "pending", total: 975 },
-];
+export async function getProperties(): Promise<Property[]> {
+  if (!supabaseConfigured) return mock.properties;
+  return (await rows(supabaseForUser(), "property_listings")).map(toProperty);
+}
 
-export const reviews: Review[] = [
-  { id: "r1", propertyId: "p1", guest: "A. Rivera", rating: 5, body: "Spotless, great location, and check-in was effortless.", status: "published" },
-  { id: "r2", propertyId: "p3", guest: "S. Patel", rating: 5, body: "Perfect for the whole family. The hot tub was a hit.", status: "pending" },
-];
+export async function getProperty(slug: string): Promise<Property | undefined> {
+  if (!supabaseConfigured) return mock.properties.find((p) => p.slug === slug);
+  const r = await rows(supabaseForUser(), "property_listings", (q) => q.eq("slug", slug));
+  return r[0] ? toProperty(r[0]) : undefined;
+}
 
-export const payouts: Payout[] = [
-  { id: "x1", ownerId: "o2", bookingId: "b3", gross: 1850, fee: 370, net: 1480, status: "paid", releaseOn: "2026-09-26" },
-  { id: "x2", ownerId: "o1", bookingId: "b2", gross: 715, fee: 129, net: 586, status: "scheduled", releaseOn: "2026-10-05" },
-  { id: "x3", ownerId: "o1", bookingId: "b1", gross: 1260, fee: 227, net: 1033, status: "scheduled", releaseOn: "2026-10-10" },
-];
+export async function getPublishedReviews(propertyId: string): Promise<Review[]> {
+  if (!supabaseConfigured) return mock.reviews.filter((r) => r.propertyId === propertyId && r.status === "published");
+  return (await rows(supabaseForUser(), "reviews", (q) => q.eq("property_id", propertyId).eq("published", true))).map(toReview);
+}
 
-export const getProperties = async () => properties;
-export const getProperty = async (slug: string) => properties.find((p) => p.slug === slug);
-export const getOwners = async () => owners;
-export const getBookings = async () => bookings;
-export const getReviews = async () => reviews;
-export const getPayouts = async () => payouts;
-export const propertyName = (id: string) => properties.find((p) => p.id === id)?.name ?? id;
-export const ownerName = (id: string) => owners.find((o) => o.id === id)?.name ?? id;
-export const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+// ---- Owner portal (user client; RLS scopes to the signed-in owner) ----
+
+export async function getOwnerForClerkUser(clerkUserId: string): Promise<Owner | undefined> {
+  if (!supabaseConfigured) return mock.owners[0]; // demo owner
+  const r = await rows(supabaseForUser(), "owners", (q) => q.eq("clerk_user_id", clerkUserId));
+  return r[0] ? toOwner(r[0]) : undefined;
+}
+
+export async function getOwnerDashboard(owner: Owner) {
+  if (!supabaseConfigured) {
+    const props = mock.properties.filter((p) => p.ownerId === owner.id);
+    const ids = new Set(props.map((p) => p.id));
+    return {
+      properties: props,
+      bookings: mock.bookings.filter((b) => ids.has(b.propertyId)),
+      payouts: mock.payouts.filter((x) => x.ownerId === owner.id),
+    };
+  }
+  const db = supabaseForUser();
+  const properties = (await rows(db, "property_listings", (q) => q.eq("owner_id", owner.id))).map(toProperty);
+  const ids = properties.map((p) => p.id);
+  const [bookings, payouts] = await Promise.all([
+    ids.length ? rows(db, "bookings", (q) => q.in("property_id", ids).order("check_in")) : [],
+    rows(db, "payouts", (q) => q.eq("owner_id", owner.id).order("release_on")),
+  ]);
+  return { properties, bookings: bookings.map(toBooking), payouts: payouts.map(toPayout) };
+}
+
+// ---- Admin (service role; server only) ----
+
+export async function getAllProperties(): Promise<Property[]> {
+  if (!supabaseConfigured) return mock.properties;
+  return (await rows(supabaseAdmin(), "property_listings")).map(toProperty);
+}
+export async function getOwners(): Promise<Owner[]> {
+  if (!supabaseConfigured) return mock.owners;
+  return (await rows(supabaseAdmin(), "owners", (q) => q.order("name"))).map(toOwner);
+}
+export async function getBookings(): Promise<Booking[]> {
+  if (!supabaseConfigured) return mock.bookings;
+  return (await rows(supabaseAdmin(), "bookings", (q) => q.order("check_in", { ascending: false }))).map(toBooking);
+}
+export async function getReviews(): Promise<Review[]> {
+  if (!supabaseConfigured) return mock.reviews;
+  return (await rows(supabaseAdmin(), "reviews", (q) => q.order("created_at", { ascending: false }))).map(toReview);
+}
+export async function getPayouts(): Promise<Payout[]> {
+  if (!supabaseConfigured) return mock.payouts;
+  return (await rows(supabaseAdmin(), "payouts", (q) => q.order("release_on", { ascending: false }))).map(toPayout);
+}
+
+// Lookup helpers for tables that join by id.
+export const nameMap = <T extends { id: string; name: string }>(list: T[]) =>
+  (id: string) => list.find((x) => x.id === id)?.name ?? id;

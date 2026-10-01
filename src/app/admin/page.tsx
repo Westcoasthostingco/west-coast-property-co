@@ -1,9 +1,9 @@
 import Stat from "@/components/Stat";
-import { getBookings, getOwners, getPayouts, getProperties, getReviews, money } from "@/lib/data";
+import { getBookings, getOwners, getPayouts, getAllProperties, getReviews, money } from "@/lib/data";
 
 export default async function AdminHome() {
   const [props, bookings, owners, payouts, reviews] = await Promise.all([
-    getProperties(), getBookings(), getOwners(), getPayouts(), getReviews(),
+    getAllProperties(), getBookings(), getOwners(), getPayouts(), getReviews(),
   ]);
   const revenue = bookings.filter((b) => b.status !== "cancelled").reduce((s, b) => s + b.total, 0);
   const fees = payouts.reduce((s, x) => s + x.fee, 0);

@@ -9,7 +9,10 @@ Stack: Next.js (App Router), TypeScript, Tailwind. Planned: Clerk (auth), Supaba
 npm install
 npm run dev
 ```
-The app currently runs on mock data in `src/lib/data.ts`. No API keys are needed yet.
+Without env vars the site runs on sample data (`src/lib/mock.ts`). To use real services, copy `.env.example` to `.env.local` and fill in Clerk and Supabase keys. Clerk is required for `/owner` and `/admin`.
+
+## Roles
+Roles live in Clerk user **publicMetadata**: `{"role": "admin"}`, `"owner"` or `"cleaner"`. Admins can open every area; owners see only their own properties, bookings and payouts (enforced by Supabase row level security through the Clerk session token). An owner's Clerk user id goes in `owners.clerk_user_id`.
 
 ## Docs
 - `docs/SETUP-CHECKLIST.md`: accounts to create and build status

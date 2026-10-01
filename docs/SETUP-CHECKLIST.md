@@ -7,8 +7,8 @@ Status key: [ ] todo, [x] done. Use one business email as the owner of every acc
 - [ ] Google Workspace (admin@, billing@)
 - [x] GitHub repo: Westcoasthostingco/west-coast-property-co
 - [ ] Vercel (Pro): link repo, add env vars from `.env.example`
-- [ ] Supabase (Pro for PITR): run `supabase/schema.sql`; create `property-photos` bucket
-- [ ] Clerk: production instance on the domain; enable Organizations/roles; connect to Supabase (native integration)
+- [ ] Supabase (Pro for PITR): run `supabase/schema.sql` then `supabase/seed.sql`; create `property-photos` bucket; set each owner row's `clerk_user_id`
+- [ ] Clerk: production instance on the domain; set each user's publicMetadata `{"role":"admin"}` or `"owner"`; add Clerk as a third-party auth provider in Supabase (Authentication -> Sign In / Providers -> Third-party -> Clerk)
 - [ ] Stripe: enable Connect (Express); test and live keys; webhook endpoint; onboarding link flow
 - [ ] Resend: verify domain (SPF/DKIM)
 - [ ] QuickBooks Online: developer app for API sync (keep behind an accounting interface)
@@ -21,8 +21,8 @@ Status key: [ ] todo, [x] done. Use one business email as the owner of every acc
 - [x] Marketing pages, listings, property detail (mock data)
 - [x] Owner portal and admin pages (mock data)
 - [x] Database schema with RLS
-- [ ] Clerk auth + role-protected /owner and /admin
-- [ ] Supabase data layer replacing `src/lib/data.ts`
+- [x] Clerk auth + role-protected /owner and /admin
+- [x] Supabase data layer (`src/lib/data.ts`, falls back to sample data without keys)
 - [ ] Availability calendar + iCal import/export
 - [ ] Stripe Checkout + Connect payouts (separate charges and transfers, release after check-in)
 - [ ] Contact form + transactional emails

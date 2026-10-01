@@ -1,27 +1,18 @@
 -- West Coast Property Co: initial schema (Supabase / Postgres)
--- Auth is Clerk. Map Clerk users to rows via clerk_user_id, and expose the
--- Clerk user id to RLS with Clerk's native Supabase integration (auth.jwt()->>'sub').
+-- Auth is Clerk. Roles (admin/owner/cleaner) live in Clerk user publicMetadata.
+-- Add Clerk as a third-party auth provider in Supabase so RLS can read the
+-- Clerk user id from the session token: auth.jwt()->>'sub'.
 
 create extension if not exists "pgcrypto";
 create extension if not exists btree_gist;
 
-create type user_role as enum ('admin', 'owner', 'cleaner');
 create type booking_source as enum ('direct', 'airbnb', 'vrbo', 'booking_com');
 create type booking_status as enum ('pending', 'confirmed', 'completed', 'cancelled');
 create type payout_status as enum ('scheduled', 'paid', 'failed');
 
-create table profiles (
-  id uuid primary key default gen_random_uuid(),
-  clerk_user_id text unique not null,
-  role user_role not null default 'owner',
-  full_name text,
-  email text,
-  created_at timestamptz not null default now()
-);
-
 create table owners (
   id uuid primary key default gen_random_uuid(),
-  profile_id uuid references profiles(id),
+  clerk_user_id text unique,          -- set when the owner's Clerk account is linked
   name text not null,
   email text not null,
   stripe_account_id text unique,      -- Stripe Connect Express account
@@ -107,8 +98,16 @@ create table audit_log (
   created_at timestamptz not null default now()
 );
 
+-- Listings with review aggregates, used by the public site and portals.
+create view property_listings with (security_invoker = true) as
+select p.*,
+  coalesce(round(avg(r.rating) filter (where r.published), 1), 0) as rating,
+  count(r.id) filter (where r.published) as review_count
+from properties p
+left join reviews r on r.property_id = p.id
+group by p.id;
+
 -- Row level security. Service-role (server only) bypasses RLS for admin tasks.
-alter table profiles enable row level security;
 alter table owners enable row level security;
 alter table properties enable row level security;
 alter table property_photos enable row level security;
@@ -119,8 +118,7 @@ alter table audit_log enable row level security;
 
 create or replace function current_owner_id() returns uuid
 language sql stable as $$
-  select o.id from owners o join profiles p on p.id = o.profile_id
-  where p.clerk_user_id = (auth.jwt() ->> 'sub')
+  select id from owners where clerk_user_id = (auth.jwt() ->> 'sub')
 $$;
 
 -- Public can read published listings and published reviews.
@@ -134,4 +132,6 @@ create policy "owner reads own properties" on properties for select using (owner
 create policy "owner reads own bookings" on bookings for select
   using (property_id in (select id from properties where owner_id = current_owner_id()));
 create policy "owner reads own payouts" on payouts for select using (owner_id = current_owner_id());
+create policy "owner reads own reviews" on reviews for select
+  using (property_id in (select id from properties where owner_id = current_owner_id()));
 -- Writes (bookings, payouts, moderation) happen server-side with the service role.

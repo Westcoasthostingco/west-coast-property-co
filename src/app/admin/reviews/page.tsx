@@ -1,8 +1,9 @@
 import Table from "@/components/Table";
-import { getReviews, propertyName } from "@/lib/data";
+import { getAllProperties, getReviews, nameMap } from "@/lib/data";
 
 export default async function AdminReviews() {
-  const reviews = await getReviews();
+  const [reviews, props] = await Promise.all([getReviews(), getAllProperties()]);
+  const propertyName = nameMap(props);
   return (
     <>
       <h1 className="text-3xl font-semibold">Reviews</h1>

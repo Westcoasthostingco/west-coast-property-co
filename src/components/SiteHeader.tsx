@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Show, SignInButton, UserButton } from "@clerk/nextjs";
 
 const links = [
   { href: "/properties", label: "Stay with us" },
@@ -20,9 +21,15 @@ export default function SiteHeader() {
               {l.label}
             </Link>
           ))}
-          <Link href="/owner" className="rounded-full bg-brand px-4 py-1.5 text-white hover:bg-brand-dark">
-            Owner login
-          </Link>
+          <Show when="signed-out">
+            <SignInButton mode="modal" forceRedirectUrl="/owner">
+              <button className="rounded-full bg-brand px-4 py-1.5 text-white hover:bg-brand-dark">Owner login</button>
+            </SignInButton>
+          </Show>
+          <Show when="signed-in">
+            <Link href="/owner" className="text-muted hover:text-foreground">Portal</Link>
+            <UserButton />
+          </Show>
         </nav>
       </div>
     </header>

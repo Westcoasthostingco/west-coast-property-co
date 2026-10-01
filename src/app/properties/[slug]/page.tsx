@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getProperty, getProperties, getReviews, money } from "@/lib/data";
+import { getProperty, getProperties, getPublishedReviews, money } from "@/lib/data";
 
 export async function generateStaticParams() {
   return (await getProperties()).map((p) => ({ slug: p.slug }));
@@ -9,7 +9,7 @@ export default async function PropertyPage({ params }: PageProps<"/properties/[s
   const { slug } = await params;
   const p = await getProperty(slug);
   if (!p) notFound();
-  const reviews = (await getReviews()).filter((r) => r.propertyId === p.id && r.status === "published");
+  const reviews = await getPublishedReviews(p.id);
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-12">
