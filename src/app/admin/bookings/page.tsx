@@ -44,12 +44,12 @@ export default async function AdminBookings({ searchParams }: PageProps<"/admin/
           <option value="">All homes</option>
           {props.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
-        <button type="submit" className="ui rounded-full border border-teal px-4 py-2 text-sm text-teal hover:bg-teal hover:text-white">Filter</button>
+        <button type="submit" className="ui rounded-full border border-deep px-4 py-2 text-sm text-deep hover:bg-deep hover:text-white">Filter</button>
       </form>
 
       <DataTable head={["Check-in", "Nights", "Home", "Guest", "Source", "Status", "Total"]} empty="No stays match these filters."
         rows={list.map((b) => [
-          <Link key="d" href={`/admin/bookings/${b.id}`} className="font-medium text-charcoal hover:text-teal">{fmtDate(b.checkIn, { weekday: "short", month: "short", day: "numeric", year: "numeric" })}</Link>,
+          <Link key="d" href={`/admin/bookings/${b.id}`} className="font-medium text-charcoal hover:text-deep">{fmtDate(b.checkIn, { weekday: "short", month: "short", day: "numeric", year: "numeric" })}</Link>,
           nightsBetween(b.checkIn, b.checkOut), propertyName(b.propertyId), b.guest, b.source, <Pill key="s" value={b.status} />, money(b.total),
         ])} />
     </>

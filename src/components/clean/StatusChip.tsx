@@ -3,8 +3,8 @@ import type { CleaningStatus } from "@/lib/cleaning";
 const styles: Record<CleaningStatus, { label: string; cls: string }> = {
   unassigned: { label: "Unassigned", cls: "bg-white text-muted border-line" },
   assigned: { label: "Scheduled", cls: "bg-white text-charcoal border-line" },
-  in_progress: { label: "In progress", cls: "bg-teal text-white border-teal" },
-  done: { label: "Done", cls: "bg-mist text-teal-dark border-wave" },
+  in_progress: { label: "In progress", cls: "bg-deep text-white border-deep" },
+  done: { label: "Done", cls: "bg-mist text-deep border-wave" },
   skipped: { label: "Skipped", cls: "bg-white text-muted border-line line-through" },
 };
 

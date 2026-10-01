@@ -27,9 +27,9 @@ export default async function OwnerSettings() {
       <div className="grid gap-4 lg:grid-cols-2">
         <Card title="Contact details">
           <dl className="ui grid gap-3 text-sm">
-            <div><dt className="caps-tight text-[0.6rem] text-sky">Name</dt><dd className="mt-1 text-charcoal">{owner.name}</dd></div>
-            <div><dt className="caps-tight text-[0.6rem] text-sky">Email</dt><dd className="mt-1 text-charcoal">{owner.email}</dd></div>
-            <div><dt className="caps-tight text-[0.6rem] text-sky">Homes</dt><dd className="mt-1 text-charcoal">{properties.map((p) => p.name).join(", ") || "None linked yet"}</dd></div>
+            <div><dt className="caps-tight text-[0.6rem] text-deep">Name</dt><dd className="mt-1 text-charcoal">{owner.name}</dd></div>
+            <div><dt className="caps-tight text-[0.6rem] text-deep">Email</dt><dd className="mt-1 text-charcoal">{owner.email}</dd></div>
+            <div><dt className="caps-tight text-[0.6rem] text-deep">Homes</dt><dd className="mt-1 text-charcoal">{properties.map((p) => p.name).join(", ") || "None linked yet"}</dd></div>
           </dl>
           <p className="mt-4 text-xs leading-relaxed text-muted">Need to change your name or email? Reply to any of our emails and we will update it for you.</p>
         </Card>
@@ -44,7 +44,7 @@ export default async function OwnerSettings() {
               <p className="text-sm leading-relaxed text-charcoal">
                 Add your bank details with Stripe to receive your share of each stay. It takes about five minutes; Stripe handles identity and tax details securely.
               </p>
-              <button type="submit" className="caps-tight rounded-full bg-teal px-5 py-2 text-[0.7rem] text-white transition hover:bg-teal-dark">Set up payouts</button>
+              <button type="submit" className="caps-tight rounded-full bg-deep px-5 py-2 text-[0.7rem] text-white transition hover:bg-dusk">Set up payouts</button>
             </form>
           )}
         </Card>
@@ -64,7 +64,7 @@ export default async function OwnerSettings() {
                 <span>{label}</span>
               </label>
             ))}
-            <button type="submit" disabled className="caps-tight mt-2 cursor-not-allowed rounded-full bg-teal/40 px-5 py-2 text-[0.7rem] text-white">Save preferences</button>
+            <button type="submit" disabled className="caps-tight mt-2 cursor-not-allowed rounded-full bg-deep/40 px-5 py-2 text-[0.7rem] text-white">Save preferences</button>
             <p className="ui text-xs leading-relaxed text-muted">Email notifications arrive with the notifications step (Resend). Preferences will be saved to your owner record then.</p>
           </form>
         </Card>

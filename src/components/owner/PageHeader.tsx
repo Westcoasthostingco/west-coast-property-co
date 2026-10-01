@@ -5,7 +5,7 @@ export default function PageHeader({ eyebrow, title, intro, actions }: { eyebrow
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="max-w-2xl">
-        <p className="caps text-xs text-sky">{eyebrow}</p>
+        <p className="caps text-xs text-deep">{eyebrow}</p>
         <h1 className="display mt-2 text-4xl text-charcoal sm:text-5xl">{title}</h1>
         {intro && <p className="mt-3 leading-relaxed text-muted">{intro}</p>}
       </div>

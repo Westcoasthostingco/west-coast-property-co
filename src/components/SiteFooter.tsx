@@ -3,7 +3,7 @@ import Wordmark from "./Wordmark";
 
 export default function SiteFooter() {
   return (
-    <footer className="bg-teal text-white">
+    <footer className="bg-dusk text-white">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1fr_auto_auto]">
         <div>
           <Wordmark reversed href={null} />
@@ -30,7 +30,10 @@ export default function SiteFooter() {
       <div className="border-t border-white/15">
         <div className="caps mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-[0.6rem] text-white/60 sm:px-6">
           <span>© {new Date().getFullYear()} West Coast Hosting Co</span>
-          <span className="flex gap-4">
+          <span className="flex flex-wrap gap-4">
+            <Link href="/legal/privacy" className="hover:text-white">Privacy</Link>
+            <Link href="/legal/terms" className="hover:text-white">Terms</Link>
+            <Link href="/legal/policies" className="hover:text-white">Policies</Link>
             <Link href="/owner" className="hover:text-white">Owner portal</Link>
             <Link href="/clean" className="hover:text-white">Cleaner</Link>
             <Link href="/admin" className="hover:text-white">Team</Link>

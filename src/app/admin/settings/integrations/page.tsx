@@ -30,7 +30,7 @@ export default async function Integrations() {
               {s.vars.map((v) => (
                 <li key={v.name} className="flex items-center justify-between gap-2">
                   <code className="truncate text-charcoal">{v.name}</code>
-                  <span className={v.present ? "text-teal-dark" : "text-[#b6633a]"}>{v.present ? "set" : "not set"}</span>
+                  <span className={v.present ? "text-deep" : "text-[#b6633a]"}>{v.present ? "set" : "not set"}</span>
                 </li>
               ))}
             </ul>
@@ -40,13 +40,13 @@ export default async function Integrations() {
 
       <section className="space-y-2">
         <div className="flex items-baseline justify-between">
-          <h2 className="caps-tight text-[0.68rem] text-sky">iCal feeds</h2>
+          <h2 className="caps-tight text-[0.68rem] text-deep">iCal feeds</h2>
           <p className="ui text-xs text-muted">Edit URLs on each home&apos;s page. Synced hourly by cron.</p>
         </div>
         {!supabaseConfigured && <p className="ui text-xs text-muted">Sample mode: feeds are stored in Supabase, so none are listed.</p>}
         <DataTable head={["Home", "Channel", "Last sync", "Last error", "Export feed"]} empty="No channel feeds yet."
           rows={feeds.map((f) => [
-            <Link key="p" href={`/admin/properties/${f.propertyId}`} className="font-medium text-charcoal hover:text-teal">{propertyName(f.propertyId)}</Link>,
+            <Link key="p" href={`/admin/properties/${f.propertyId}`} className="font-medium text-charcoal hover:text-deep">{propertyName(f.propertyId)}</Link>,
             sourceLabel[f.source] ?? f.source,
             f.lastSyncedAt ? fmtDateTime(f.lastSyncedAt) : <span className="text-muted">never</span>,
             f.lastError ? <span className="text-xs text-[#b6633a]">{f.lastError}</span> : "—",

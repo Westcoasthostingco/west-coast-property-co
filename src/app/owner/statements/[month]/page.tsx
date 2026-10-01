@@ -47,7 +47,7 @@ export default async function OwnerStatement({ params }: Props) {
       <PageHeader eyebrow="Statement" title={monthTitle(month)}
         intro={`Prepared for ${owner.name}. Stays are listed by check-in date. Our fee is ${owner.feePercent}% of the nights subtotal.`}
         actions={<>
-          <Link href="/owner/statements" className="caps-tight rounded-full border border-line px-4 py-2 text-[0.65rem] text-muted transition hover:border-teal hover:text-teal">All statements</Link>
+          <Link href="/owner/statements" className="caps-tight rounded-full border border-line px-4 py-2 text-[0.65rem] text-muted transition hover:border-deep hover:text-deep">All statements</Link>
           <PrintButton />
         </>} />
 

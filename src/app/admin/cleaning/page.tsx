@@ -52,8 +52,8 @@ export default async function CleaningBoard({ searchParams }: PageProps<"/admin/
 
       <div className="flex flex-wrap items-center gap-3">
         <div className="ui flex rounded-full border border-line bg-white p-1 text-xs">
-          <Link href="/admin/cleaning" className={`rounded-full px-3 py-1 ${tab === "upcoming" ? "bg-teal text-white" : "text-muted hover:text-charcoal"}`}>Next 30 days</Link>
-          <Link href="/admin/cleaning?tab=past" className={`rounded-full px-3 py-1 ${tab === "past" ? "bg-teal text-white" : "text-muted hover:text-charcoal"}`}>Past 30 days</Link>
+          <Link href="/admin/cleaning" className={`rounded-full px-3 py-1 ${tab === "upcoming" ? "bg-deep text-white" : "text-muted hover:text-charcoal"}`}>Next 30 days</Link>
+          <Link href="/admin/cleaning?tab=past" className={`rounded-full px-3 py-1 ${tab === "past" ? "bg-deep text-white" : "text-muted hover:text-charcoal"}`}>Past 30 days</Link>
         </div>
         <form method="get" className="ui flex flex-wrap gap-2 text-sm">
           {tab === "past" && <input type="hidden" name="tab" value="past" />}
@@ -66,7 +66,7 @@ export default async function CleaningBoard({ searchParams }: PageProps<"/admin/
             <option value="">Any status</option>
             {STATUSES.map((s) => <option key={s} value={s}>{s.replace("_", " ")}</option>)}
           </select>
-          <button type="submit" className="rounded-full border border-teal px-3 py-1.5 text-xs text-teal hover:bg-teal hover:text-white">Filter</button>
+          <button type="submit" className="rounded-full border border-deep px-3 py-1.5 text-xs text-deep hover:bg-deep hover:text-white">Filter</button>
         </form>
       </div>
 
@@ -76,7 +76,7 @@ export default async function CleaningBoard({ searchParams }: PageProps<"/admin/
             const mine = doneJobs.filter((j) => j.cleanerId === c.id);
             return (
               <Card key={c.id}>
-                <p className="caps-tight text-[0.65rem] text-sky">{c.name}</p>
+                <p className="caps-tight text-[0.65rem] text-deep">{c.name}</p>
                 <p className="display mt-1 text-3xl not-italic text-charcoal">{money(mine.reduce((s, j) => s + (j.cost ?? 0), 0))}</p>
                 <p className="ui text-xs text-muted">{mine.length} jobs · {money(c.payRate)} per job</p>
               </Card>
@@ -89,8 +89,8 @@ export default async function CleaningBoard({ searchParams }: PageProps<"/admin/
       {dates.map((date) => (
         <section key={date} className="space-y-2">
           <h2 className="ui flex items-baseline gap-2 text-sm">
-            <span className={`font-medium ${date === today ? "text-teal" : "text-charcoal"}`}>{fmtDate(date, { weekday: "long", month: "short", day: "numeric" })}</span>
-            {date === today && <span className="caps-tight text-[0.6rem] text-teal">today</span>}
+            <span className={`font-medium ${date === today ? "text-deep" : "text-charcoal"}`}>{fmtDate(date, { weekday: "long", month: "short", day: "numeric" })}</span>
+            {date === today && <span className="caps-tight text-[0.6rem] text-deep">today</span>}
             <span className="text-xs text-muted">{byDate.get(date)!.length} job{byDate.get(date)!.length === 1 ? "" : "s"}</span>
           </h2>
           <DataTable head={["Home", "Window", "Cleaner", "Status", "Next check-in", tab === "past" ? "Cost" : "Booking"]}
@@ -105,7 +105,7 @@ export default async function CleaningBoard({ searchParams }: PageProps<"/admin/
                   <option value="">Unassigned</option>
                   {cleaners.filter((c) => c.active || c.id === j.cleanerId).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </AutoSubmitSelect>
-                <noscript><button type="submit" className="text-xs text-teal">Save</button></noscript>
+                <noscript><button type="submit" className="text-xs text-deep">Save</button></noscript>
               </form>,
               <form key="s" action={setJobStatusAction} className="flex items-center gap-2">
                 <input type="hidden" name="jobId" value={j.id} />
@@ -117,7 +117,7 @@ export default async function CleaningBoard({ searchParams }: PageProps<"/admin/
               </form>,
               j.nextCheckIn ? <span key="n" className={j.nextCheckIn === j.scheduledDate ? "font-medium text-[#b6633a]" : ""}>{j.nextCheckIn === j.scheduledDate ? "Same day" : fmtDate(j.nextCheckIn)}</span> : <span key="n" className="text-muted">open</span>,
               tab === "past" ? (j.cost != null ? money(j.cost) : "—")
-                : j.bookingId ? <Link key="b" href={`/admin/bookings/${j.bookingId}`} className="text-teal hover:underline">stay ↗</Link> : "—",
+                : j.bookingId ? <Link key="b" href={`/admin/bookings/${j.bookingId}`} className="text-deep hover:underline">stay ↗</Link> : "—",
             ])} />
         </section>
       ))}

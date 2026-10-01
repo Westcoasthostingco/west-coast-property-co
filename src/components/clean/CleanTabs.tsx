@@ -19,7 +19,7 @@ export default function CleanTabs() {
               key={t.href}
               href={t.href}
               aria-current={active ? "page" : undefined}
-              className={`ui flex min-h-[48px] flex-1 items-center justify-center border-b-2 text-base font-medium transition-colors ${active ? "border-teal text-teal-dark" : "border-transparent text-muted hover:text-charcoal"}`}
+              className={`ui flex min-h-[48px] flex-1 items-center justify-center border-b-2 text-base font-medium transition-colors ${active ? "border-deep text-deep" : "border-transparent text-muted hover:text-charcoal"}`}
             >
               {t.label}
             </Link>

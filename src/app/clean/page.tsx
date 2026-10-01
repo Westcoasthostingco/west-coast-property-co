@@ -29,7 +29,7 @@ export default async function CleanHome() {
   return (
     <div className="space-y-10">
       <header>
-        <p className="caps-tight text-xs text-sky">{formatDay(today, { year: true })}</p>
+        <p className="caps-tight text-xs text-deep">{formatDay(today, { year: true })}</p>
         <h1 className="display mt-1 text-4xl leading-tight">Hi, {firstName}.</h1>
         <p className="mt-2 text-lg text-muted">
           {todays.length === 0 ? "Nothing on the board today." : todays.length === 1 ? "One turnover today." : `${todays.length} turnovers today.`}
@@ -37,7 +37,7 @@ export default async function CleanHome() {
       </header>
 
       <section aria-labelledby="today-heading">
-        <h2 id="today-heading" className="caps text-xs text-sky">Today</h2>
+        <h2 id="today-heading" className="caps text-xs text-deep">Today</h2>
         <div className="mt-3 space-y-4">
           {todays.length === 0 ? (
             <Empty>No cleans scheduled for today. Enjoy the breather.</Empty>
@@ -48,7 +48,7 @@ export default async function CleanHome() {
       </section>
 
       <section aria-labelledby="week-heading">
-        <h2 id="week-heading" className="caps text-xs text-sky">Next 7 days</h2>
+        <h2 id="week-heading" className="caps text-xs text-deep">Next 7 days</h2>
         <div className="mt-3 space-y-4">
           {upcoming.length === 0 ? (
             <Empty>
@@ -61,7 +61,7 @@ export default async function CleanHome() {
       </section>
 
       <section aria-labelledby="recent-heading">
-        <h2 id="recent-heading" className="caps text-xs text-sky">Recent</h2>
+        <h2 id="recent-heading" className="caps text-xs text-deep">Recent</h2>
         {recent.length === 0 ? (
           <div className="mt-3"><Empty>No finished jobs yet.</Empty></div>
         ) : (

@@ -16,7 +16,7 @@ export default function DataTable({ columns, rows, empty = "Nothing here yet.", 
         <thead>
           <tr className="border-b border-line">
             {columns.map((c) => (
-              <th key={c.label} className={`caps-tight whitespace-nowrap px-4 py-3 text-[0.6rem] font-medium text-sky ${cls(c)}`}>{c.label}</th>
+              <th key={c.label} className={`caps-tight whitespace-nowrap px-4 py-3 text-[0.6rem] font-medium text-deep ${cls(c)}`}>{c.label}</th>
             ))}
           </tr>
         </thead>

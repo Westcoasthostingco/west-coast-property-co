@@ -40,7 +40,7 @@ export default async function CleanCalendar(props: { searchParams: Promise<{ mon
       <header className="flex items-center justify-between gap-2">
         <Link href={`/clean/calendar?month=${monthKey(prev.year, prev.month)}`} aria-label="Previous month" className="flex h-12 w-12 items-center justify-center rounded-full border border-line bg-white text-2xl text-charcoal active:bg-mist">&lsaquo;</Link>
         <div className="text-center">
-          <p className="caps-tight text-xs text-sky">My calendar</p>
+          <p className="caps-tight text-xs text-deep">My calendar</p>
           <h1 className="display text-3xl leading-tight">{monthLabel(year, month)}</h1>
         </div>
         <Link href={`/clean/calendar?month=${monthKey(next.year, next.month)}`} aria-label="Next month" className="flex h-12 w-12 items-center justify-center rounded-full border border-line bg-white text-2xl text-charcoal active:bg-mist">&rsaquo;</Link>
@@ -56,7 +56,7 @@ export default async function CleanCalendar(props: { searchParams: Promise<{ mon
       <div className="overflow-hidden rounded-2xl border border-line bg-white">
         <div className="grid grid-cols-7 border-b border-line bg-mist">
           {weekdays.map((d, i) => (
-            <div key={i} className="caps-tight py-2 text-center text-[11px] text-sky">{d}</div>
+            <div key={i} className="caps-tight py-2 text-center text-[11px] text-deep">{d}</div>
           ))}
         </div>
         <div className="grid grid-cols-7">
@@ -67,7 +67,7 @@ export default async function CleanCalendar(props: { searchParams: Promise<{ mon
             const dayJobs = byDay.get(day) ?? [];
             return (
               <div key={i} className={`min-h-[72px] border-b border-r border-line/60 p-1 ${isToday ? "bg-mist/70" : ""}`}>
-                <p className={`ui mb-1 text-center text-xs ${isToday ? "mx-auto flex h-6 w-6 items-center justify-center rounded-full bg-teal font-medium text-white" : "text-muted"}`}>{day}</p>
+                <p className={`ui mb-1 text-center text-xs ${isToday ? "mx-auto flex h-6 w-6 items-center justify-center rounded-full bg-deep font-medium text-white" : "text-muted"}`}>{day}</p>
                 <div className="space-y-1">
                   {dayJobs.map((j) => {
                     const p = info.get(j.propertyId);
@@ -77,7 +77,7 @@ export default async function CleanCalendar(props: { searchParams: Promise<{ mon
                         key={j.id}
                         href={`/clean/jobs/${j.id}`}
                         title={p?.name}
-                        className={`block truncate rounded px-1 py-1 text-[11px] leading-tight ${done ? "bg-cream text-muted line-through" : j.status === "in_progress" ? "bg-teal text-white" : "bg-wave/60 text-charcoal"}`}
+                        className={`block truncate rounded px-1 py-1 text-[11px] leading-tight ${done ? "bg-cream text-muted line-through" : j.status === "in_progress" ? "bg-deep text-white" : "bg-wave/60 text-charcoal"}`}
                       >
                         {p?.name ?? "Job"}
                       </Link>
@@ -92,7 +92,7 @@ export default async function CleanCalendar(props: { searchParams: Promise<{ mon
 
       {jobs.length > 0 && (
         <section>
-          <h2 className="caps text-xs text-sky">This month</h2>
+          <h2 className="caps text-xs text-deep">This month</h2>
           <ul className="mt-3 divide-y divide-line overflow-hidden rounded-2xl border border-line bg-white">
             {jobs.map((j) => {
               const p = info.get(j.propertyId);

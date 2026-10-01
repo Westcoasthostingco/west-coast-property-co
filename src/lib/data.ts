@@ -27,6 +27,12 @@ const toProperty = (r: Record<string, unknown>): Property => ({
   rating: Number(r.rating ?? 0),
   reviewCount: (r.review_count as number) ?? 0,
   airbnbUrl: (r.airbnb_url as string | null) ?? null,
+  taxRateBps: (r.tax_rate_bps as number) ?? 0,
+  minNights: (r.min_nights as number) ?? 2,
+  tideStationId: (r.tide_station_id as string | null) ?? null,
+  skiResort: r.ski_resort_name && r.ski_lat != null && r.ski_lng != null
+    ? { name: r.ski_resort_name as string, lat: Number(r.ski_lat), lng: Number(r.ski_lng) }
+    : null,
 });
 
 const toOwner = (r: Record<string, unknown>): Owner => ({

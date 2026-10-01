@@ -16,7 +16,7 @@ export default async function AdminOwners({ searchParams }: PageProps<"/admin/ow
         rows={owners.map((o) => {
           const mine = payouts.filter((x) => x.ownerId === o.id);
           return [
-            <Link key="n" href={`/admin/owners/${o.id}`} className="font-medium text-charcoal hover:text-teal">{o.name}</Link>,
+            <Link key="n" href={`/admin/owners/${o.id}`} className="font-medium text-charcoal hover:text-deep">{o.name}</Link>,
             o.email, props.filter((p) => p.ownerId === o.id).map((p) => p.name).join(", ") || "—", `${o.feePercent}%`,
             money(mine.filter((x) => x.status === "paid").reduce((s, x) => s + x.net, 0)),
             money(mine.filter((x) => x.status === "scheduled").reduce((s, x) => s + x.net, 0)),

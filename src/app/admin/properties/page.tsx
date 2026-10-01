@@ -21,7 +21,7 @@ export default async function AdminProperties({ searchParams }: PageProps<"/admi
         rows={props.map((p) => {
           const n = next(p.id);
           return [
-            <Link key="n" href={`/admin/properties/${p.id}`} className="flex items-center gap-3 font-medium text-charcoal hover:text-teal">
+            <Link key="n" href={`/admin/properties/${p.id}`} className="flex items-center gap-3 font-medium text-charcoal hover:text-deep">
               <PropertyImage slug={p.slug} name={p.name} className="h-9 w-12 rounded-lg" />{p.name}
             </Link>,
             `${p.city}, ${p.region}`, ownerName(p.ownerId), `${p.guests} · ${p.bedrooms}bd ${p.bathrooms}ba`, money(p.nightlyRate), money(p.cleaningFee),

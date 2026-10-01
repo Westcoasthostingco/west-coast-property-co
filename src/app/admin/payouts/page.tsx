@@ -48,7 +48,7 @@ export default async function AdminPayouts({ searchParams }: PageProps<"/admin/p
             {failed.map((x) => (
               <li key={x.id} className="flex flex-wrap items-center justify-between gap-3 py-2">
                 <div>
-                  <p className="font-medium text-charcoal">{ownerName(x.ownerId)} · {money(x.net)} · <Link href={`/admin/bookings/${x.bookingId}`} className="text-teal hover:underline">{propertyOf(x.bookingId)}</Link></p>
+                  <p className="font-medium text-charcoal">{ownerName(x.ownerId)} · {money(x.net)} · <Link href={`/admin/bookings/${x.bookingId}`} className="text-deep hover:underline">{propertyOf(x.bookingId)}</Link></p>
                   <p className="text-xs text-[#b6633a]">{x.lastError ?? "Unknown error"}</p>
                 </div>
                 <form action={retryPayoutAction.bind(null, x.id)}><button type="submit" className={ghostButtonClass}>Requeue</button></form>
@@ -60,13 +60,13 @@ export default async function AdminPayouts({ searchParams }: PageProps<"/admin/p
 
       <div className="ui flex flex-wrap gap-2 text-xs">
         {["", "scheduled", "processing", "paid", "failed", "reversed"].map((s) => (
-          <Link key={s} href={s ? `/admin/payouts?status=${s}` : "/admin/payouts"} className={`rounded-full border px-3 py-1 ${status === s ? "border-teal bg-teal text-white" : "border-line bg-white text-muted hover:text-charcoal"}`}>{s || "All"}</Link>
+          <Link key={s} href={s ? `/admin/payouts?status=${s}` : "/admin/payouts"} className={`rounded-full border px-3 py-1 ${status === s ? "border-deep bg-deep text-white" : "border-line bg-white text-muted hover:text-charcoal"}`}>{s || "All"}</Link>
         ))}
       </div>
 
       <DataTable head={["Release", "Owner", "Home", "Gross", "Fee", "Net", "Status", "Transfer"]} empty="No payouts in this view."
         rows={list.map((x) => [
-          <Link key="r" href={`/admin/bookings/${x.bookingId}`} className="font-medium text-charcoal hover:text-teal">{fmtDate(x.releaseOn, { month: "short", day: "numeric", year: "numeric" })}</Link>,
+          <Link key="r" href={`/admin/bookings/${x.bookingId}`} className="font-medium text-charcoal hover:text-deep">{fmtDate(x.releaseOn, { month: "short", day: "numeric", year: "numeric" })}</Link>,
           ownerName(x.ownerId), propertyOf(x.bookingId), money(x.gross), money(x.fee), money(x.net),
           <span key="s"><Pill value={x.status} />{x.lastError && x.status !== "failed" && <span className="ml-2 text-xs text-muted" title={x.lastError}>held</span>}</span>,
           x.transferId ? <span key="t" className="text-xs text-muted">{x.transferId}</span> : "—",

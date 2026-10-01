@@ -34,13 +34,13 @@ export default async function OwnerProperties() {
               <PropertyImage slug={p.slug} name={p.name} className="h-32" />
               <div className="p-5">
                 <div className="flex items-baseline justify-between gap-3">
-                  <h2 className="display text-2xl text-charcoal group-hover:text-teal-dark">{p.name}</h2>
+                  <h2 className="display text-2xl text-charcoal group-hover:text-deep">{p.name}</h2>
                   <span className="ui text-xs text-muted">{p.city}, {p.region}</span>
                 </div>
                 <dl className="ui mt-3 grid grid-cols-3 gap-3 text-sm">
-                  <div><dt className="caps-tight text-[0.6rem] text-sky">This month</dt><dd className="mt-1 text-charcoal">{money(now.revenue)}</dd></div>
-                  <div><dt className="caps-tight text-[0.6rem] text-sky">Occupancy</dt><dd className="mt-1 text-charcoal">{percent(now.occupancy)}</dd></div>
-                  <div><dt className="caps-tight text-[0.6rem] text-sky">Avg. rate</dt><dd className="mt-1 text-charcoal">{now.adr ? money(now.adr) : "—"}</dd></div>
+                  <div><dt className="caps-tight text-[0.6rem] text-deep">This month</dt><dd className="mt-1 text-charcoal">{money(now.revenue)}</dd></div>
+                  <div><dt className="caps-tight text-[0.6rem] text-deep">Occupancy</dt><dd className="mt-1 text-charcoal">{percent(now.occupancy)}</dd></div>
+                  <div><dt className="caps-tight text-[0.6rem] text-deep">Avg. rate</dt><dd className="mt-1 text-charcoal">{now.adr ? money(now.adr) : "—"}</dd></div>
                 </dl>
                 <div className="mt-4">
                   <TimeSeries title={`${p.name} revenue by month`} height={120} points={trend.map((m) => ({ label: monthLabel(m.month), value: m.revenue }))} format="money" />

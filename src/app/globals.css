@@ -4,8 +4,11 @@
 :root {
   --cream: #fbfdfc;        /* primary background, cool not peachy */
   --charcoal: #3a4448;     /* body text */
-  --teal: #6ba8bc;         /* Deep Sky Teal: wordmark, backgrounds, buttons */
-  --teal-dark: #5a93a6;    /* hover state, derived */
+  --teal: #6ba8bc;         /* Deep Sky Teal: wordmark (never recolored), accents */
+  --teal-dark: #5a93a6;    /* hover on light teal surfaces */
+  --deep: #2f6f86;         /* Harbor: primary buttons, links, chart lines (hue 196, same family) */
+  --dusk: #1e4b5c;         /* Dusk: footer, dark panels, hover of deep */
+  --ink: #14323d;          /* Night water: deepest surface, hero gradient base */
   --sky: #8fc0ce;          /* Soft Sky Blue: caps text, accents */
   --wave: #a8d0dc;         /* Pale Wave Blue: wave motif, dividers, highlights */
   --tagline: #a8ccd8;      /* Muted Tagline Blue: quiet supporting text */
@@ -19,6 +22,9 @@
   --color-charcoal: var(--charcoal);
   --color-teal: var(--teal);
   --color-teal-dark: var(--teal-dark);
+  --color-deep: var(--deep);
+  --color-dusk: var(--dusk);
+  --color-ink: var(--ink);
   --color-sky: var(--sky);
   --color-wave: var(--wave);
   --color-tagline: var(--tagline);

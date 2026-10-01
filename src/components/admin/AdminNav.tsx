@@ -23,7 +23,7 @@ export default function AdminNav() {
         const active = href === "/admin" ? path === "/admin" : path.startsWith(href);
         return (
           <Link key={href} href={href} aria-current={active ? "page" : undefined}
-            className={`caps-tight shrink-0 rounded-full px-3 py-1.5 text-[0.68rem] transition md:rounded-lg ${active ? "bg-teal text-white" : "text-muted hover:bg-mist hover:text-charcoal"}`}>
+            className={`caps-tight shrink-0 rounded-full px-3 py-1.5 text-[0.68rem] transition md:rounded-lg ${active ? "bg-deep text-white" : "text-muted hover:bg-mist hover:text-charcoal"}`}>
             {label}
           </Link>
         );

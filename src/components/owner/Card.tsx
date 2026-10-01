@@ -6,7 +6,7 @@ export default function Card({ title, children, className = "", aside }: { title
     <section className={`rounded-2xl border border-line bg-white p-5 ${className}`}>
       {(title || aside) && (
         <div className="mb-4 flex items-baseline justify-between gap-3">
-          {title && <h2 className="caps-tight text-[0.65rem] text-sky">{title}</h2>}
+          {title && <h2 className="caps-tight text-[0.65rem] text-deep">{title}</h2>}
           {aside}
         </div>
       )}

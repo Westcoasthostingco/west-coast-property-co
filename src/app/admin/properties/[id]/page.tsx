@@ -22,8 +22,8 @@ export default async function EditProperty({ params, searchParams }: PageProps<"
         actions={
           <>
             <Pill value={p.published ? "published" : "pending"} />
-            <Link href={`/properties/${p.slug}`} className="ui text-sm text-teal hover:underline" target="_blank">View listing ↗</Link>
-            <Link href={`/admin/calendar`} className="ui text-sm text-teal hover:underline">Calendar</Link>
+            <Link href={`/properties/${p.slug}`} className="ui text-sm text-deep hover:underline" target="_blank">View listing ↗</Link>
+            <Link href={`/admin/calendar`} className="ui text-sm text-deep hover:underline">Calendar</Link>
           </>
         } />
       <Notice searchParams={sp} />
@@ -47,7 +47,7 @@ export default async function EditProperty({ params, searchParams }: PageProps<"
             </ul>
             <form action={uploadPhotoAction.bind(null, p.id)} className="mt-3 space-y-3" encType="multipart/form-data">
               <Field label="Add a photo" hint={supabaseConfigured ? "JPG or PNG, under 1 MB each (see deployer notes to raise)" : "Sample mode: uploads are disabled"}>
-                <input type="file" name="photo" accept="image/*" required className="ui block w-full text-sm text-charcoal file:mr-3 file:rounded-full file:border-0 file:bg-mist file:px-3 file:py-1.5 file:text-xs file:text-teal-dark" />
+                <input type="file" name="photo" accept="image/*" required className="ui block w-full text-sm text-charcoal file:mr-3 file:rounded-full file:border-0 file:bg-mist file:px-3 file:py-1.5 file:text-xs file:text-deep" />
               </Field>
               <Field label="Alt text"><input name="alt" placeholder="Living room with harbor view" className={inputClass} /></Field>
               <button type="submit" className={buttonClass} disabled={!supabaseConfigured}>Upload</button>

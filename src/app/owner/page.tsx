@@ -37,7 +37,7 @@ export default async function OwnerOverview() {
           <p className="text-sm leading-relaxed text-charcoal">
             Payouts are not set up yet. Add your bank details with Stripe and your share of each stay arrives the day after check-in.
           </p>
-          <button type="submit" className="caps-tight shrink-0 rounded-full bg-teal px-5 py-2 text-[0.7rem] text-white transition hover:bg-teal-dark">Set up payouts</button>
+          <button type="submit" className="caps-tight shrink-0 rounded-full bg-deep px-5 py-2 text-[0.7rem] text-white transition hover:bg-dusk">Set up payouts</button>
         </form>
       )}
 
@@ -55,14 +55,14 @@ export default async function OwnerOverview() {
       <div className="grid gap-4 lg:grid-cols-[1fr_280px]">
         <section>
           <div className="mb-3 flex items-baseline justify-between">
-            <h2 className="caps-tight text-[0.65rem] text-sky">Upcoming stays</h2>
+            <h2 className="caps-tight text-[0.65rem] text-deep">Upcoming stays</h2>
             <span className="ui text-xs text-muted">Next {upcoming.length}</span>
           </div>
           <DataTable
             columns={[{ label: "Home" }, { label: "Dates" }, { label: "Guest" }, { label: "Source" }, { label: "Nights", align: "right" }, { label: "Status" }]}
             empty="No stays on the books yet. They will show up here as soon as a guest books."
             rows={upcoming.map((b) => [
-              <Link key="p" href={`/owner/properties/${b.propertyId}`} className="text-teal-dark hover:underline">{propertyName(b.propertyId)}</Link>,
+              <Link key="p" href={`/owner/properties/${b.propertyId}`} className="text-deep hover:underline">{propertyName(b.propertyId)}</Link>,
               fmtRange(b.checkIn, b.checkOut),
               b.guest,
               b.source,
@@ -77,13 +77,13 @@ export default async function OwnerOverview() {
             <p className="ui mt-1 text-xs text-muted">
               {owner.payoutsReady ? "Released the day after each check-in." : "Held until payouts are set up."}
             </p>
-            <Link href="/owner/statements" className="caps-tight mt-4 inline-block text-[0.65rem] text-teal-dark hover:underline">See statements</Link>
+            <Link href="/owner/statements" className="caps-tight mt-4 inline-block text-[0.65rem] text-deep hover:underline">See statements</Link>
           </Card>
           <Card title="Your homes">
             <ul className="ui space-y-2 text-sm">
               {properties.map((p) => (
                 <li key={p.id} className="flex items-baseline justify-between gap-3">
-                  <Link href={`/owner/properties/${p.id}`} className="text-charcoal hover:text-teal">{p.name}</Link>
+                  <Link href={`/owner/properties/${p.id}`} className="text-charcoal hover:text-deep">{p.name}</Link>
                   <span className="text-xs text-muted">{percent(monthlyMetrics(bookings.filter((b) => b.propertyId === p.id), [p], lastMonths(1))[0].occupancy)} occ.</span>
                 </li>
               ))}

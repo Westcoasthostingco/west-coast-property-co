@@ -45,6 +45,8 @@ create table properties (
   amenities text[] not null default '{}',
   airbnb_url text,                              -- public listing page, shown on the property page
   vrbo_url text,
+  tide_station_id text,                         -- NOAA CO-OPS station for the tide widget (waterfront homes)
+  ski_resort_name text, ski_lat double precision, ski_lng double precision,  -- snow widget (mountain homes)
   published boolean not null default false,
   created_at timestamptz not null default now()
 );
@@ -107,6 +109,7 @@ create table bookings (
   stripe_checkout_session_id text,
   stripe_payment_intent_id text,
   stripe_charge_id text,
+  accepted_policy_version text,        -- which /legal/policies version the guest accepted at checkout
   notes text,
   cancelled_at timestamptz,
   created_at timestamptz not null default now(),
@@ -220,6 +223,7 @@ select p.id, p.owner_id, p.slug, p.name, p.city, p.region, p.lat, p.lng,
   p.bedrooms, p.bathrooms, p.max_guests, p.nightly_rate_cents, p.cleaning_fee_cents,
   p.tax_rate_bps, p.min_nights, p.check_in_time, p.check_out_time, p.pets_allowed,
   p.summary, p.description, p.amenities, p.published, p.airbnb_url, p.vrbo_url,
+  p.tide_station_id, p.ski_resort_name, p.ski_lat, p.ski_lng,
   coalesce(round(avg(r.rating) filter (where r.published), 1), 0) as rating,
   count(r.id) filter (where r.published) as review_count
 from properties p

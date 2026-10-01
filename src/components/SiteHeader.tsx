@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Show, SignInButton, UserButton } from "@clerk/nextjs";
 import Wordmark from "./Wordmark";
+import MobileNav from "./MobileNav";
 import { clerkConfigured, getRole } from "@/lib/auth";
 
 const publicLinks = [
@@ -17,33 +18,34 @@ export default async function SiteHeader() {
   const portal = role ? portalFor[role] : null;
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-cream/90 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
+      <div className="relative mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
         <Wordmark />
-        <nav className="caps-tight flex items-center gap-5 text-[0.7rem] text-charcoal/80">
+        <nav className="caps-tight flex items-center gap-3 text-[0.7rem] text-charcoal/80 sm:gap-5" aria-label="Main">
           {publicLinks.map((l) => (
-            <Link key={l.href} href={l.href} className="hidden hover:text-teal sm:inline">{l.label}</Link>
+            <Link key={l.href} href={l.href} className="hidden hover:text-deep sm:inline">{l.label}</Link>
           ))}
+          <MobileNav links={publicLinks} />
           {clerkConfigured ? (
             <>
               <Show when="signed-out">
                 <SignInButton mode="modal" forceRedirectUrl="/owner">
-                  <button className="rounded-full border border-teal px-4 py-1.5 text-teal transition hover:bg-teal hover:text-white">Sign in</button>
+                  <button className="rounded-full border border-deep px-4 py-1.5 text-deep transition hover:bg-deep hover:text-white">Sign in</button>
                 </SignInButton>
               </Show>
               <Show when="signed-in">
                 {portal ? (
-                  <Link href={portal.href} className="rounded-full bg-teal px-4 py-1.5 text-white hover:bg-teal-dark">{portal.label}</Link>
+                  <Link href={portal.href} className="rounded-full bg-deep px-4 py-1.5 text-white hover:bg-dusk">{portal.label}</Link>
                 ) : (
                   // Signed in but no role yet: explain instead of hiding the portals.
-                  <Link href="/unauthorized" className="rounded-full border border-teal px-4 py-1.5 text-teal hover:bg-teal hover:text-white">Portal</Link>
+                  <Link href="/unauthorized" className="rounded-full border border-deep px-4 py-1.5 text-deep hover:bg-deep hover:text-white">Portal</Link>
                 )}
                 <UserButton />
               </Show>
             </>
           ) : portal ? (
-            <Link href={portal.href} className="rounded-full bg-teal px-4 py-1.5 text-white hover:bg-teal-dark">{portal.label}</Link>
+            <Link href={portal.href} className="rounded-full bg-deep px-4 py-1.5 text-white hover:bg-dusk">{portal.label}</Link>
           ) : (
-            <Link href="/sign-in" className="rounded-full border border-teal px-4 py-1.5 text-teal transition hover:bg-teal hover:text-white">Sign in</Link>
+            <Link href="/sign-in" className="rounded-full border border-deep px-4 py-1.5 text-deep transition hover:bg-deep hover:text-white">Sign in</Link>
           )}
         </nav>
       </div>

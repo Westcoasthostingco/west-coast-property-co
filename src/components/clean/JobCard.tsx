@@ -12,7 +12,7 @@ export default function JobCard({ job, property, showDate = true }: { job: Clean
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          {showDate && <p className="caps-tight text-xs text-sky">{relativeDay(job.scheduledDate)}</p>}
+          {showDate && <p className="caps-tight text-xs text-deep">{relativeDay(job.scheduledDate)}</p>}
           <h3 className="display mt-1 truncate text-2xl leading-tight">{property.name}</h3>
           <p className="mt-0.5 text-base text-muted">{property.city}</p>
         </div>
@@ -20,11 +20,11 @@ export default function JobCard({ job, property, showDate = true }: { job: Clean
       </div>
       <dl className="mt-4 grid grid-cols-2 gap-3 text-base">
         <div>
-          <dt className="caps-tight text-[11px] text-sky">Check-out</dt>
+          <dt className="caps-tight text-[11px] text-deep">Check-out</dt>
           <dd className="ui mt-0.5 font-medium">{formatTime(job.windowStart) || "Flexible"}</dd>
         </div>
         <div>
-          <dt className="caps-tight text-[11px] text-sky">Next check-in</dt>
+          <dt className="caps-tight text-[11px] text-deep">Next check-in</dt>
           <dd className="ui mt-0.5 font-medium">
             {job.nextCheckIn ? `${formatDay(job.nextCheckIn)} · ${formatTime(property.checkInTime)}` : "Nobody yet"}
           </dd>
