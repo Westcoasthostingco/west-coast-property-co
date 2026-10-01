@@ -1,4 +1,4 @@
-# West Coast Property Co: product architecture plan
+# West Coast Hosting Co: product architecture plan
 
 Status: audited 2026-10-01; step 0 fixes applied in code and schema. Four audiences, one Next.js app, one Postgres database, roles enforced by Clerk metadata and Supabase row level security.
 

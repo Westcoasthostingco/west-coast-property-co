@@ -1,4 +1,4 @@
--- West Coast Property Co: initial schema (Supabase / Postgres)
+-- West Coast Hosting Co: initial schema (Supabase / Postgres)
 -- Auth is Clerk. Roles (admin/owner/cleaner) live in Clerk user publicMetadata.
 -- Add Clerk as a third-party auth provider in Supabase so RLS can read the
 -- Clerk user id from the session token: auth.jwt()->>'sub'.

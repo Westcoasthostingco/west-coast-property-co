@@ -1,29 +1,56 @@
 @import "tailwindcss";
 
+/* West Coast Hosting Co brand tokens (brand guide, 2026) */
 :root {
-  --background: #fbfaf7;
-  --foreground: #14232b;
-  --brand: #0f4c5c;
-  --brand-dark: #0a3641;
-  --accent: #e07a3f;
-  --muted: #5d6b72;
-  --line: #e4e0d6;
+  --cream: #fbfdfc;        /* primary background, cool not peachy */
+  --charcoal: #3a4448;     /* body text */
+  --teal: #6ba8bc;         /* Deep Sky Teal: wordmark, backgrounds, buttons */
+  --teal-dark: #5a93a6;    /* hover state, derived */
+  --sky: #8fc0ce;          /* Soft Sky Blue: caps text, accents */
+  --wave: #a8d0dc;         /* Pale Wave Blue: wave motif, dividers, highlights */
+  --tagline: #a8ccd8;      /* Muted Tagline Blue: quiet supporting text */
+  --mist: #eef5f7;         /* tinted surface, derived from wave at 25% */
+  --line: #dde9ed;         /* hairlines, derived */
+  --muted: #6b777c;        /* secondary text, derived from charcoal */
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-brand: var(--brand);
-  --color-brand-dark: var(--brand-dark);
-  --color-accent: var(--accent);
-  --color-muted: var(--muted);
+  --color-cream: var(--cream);
+  --color-charcoal: var(--charcoal);
+  --color-teal: var(--teal);
+  --color-teal-dark: var(--teal-dark);
+  --color-sky: var(--sky);
+  --color-wave: var(--wave);
+  --color-tagline: var(--tagline);
+  --color-mist: var(--mist);
   --color-line: var(--line);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted: var(--muted);
+  --font-display: var(--font-playfair), Georgia, serif;
+  --font-body: var(--font-pt-serif), Georgia, serif;
+  --font-caps: var(--font-poppins), "Helvetica Neue", Arial, sans-serif;
 }
 
+html { scroll-behavior: smooth; }
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  background: var(--cream);
+  color: var(--charcoal);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
 }
+
+/* Type roles from the guide */
+.display { font-family: var(--font-display); font-style: italic; font-weight: 400; letter-spacing: -0.01em; }
+.caps { font-family: var(--font-caps); text-transform: uppercase; letter-spacing: 0.28em; font-weight: 400; }
+.caps-tight { font-family: var(--font-caps); text-transform: uppercase; letter-spacing: 0.14em; font-weight: 500; }
+.ui { font-family: var(--font-caps); }
+
+/* Wave accent from the logo lockup */
+.wave::after {
+  content: "";
+  display: block;
+  width: 96px; height: 10px;
+  margin: 0.75rem auto 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 10'%3E%3Cpath d='M1 6c12-6 20-6 32 0s20 6 32 0 20-6 30 0' fill='none' stroke='%23a8d0dc' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+.wave-left::after { margin-left: 0; }

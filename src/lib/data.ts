@@ -50,6 +50,7 @@ const toBooking = (r: Record<string, unknown>): Booking => ({
   source: sources[r.source as string] ?? "Direct",
   // 'completed' is derived: a confirmed stay whose check-out has passed
   status: r.status === "confirmed" && (r.check_out as string) < today() ? "completed" : (r.status as Booking["status"]),
+  subtotal: r.subtotal_cents != null ? (r.subtotal_cents as number) / 100 : undefined,
   total: ((r.total_cents as number) ?? 0) / 100,
 });
 
@@ -99,6 +100,17 @@ export async function getProperty(slug: string): Promise<Property | undefined> {
 export async function getPublishedReviews(propertyId: string): Promise<Review[]> {
   if (!supabaseConfigured) return mock.reviews.filter((r) => r.propertyId === propertyId && r.status === "published");
   return (await rows(supabaseForUser(), "reviews", (q) => q.eq("property_id", propertyId).eq("published", true))).map(toReview);
+}
+
+export type Stay = { propertyId: string; checkIn: string; checkOut: string };
+export async function getUnavailableDates(propertyId?: string): Promise<Stay[]> {
+  if (!supabaseConfigured) {
+    return mock.bookings
+      .filter((b) => (b.status === "pending" || b.status === "confirmed") && (!propertyId || b.propertyId === propertyId))
+      .map((b) => ({ propertyId: b.propertyId, checkIn: b.checkIn, checkOut: b.checkOut }));
+  }
+  const r = await rows(supabaseForUser(), "property_unavailable_dates", (q) => (propertyId ? q.eq("property_id", propertyId) : q));
+  return r.map((x) => ({ propertyId: x.property_id as string, checkIn: x.check_in as string, checkOut: x.check_out as string }));
 }
 
 // ---- Owner portal (user client; RLS scopes to the signed-in owner) ----

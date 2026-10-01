@@ -5,7 +5,7 @@ let client: Stripe | undefined;
 export function stripe(): Stripe {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) throw new Error("STRIPE_SECRET_KEY is not set");
-  return (client ??= new Stripe(key, { appInfo: { name: "West Coast Property Co" } }));
+  return (client ??= new Stripe(key, { appInfo: { name: "West Coast Hosting Co" } }));
 }
 
 export const appUrl = () =>

@@ -1,4 +1,4 @@
-# West Coast Property Co
+# West Coast Hosting Co
 
 Short-term rental management website: public marketing and listings, an owner portal, and an admin back end.
 

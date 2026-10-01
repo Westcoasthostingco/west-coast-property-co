@@ -22,7 +22,7 @@ export async function POST() {
       country: "US",
       email: owner.email,
       capabilities: { transfers: { requested: true } },
-      business_profile: { product_description: "Short-term rental income managed by West Coast Property Co" },
+      business_profile: { product_description: "Short-term rental income managed by West Coast Hosting Co" },
       metadata: { owner_id: owner.id },
     });
     accountId = account.id;

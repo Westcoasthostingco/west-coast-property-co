@@ -3,7 +3,7 @@
 Status key: [ ] todo, [x] done. Use one business email as the owner of every account.
 
 ## Accounts
-- [ ] Domain registrar + DNS (Cloudflare / Namecheap / Vercel Domains)
+- [x] Domain: westcoasthostingco.com at Squarespace. Point DNS to Vercel (A @ 76.76.21.21, CNAME www cname.vercel-dns.com)
 - [ ] Google Workspace (admin@, billing@)
 - [x] GitHub repo: Westcoasthostingco/west-coast-property-co
 - [x] Vercel (Pro): link repo, add env vars from `.env.example`
