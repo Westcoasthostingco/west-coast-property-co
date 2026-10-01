@@ -6,7 +6,7 @@ Status key: [ ] todo, [x] done. Use one business email as the owner of every acc
 - [ ] Domain registrar + DNS (Cloudflare / Namecheap / Vercel Domains)
 - [ ] Google Workspace (admin@, billing@)
 - [x] GitHub repo: Westcoasthostingco/west-coast-property-co
-- [ ] Vercel (Pro): link repo, add env vars from `.env.example`
+- [x] Vercel (Pro): link repo, add env vars from `.env.example`
 - [ ] Supabase (Pro for PITR): run `supabase/schema.sql` then `supabase/seed.sql`; create `property-photos` bucket; set each owner row's `clerk_user_id`
 - [ ] Clerk: production instance on the domain; set each user's publicMetadata `{"role":"admin"}` or `"owner"`; add Clerk as a third-party auth provider in Supabase (Authentication -> Sign In / Providers -> Third-party -> Clerk)
 - [ ] Stripe: enable Connect (Express); test and live keys; webhook endpoint; onboarding link flow
