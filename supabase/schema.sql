@@ -232,6 +232,18 @@ group by p.id;
 create view property_unavailable_dates with (security_invoker = true) as
 select property_id, check_in, check_out from bookings where status in ('pending', 'confirmed');
 
+-- Privileges. New Supabase projects grant nothing to the API roles by default,
+-- so RLS alone is not enough: each role also needs explicit GRANTs.
+grant usage on schema public to anon, authenticated, service_role;
+grant all on all tables in schema public to service_role;
+grant all on all sequences in schema public to service_role;
+grant all on all routines in schema public to service_role;
+grant select on all tables in schema public to authenticated;
+grant select on properties, property_photos, pricing_rules, reviews, property_listings, property_unavailable_dates to anon;
+alter default privileges in schema public grant all on tables to service_role;
+alter default privileges in schema public grant all on sequences to service_role;
+alter default privileges in schema public grant select on tables to authenticated;
+
 -- Row level security. The service role (server only) bypasses RLS.
 alter table owners enable row level security;
 alter table properties enable row level security;
@@ -265,8 +277,7 @@ create policy "public read photos" on property_photos for select using (true);
 create policy "public read pricing" on pricing_rules for select using (true);
 create policy "public read published reviews" on reviews for select using (published);
 -- Anonymous visitors may read only the dates of active stays (for the availability view).
-revoke all on bookings from anon;
-grant select (property_id, check_in, check_out) on bookings to anon;
+grant select (property_id, check_in, check_out, status) on bookings to anon;
 create policy "anon sees active stay dates" on bookings for select to anon
   using (status in ('pending', 'confirmed'));
 grant select on property_unavailable_dates to anon, authenticated;
