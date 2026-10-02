@@ -10,9 +10,9 @@ import { tideLevelAt, timeLabel, type TideEvent } from "@/lib/tides";
 type Props = { events: TideEvent[]; now: number; level: number; className?: string; compact?: boolean };
 
 const W = 480, HOUR = 3600_000;
-// Full scene is 480x270. Compact (property cards) is 480x206, about 24% shorter,
-// with the same type sizes and the tide range squeezed into less height.
-const FULL = { H: 270, TOP: 56, BOTTOM: 238 }, COMPACT = { H: 206, TOP: 60, BOTTOM: 174 };
+// Full scene is 480x270. Compact (property cards) is 480x155, 43% shorter, with
+// smaller type and tighter label offsets so the tide range still fits.
+const FULL = { H: 270, TOP: 56, BOTTOM: 238 }, COMPACT = { H: 155, TOP: 50, BOTTOM: 118 };
 const C = { deep: "#2f6f86", dusk: "#1e4b5c", teal: "#6ba8bc", sky: "#8fc0ce", wave: "#a8d0dc", mist: "#eef5f7", line: "#dde9ed", charcoal: "#3a4448", muted: "#6b777c", cream: "#fbfdfc", sand: "#e6eef1", pine: "#5a7580" };
 
 function wavePath(period: number, amp: number, width: number) {
@@ -23,6 +23,10 @@ function wavePath(period: number, amp: number, width: number) {
 
 export default function TideScene({ events, now, level, className = "", compact = false }: Props) {
   const { H, TOP, BOTTOM } = compact ? COMPACT : FULL;
+  // Label geometry: [hour grid top, hour label y, hour font, high/low value offsets above/below, small-line offsets above/below, value font, small font, now line top, now label y, now font]
+  const g = compact
+    ? { gridTop: 32, hourY: 24, hourFs: 9, vUp: 11, vDn: 11, sUp: 2, sDn: 21, vFs: 10, sFs: 8.5, nowTop: 15, nowY: 10, nowFs: 8.5 }
+    : { gridTop: 40, hourY: 30, hourFs: 11, vUp: 16, vDn: 16, sUp: 5, sDn: 28, vFs: 12, sFs: 10, nowTop: 20, nowY: 14, nowFs: 10 };
   const start = Math.floor((now - 4 * HOUR) / HOUR) * HOUR;
   const span = 24 * HOUR;
   const x = (t: number) => ((t - start) / span) * W;
@@ -80,8 +84,8 @@ export default function TideScene({ events, now, level, className = "", compact 
       {/* hour grid (recessive) + labels along the top */}
       {hours.filter((t) => x(t) > 22).map((t) => (
         <g key={t}>
-          <line x1={x(t)} x2={x(t)} y1={40} y2={BOTTOM} stroke={C.line} strokeWidth={1} />
-          <text x={x(t)} y={30} textAnchor="middle" fontSize={11} fill={C.muted} fontFamily="var(--font-poppins)">{hourText(t)}</text>
+          <line x1={x(t)} x2={x(t)} y1={g.gridTop} y2={BOTTOM} stroke={C.line} strokeWidth={1} />
+          <text x={x(t)} y={g.hourY} textAnchor="middle" fontSize={g.hourFs} fill={C.muted} fontFamily="var(--font-poppins)">{hourText(t)}</text>
         </g>
       ))}
 
@@ -134,15 +138,15 @@ export default function TideScene({ events, now, level, className = "", compact 
         return (
           <g key={e.time} fontFamily="var(--font-poppins)" textAnchor={anchor}>
             <circle cx={ex} cy={ey} r={2.5} fill={above ? C.dusk : C.cream} stroke={C.dusk} strokeWidth={1.2} />
-            <text x={ex} y={above ? ey - 16 : ey + 16} fontSize={12} fontWeight={500} fill={above ? C.charcoal : C.cream} stroke={above ? C.cream : C.deep} strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">{e.height.toFixed(1)} ft</text>
-            <text x={ex} y={above ? ey - 5 : ey + 28} fontSize={10} fill={above ? C.muted : C.wave} stroke={above ? C.cream : C.deep} strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">{above ? "high" : "low"} {e.timeLabel}</text>
+            <text x={ex} y={above ? ey - g.vUp : ey + g.vDn} fontSize={g.vFs} fontWeight={500} fill={above ? C.charcoal : C.cream} stroke={above ? C.cream : C.deep} strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">{e.height.toFixed(1)} ft</text>
+            <text x={ex} y={above ? ey - g.sUp : ey + g.sDn} fontSize={g.sFs} fill={above ? C.muted : C.wave} stroke={above ? C.cream : C.deep} strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">{above ? "high" : "low"} {e.timeLabel}</text>
           </g>
         );
       })}
       {/* now */}
-      <line x1={x(now)} x2={x(now)} y1={20} y2={surfaceY} stroke={C.deep} strokeWidth={1} strokeDasharray="2 3" />
+      <line x1={x(now)} x2={x(now)} y1={g.nowTop} y2={surfaceY} stroke={C.deep} strokeWidth={1} strokeDasharray="2 3" />
       <circle cx={x(now)} cy={surfaceY} r={5} fill={C.deep} stroke={C.cream} strokeWidth={2} />
-      <text x={x(now)} y={14} textAnchor="middle" fontSize={10} fontWeight={500} fill={C.deep} fontFamily="var(--font-poppins)" style={{ textTransform: "uppercase", letterSpacing: "0.14em" }}>now {timeLabel(now)}</text>
+      <text x={x(now)} y={g.nowY} textAnchor="middle" fontSize={g.nowFs} fontWeight={500} fill={C.deep} fontFamily="var(--font-poppins)" style={{ textTransform: "uppercase", letterSpacing: "0.14em" }}>now {timeLabel(now)}</text>
     </svg>
   );
 }

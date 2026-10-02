@@ -62,12 +62,12 @@ function Tree({ x, h = 18, color = C.pine }: { x: number; h?: number; color?: st
   return <path d={`M${x},${y + 1} l${-h * 0.32},0 l${h * 0.32},${-h} l${h * 0.32},${h} z M${x - h * 0.24},${y + 1 - h * 0.42} l${h * 0.24},${-h * 0.5} l${h * 0.24},${h * 0.5} z`} fill={color} />;
 }
 
-// Compact crops 34 units of empty sky so the scene is 480x206, the same size as the
-// compact tide scene.
+// Compact shows the 480x155 band from y=56 to y=211 (crops empty sky and the
+// lower foreground), the same size as the compact tide scene.
 export default function SkiScene({ snowing, icon, className = "", compact = false }: Props) {
   const overcast = icon !== "sun";
   return (
-    <svg viewBox={compact ? `0 34 ${W} ${H - 34}` : `0 0 ${W} ${H}`} className={`block w-full overflow-hidden ${className}`} role="img"
+    <svg viewBox={compact ? `0 56 ${W} 155` : `0 0 ${W} ${H}`} className={`block w-full overflow-hidden ${className}`} role="img"
       aria-label={snowing ? "Mountain scene with falling snow and a skier on the slope" : "Mountain scene with a skier on the slope"}>
       <style>{`
         @keyframes sk-run { ${skierFrames} }
