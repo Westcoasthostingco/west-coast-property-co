@@ -34,16 +34,16 @@ export default async function SiteHeader() {
               </Show>
               <Show when="signed-in">
                 {portal ? (
-                  <Link href={portal.href} className="rounded-full bg-deep px-4 py-1.5 text-white hover:bg-dusk">{portal.label}</Link>
+                  <a href={portal.href} className="rounded-full bg-deep px-4 py-1.5 text-white hover:bg-dusk">{portal.label}</a>
                 ) : (
                   // Signed in but no role yet: explain instead of hiding the portals.
-                  <Link href="/unauthorized" className="rounded-full border border-deep px-4 py-1.5 text-deep hover:bg-deep hover:text-white">Portal</Link>
+                  <a href="/unauthorized" className="rounded-full border border-deep px-4 py-1.5 text-deep hover:bg-deep hover:text-white">Portal</a>
                 )}
                 <UserButton />
               </Show>
             </>
           ) : portal ? (
-            <Link href={portal.href} className="rounded-full bg-deep px-4 py-1.5 text-white hover:bg-dusk">{portal.label}</Link>
+            <a href={portal.href} className="rounded-full bg-deep px-4 py-1.5 text-white hover:bg-dusk">{portal.label}</a>
           ) : (
             <Link href="/sign-in" className="rounded-full border border-deep px-4 py-1.5 text-deep transition hover:bg-deep hover:text-white">Sign in</Link>
           )}
