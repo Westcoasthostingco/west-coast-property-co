@@ -34,9 +34,9 @@ export default function SiteFooter() {
             <Link href="/legal/privacy" className="hover:text-white">Privacy</Link>
             <Link href="/legal/terms" className="hover:text-white">Terms</Link>
             <Link href="/legal/policies" className="hover:text-white">Policies</Link>
-            <Link href="/owner" className="hover:text-white">Owner portal</Link>
-            <Link href="/clean" className="hover:text-white">Cleaner</Link>
-            <Link href="/admin" className="hover:text-white">Team</Link>
+            <a href="/owner" className="hover:text-white">Owner portal</a>
+            <a href="/clean" className="hover:text-white">Cleaner</a>
+            <a href="/admin" className="hover:text-white">Team</a>
           </span>
         </div>
       </div>

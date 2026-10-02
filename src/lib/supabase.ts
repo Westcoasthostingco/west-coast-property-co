@@ -8,6 +8,10 @@ const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 export const supabaseConfigured = Boolean(url && anonKey);
 
+// Every Supabase call gives up after 10 seconds, so a network problem shows an
+// error page instead of leaving a click hanging with no feedback.
+const timedFetch: typeof fetch = (input, init) => fetch(input, { ...init, signal: init?.signal ?? AbortSignal.timeout(10_000) });
+
 // Per-request client that forwards the Clerk session token, so Supabase row
 // level security sees the signed-in user (auth.jwt()->>'sub' = Clerk user id).
 // Requires Clerk to be added as a third-party auth provider in Supabase.
@@ -15,9 +19,10 @@ export const supabaseConfigured = Boolean(url && anonKey);
 // fall back to a plain anon client.
 export function supabaseForUser(): SupabaseClient {
   if (!url || !anonKey) throw new Error("Supabase env vars are not set");
-  if (!clerkConfigured) return createClient(url, anonKey, { auth: { persistSession: false } });
+  if (!clerkConfigured) return createClient(url, anonKey, { auth: { persistSession: false }, global: { fetch: timedFetch } });
   return createClient(url, anonKey, {
     accessToken: async () => (await auth()).getToken(),
+    global: { fetch: timedFetch },
   });
 }
 
@@ -25,5 +30,5 @@ export function supabaseForUser(): SupabaseClient {
 // background jobs. Never import this into a client component.
 export function supabaseAdmin(): SupabaseClient {
   if (!url || !serviceKey) throw new Error("SUPABASE_SERVICE_ROLE_KEY is not set");
-  return createClient(url, serviceKey, { auth: { persistSession: false } });
+  return createClient(url, serviceKey, { auth: { persistSession: false }, global: { fetch: timedFetch } });
 }
