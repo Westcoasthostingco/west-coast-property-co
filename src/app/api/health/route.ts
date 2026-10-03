@@ -18,6 +18,21 @@ function clerkInstance() {
   return { mode: m[1] === "live" ? "production" : "development", frontendApi };
 }
 
+// Shape of the Clerk secret key without revealing it: which known prefix it
+// starts with (prefixes are not secret), its length, and stray characters.
+function secretKeyShape() {
+  const raw = process.env.CLERK_SECRET_KEY;
+  if (raw === undefined) return null;
+  const prefixes = ["sk_live_", "sk_test_", "pk_live_", "pk_test_", "whsec_", "sb_secret_", "sk_"];
+  const t = raw.trim();
+  return {
+    startsWith: prefixes.find((p) => t.startsWith(p)) ?? "unknown",
+    length: raw.length,
+    hasSpacesOrLineBreaks: /\s/.test(raw),
+    hasQuotes: /["'`]/.test(raw),
+  };
+}
+
 export async function GET() {
   const env = (k: string) => Boolean(process.env[k]);
   let database = "not configured";
@@ -33,6 +48,7 @@ export async function GET() {
     environment: process.env.VERCEL_ENV ?? "local",
     clerk: clerkConfigured ? "configured" : env("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY") || env("CLERK_SECRET_KEY") ? "keys malformed or incomplete" : "not configured",
     clerkInstance: clerkInstance(),
+    clerkSecretKeyShape: secretKeyShape(),
     supabase: {
       publicSiteUsesDatabase: supabaseConfigured,
       NEXT_PUBLIC_SUPABASE_URL: env("NEXT_PUBLIC_SUPABASE_URL"),
