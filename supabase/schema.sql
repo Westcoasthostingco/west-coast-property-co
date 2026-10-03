@@ -353,3 +353,16 @@ create policy "cleaner reads own job photos" on cleaning_photos for select to au
 create policy "cleaner reads job properties" on properties for select to authenticated
   using (id in (select property_id from cleaning_jobs where cleaner_id = current_cleaner_id()));
 -- Writes (bookings, payouts, job status, moderation) happen server-side with the service role.
+
+-- Security advisor hardening (applied to the live project 2026-10-03).
+-- Trigger functions get a fixed search_path.
+alter function payouts_touch() set search_path = public;
+alter function sync_cleaning_job() set search_path = public;
+-- The SECURITY DEFINER helpers used by the RLS policies above live in a schema
+-- the Data API does not expose, so signed-in users cannot call them directly.
+-- Policies reference functions by OID, so moving them keeps the policies intact.
+create schema if not exists private;
+revoke all on schema private from public, anon;
+grant usage on schema private to authenticated, service_role;
+alter function current_owner_id() set schema private;
+alter function current_cleaner_id() set schema private;
