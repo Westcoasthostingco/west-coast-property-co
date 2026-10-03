@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const env = (k: string) => Boolean(process.env[k]);
   let database = "not configured";
-  if (env("NEXT_PUBLIC_SUPABASE_URL") && env("SUPABASE_SERVICE_ROLE_KEY")) {
+  if ((env("NEXT_PUBLIC_SUPABASE_URL") || env("SUPABASE_URL")) && (env("SUPABASE_SERVICE_ROLE_KEY") || env("SUPABASE_SECRET_KEY"))) {
     try {
       const { error } = await supabaseAdmin().from("properties").select("id", { count: "exact", head: true });
       database = error ? `error ${error.code ?? ""}`.trim() : "ok";
@@ -34,5 +34,8 @@ export async function GET() {
       STRIPE_CONNECT_WEBHOOK_SECRET: env("STRIPE_CONNECT_WEBHOOK_SECRET"),
     },
     CRON_SECRET: env("CRON_SECRET"),
+    // Names (never values) of related variables this deployment can see, to
+    // catch typos or a missing Production tick in Vercel.
+    variableNamesSeen: Object.keys(process.env).filter((k) => /SUPABASE|STRIPE|CLERK|CRON/i.test(k)).sort(),
   }, { headers: { "Cache-Control": "no-store" } });
 }

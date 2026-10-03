@@ -2,9 +2,11 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { auth } from "@clerk/nextjs/server";
 import { clerkConfigured } from "@/lib/auth";
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// Primary names first, then the names Supabase's dashboard and Vercel
+// integration use for the newer publishable/secret keys.
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
 
 export const supabaseConfigured = Boolean(url && anonKey);
 
