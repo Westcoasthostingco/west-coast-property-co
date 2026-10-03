@@ -4,6 +4,6 @@ insert into storage.buckets (id, name, public) values ('property-photos', 'prope
 insert into storage.buckets (id, name, public) values ('cleaning-photos', 'cleaning-photos', false)
   on conflict (id) do nothing;
 
--- Anyone may view property photos; only the service role writes (admin uploads).
-create policy "public read property photos" on storage.objects for select
-  using (bucket_id = 'property-photos');
+-- property-photos is a public bucket: files are served by their public URL with
+-- no storage.objects policy needed, and only the service role writes (admin
+-- uploads). No SELECT policy, so the bucket's contents cannot be listed.
