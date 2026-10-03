@@ -12,13 +12,32 @@ function frontendHost() {
   try { return m ? atob(m[1]).replace(/\$$/, "") : "the sign-in service"; } catch { return "the sign-in service"; }
 }
 
+// Technical details for the failure message, read from the page itself: which
+// Clerk script the page tried to load and whether it ran.
+function useDiagnostics() {
+  const [info, setInfo] = useState<string | null>(null);
+  useEffect(() => {
+    const tag = document.querySelector<HTMLScriptElement>("script[data-clerk-js-script], script[src*='clerk-js'], script[src*='clerk.browser']");
+    const w = window as unknown as { Clerk?: { loaded?: boolean; version?: string } };
+    setInfo([
+      `page: ${location.host}`,
+      `script: ${tag?.src ?? "not added to page"}`,
+      `script ran: ${w.Clerk ? "yes" : "no"}`,
+      w.Clerk ? `clerk loaded: ${w.Clerk.loaded ? "yes" : "no"}${w.Clerk.version ? ` (v${w.Clerk.version})` : ""}` : null,
+    ].filter(Boolean).join(" · "));
+  }, []);
+  return info;
+}
+
 function Failed() {
+  const info = useDiagnostics();
   return (
     <div className="max-w-md text-center" role="alert">
       <h1 className="display text-3xl text-charcoal">Sign-in couldn&apos;t load</h1>
       <p className="mt-3 leading-relaxed text-muted">
         Your browser could not reach <code className="text-charcoal">{frontendHost()}</code>. Refresh the page; if it keeps happening, try another browser or turn off ad blockers for this site, or email hello@westcoasthostingco.com.
       </p>
+      {info && <p className="ui mt-4 break-all rounded-xl bg-mist px-4 py-3 text-left text-xs text-charcoal">{info}</p>}
     </div>
   );
 }

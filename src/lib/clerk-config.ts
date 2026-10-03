@@ -1,3 +1,14 @@
+// Clerk's SDK turns on "auto proxy" for production keys whenever Vercel's
+// production URL is a *.vercel.app host: the browser then sends every Clerk
+// request to /__clerk on this site. But the middleware only forwards /__clerk
+// when the visitor is on a *.vercel.app host, so on www.westcoasthostingco.com
+// those requests fail ("unable to attribute this request to an instance") and
+// sign-in never loads. This site has a verified Clerk frontend API domain
+// (clerk.westcoasthostingco.com), so it needs no proxy. CLERK_DISABLE_AUTO_PROXY
+// is Clerk's own switch; it is read at request time, so setting it here, in a
+// module both the middleware and the root layout import first, is enough.
+if (!process.env.CLERK_DISABLE_AUTO_PROXY) process.env.CLERK_DISABLE_AUTO_PROXY = "true";
+
 // Edge-safe check (no Clerk imports) that both Clerk keys are present and
 // well-formed. A malformed key makes clerkMiddleware and ClerkProvider throw on
 // every request, which takes the whole site down with a bare "Internal Server
