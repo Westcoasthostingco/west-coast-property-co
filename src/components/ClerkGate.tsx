@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { ClerkFailed, ClerkLoaded, useAuth } from "@clerk/nextjs";
+import { ClerkFailed, ClerkLoaded, ClerkLoading, useAuth } from "@clerk/nextjs";
 
 // Wraps Clerk's sign-in and sign-up widgets. Clerk's browser script loads from
 // the Clerk frontend API; while it loads a spinner shows, and if it has not
@@ -34,13 +34,16 @@ export default function ClerkGate({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      {!isLoaded && !timedOut && (
-        <div className="ui flex items-center gap-3 text-sm text-muted" role="status">
-          <span className="h-5 w-5 animate-spin rounded-full border-2 border-wave border-t-deep" aria-hidden="true" />
-          Loading sign-in…
-        </div>
-      )}
-      {!isLoaded && timedOut && <Failed />}
+      {/* ClerkLoading hides as soon as Clerk is ready or reports a failure, so the
+          spinner and the failure message never show together. */}
+      <ClerkLoading>
+        {timedOut ? <Failed /> : (
+          <div className="ui flex items-center gap-3 text-sm text-muted" role="status">
+            <span className="h-5 w-5 animate-spin rounded-full border-2 border-wave border-t-deep" aria-hidden="true" />
+            Loading sign-in…
+          </div>
+        )}
+      </ClerkLoading>
       <ClerkLoaded>{children}</ClerkLoaded>
       <ClerkFailed><Failed /></ClerkFailed>
     </>
