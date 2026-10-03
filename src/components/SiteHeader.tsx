@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Show, SignInButton, UserButton } from "@clerk/nextjs";
+import { UserButton } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import Wordmark from "./Wordmark";
 import MobileNav from "./MobileNav";
 import { clerkConfigured, getRole } from "@/lib/auth";
@@ -15,6 +16,9 @@ const portalFor = { admin: { href: "/admin", label: "Admin" }, owner: { href: "/
 
 export default async function SiteHeader() {
   const role = await getRole().catch(() => null);
+  // Decide signed-in state on the server, so the Sign in link renders and works
+  // even before (or without) Clerk's browser script loading.
+  const userId = clerkConfigured ? await auth().then((a) => a.userId).catch(() => null) : null;
   const portal = role ? portalFor[role] : null;
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-cream/90 backdrop-blur">
@@ -27,20 +31,21 @@ export default async function SiteHeader() {
           <MobileNav links={publicLinks} />
           {clerkConfigured ? (
             <>
-              <Show when="signed-out">
-                <SignInButton mode="modal" forceRedirectUrl="/owner">
-                  <button className="rounded-full border border-deep px-4 py-1.5 text-deep transition hover:bg-deep hover:text-white">Sign in</button>
-                </SignInButton>
-              </Show>
-              <Show when="signed-in">
-                {portal ? (
-                  <a href={portal.href} className="rounded-full bg-deep px-4 py-1.5 text-white hover:bg-dusk">{portal.label}</a>
-                ) : (
-                  // Signed in but no role yet: explain instead of hiding the portals.
-                  <a href="/unauthorized" className="rounded-full border border-deep px-4 py-1.5 text-deep hover:bg-deep hover:text-white">Portal</a>
-                )}
-                <UserButton />
-              </Show>
+              {!userId ? (
+                // Full page load on purpose: the sign-in page must go through Clerk's middleware fresh.
+                // eslint-disable-next-line @next/next/no-html-link-for-pages
+                <a href="/sign-in" className="rounded-full border border-deep px-4 py-1.5 text-deep transition hover:bg-deep hover:text-white">Sign in</a>
+              ) : (
+                <>
+                  {portal ? (
+                    <a href={portal.href} className="rounded-full bg-deep px-4 py-1.5 text-white hover:bg-dusk">{portal.label}</a>
+                  ) : (
+                    // Signed in but no role yet: explain instead of hiding the portals.
+                    <a href="/unauthorized" className="rounded-full border border-deep px-4 py-1.5 text-deep hover:bg-deep hover:text-white">Portal</a>
+                  )}
+                  <UserButton />
+                </>
+              )}
             </>
           ) : portal ? (
             <a href={portal.href} className="rounded-full bg-deep px-4 py-1.5 text-white hover:bg-dusk">{portal.label}</a>
