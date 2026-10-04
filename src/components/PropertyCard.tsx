@@ -1,9 +1,11 @@
 import Link from "next/link";
 import PropertyImage from "./PropertyImage";
 import type { Property } from "@/lib/data";
+import { getListingContent } from "@/lib/listing-content";
 import ConditionsCard from "./widgets/ConditionsCard";
 
 export default function PropertyCard({ p, wide = false, query }: { p: Property; wide?: boolean; query?: string }) {
+  const listing = getListingContent(p.slug)?.listingRating;
   return (
     <Link href={`/properties/${p.slug}${query ? `?${query}` : ""}`} className="group block">
       <PropertyImage slug={p.slug} name={p.name} className={`rounded-2xl transition group-hover:opacity-95 ${wide ? "aspect-[4/3]" : "aspect-[5/4]"}`} />
@@ -14,7 +16,9 @@ export default function PropertyCard({ p, wide = false, query }: { p: Property; 
           <p className="ui mt-1 text-xs text-muted">{p.bedrooms} bedrooms · {p.bathrooms} baths · sleeps {p.guests}</p>
         </div>
         <div className="shrink-0 text-right">
-          {p.reviewCount > 0 && <p className="ui text-sm font-medium">★ {p.rating.toFixed(1)}<span className="text-xs font-normal text-muted"> · {p.reviewCount}</span></p>}
+          {listing ? (
+            <p className="ui text-sm font-medium">★ {listing.value.toFixed(2)}<span className="text-xs font-normal text-muted"> · {listing.count} on {listing.platform}</span></p>
+          ) : p.reviewCount > 0 && <p className="ui text-sm font-medium">★ {p.rating.toFixed(1)}<span className="text-xs font-normal text-muted"> · {p.reviewCount}</span></p>}
           <p className="ui mt-0.5 text-xs text-muted">{p.airbnbUrl || p.vrboUrl ? `Book on ${[p.airbnbUrl && "Airbnb", p.vrboUrl && "Vrbo"].filter(Boolean).join(" · ")}` : "Listing coming soon"}</p>
         </div>
       </div>
