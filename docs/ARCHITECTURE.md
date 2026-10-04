@@ -35,7 +35,7 @@ Data needed beyond today: `property_photos` (exists), `blocked_dates` (from iCal
 Routes and what each answers:
 - `/owner` Overview: this month vs last month revenue, occupancy rate, average nightly rate, upcoming stays. One line chart (revenue by month, 12 months) and one bar chart (occupancy by month).
 - `/owner/properties/[id]` Per-property trends: same four numbers, calendar of stays, reviews.
-- `/owner/statements` Monthly statements built from bookings: each stay by check-in month with nights and, where money is recorded, gross, management fee (property override, else owner percent) and net; iCal-imported stays show nights only and "paid by Airbnb/Vrbo". Guests pay the platform and the platform pays the homeowner. Print or save as PDF.
+- `/owner/statements` Monthly statements built from bookings: each stay by check-in month with nights, % fee, fixed fee and cleaning, plus gross and net where the nights subtotal is recorded; iCal-imported stays have no gross or net ("paid by Airbnb/Vrbo") but still carry the fixed fee and cleaning. Guests pay the platform and the platform pays the homeowner. Print or save as PDF.
 - `/owner/invoices` Invoices from the management team (repairs, supplies, extra services) and status, settled under the Management Agreement.
 - `/owner/settings` Contact details, management fee, how payment works (the platform pays the owner), notification preferences.
 
@@ -44,14 +44,14 @@ Metrics are computed in SQL views so the admin and owner see identical numbers:
 
 ## 4. Admin (management team)
 
-- `/admin` Dashboard: portfolio revenue, occupancy, management fees on recorded stays, stays this month, upcoming check-ins and check-outs, cleanings unassigned, open maintenance.
+- `/admin` Dashboard: portfolio revenue, occupancy, management fees (fixed fee per stay plus % where money is recorded), stays this month, upcoming check-ins and check-outs, cleanings unassigned, open maintenance.
 - `/admin/calendar` Master calendar: every property as a row, stays as bars, turnovers marked, iCal blocks shaded. Click a stay for detail. Month and 2-week views.
 - `/admin/properties` CRUD, photo upload (Supabase Storage), pricing rules, iCal URLs, lock device id, cleaner default assignment.
 - `/admin/bookings` List and detail, manual booking entry (phone bookings, owner stays), cancel, notes, informational owner split. Refunds happen on the platform.
-- `/admin/owners` CRUD, link Clerk user, fee percent, recent stays and fees per owner.
+- `/admin/owners` CRUD, link Clerk user, fee percent and fixed fee per stay, recent stays and fees per owner.
 - `/admin/cleaning` Turnover board: each checkout creates a `cleaning_job` (property, date, window, assigned cleaner, status, checklist, photos). Assign and reassign cleaners; auto-assign by property default. Cleaner pay rate per job for cost tracking.
 - `/admin/invoices` Create invoice to an owner (line items), send by email, track paid or overdue.
-- `/admin/accounting` Trends: revenue, management fees and owner share (from recorded bookings), cleaning cost, tax collected, by month and by property. Export CSV. QuickBooks sync status and last run.
+- `/admin/accounting` Trends: revenue, management fees, owner share and cleaning fees charged (shared fee math), cleaning cost, tax collected, by month and by property. Export CSV. QuickBooks sync status and last run.
 - `/admin/reviews` Moderate.
 - `/admin/settings/integrations` iCal feeds per property, Seam, Twilio, Resend, QuickBooks: status and keys present or missing (never shows secrets).
 
@@ -93,7 +93,7 @@ Row level security:
 | Seam | out | On booking confirm, create a time-boxed access code; reveal to guest 48h before, to cleaner on job day |
 | Twilio | out | Arrival reminder with code, cleaner job reminder |
 | Resend | out | Arrival details, statements, invoice sent, review request after check-out |
-| QuickBooks | out | Nightly: post our management fee per recorded booking as revenue (the platforms pay owners directly) |
+| QuickBooks | out | Nightly: post our management fee (percentage plus fixed fee) per stay as revenue (the platforms pay owners directly) |
 | Sentry | out | Errors |
 
 ## 8. Build order
@@ -114,7 +114,7 @@ Each step ships as its own PR with the build green and a Vercel preview.
 ## 9. Decisions taken in code (change if wrong) and open questions
 
 Taken:
-- Fee is a percent of the nights subtotal only; cleaning fee and lodging tax are not owner revenue and not fee-bearing. `properties.fee_percent` overrides `owners.fee_percent`.
+- Fees per guest stay (`stayFees` in `src/lib/metrics.ts`, integer cents): percent fee = `fee_percent` of the nights subtotal (only when recorded) + fixed fee (`fixed_fee_cents`, every guest stay) + cleaning (the booking's recorded cleaning fee, else the home's `cleaning_fee_cents`, every guest stay). Net to owner = gross - percent fee - fixed fee; cleaning passes through to cover the turnover and does not reduce net. Lodging tax is never fee-bearing. Owner, cancelled and pending stays carry no fees. `properties.fee_percent` and `properties.fixed_fee_cents` (null = owner default) override `owners.fee_percent` and `owners.fixed_fee_cents`.
 - Lodging tax is a per-property rate (`tax_rate_bps`) recorded on manual bookings; for platform stays the platform collects tax.
 - No payment processor. Guests pay Airbnb or Vrbo, which pay the homeowner under its payout rules and the Management Agreement. The `payouts` table and Stripe columns remain in the database as history only and are no longer read or written.
 - Minimum nights per property exists now (default 2). Seasonal `pricing_rules` table exists; pricing is set on the platform listings.

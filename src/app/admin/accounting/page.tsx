@@ -4,7 +4,7 @@ import { Card, PageHeader, ghostButtonClass } from "@/components/admin/ui";
 import { getAllProperties, getFeeOverrides, getOwners, money } from "@/lib/data";
 import { getAllJobs } from "@/lib/cleaning";
 import { getBookingsDetailed } from "@/lib/admin";
-import { lastMonths, monthLabel, monthlyMetrics, stayMoney } from "@/lib/metrics";
+import { feeTermsLookup, lastMonths, monthLabel, monthlyMetrics, stayFees } from "@/lib/metrics";
 import { requireRole } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Accounting" };
@@ -17,11 +17,15 @@ export default async function Accounting() {
   const from = `${months[0]}-01`, to = new Date().toISOString().slice(0, 10);
 
   const byMonth = (pick: (m: string) => number) => months.map((m) => ({ label: monthLabel(m), value: Math.round(pick(m)) }));
-  // Fee split per stay from recorded booking money (iCal-imported stays have none).
-  const ownerFee = (propertyId: string) => owners.find((o) => o.id === props.find((p) => p.id === propertyId)?.ownerId)?.feePercent ?? 0;
-  const split = bookings.map((b) => ({ month: b.checkIn.slice(0, 7), m: stayMoney(b, feeOverrides[b.propertyId], ownerFee(b.propertyId)) }));
-  const fees = byMonth((m) => split.filter((x) => x.month === m).reduce((s, x) => s + (x.m?.fee ?? 0), 0));
-  const net = byMonth((m) => split.filter((x) => x.month === m).reduce((s, x) => s + (x.m?.net ?? 0), 0));
+  // Fees per guest stay with the shared math: fixed fee and cleaning on every guest stay, the
+  // percentage and owner net only where the nights subtotal is recorded (iCal imports have none).
+  const termsFor = feeTermsLookup(props, owners, feeOverrides);
+  const split = bookings.map((b) => ({ month: b.checkIn.slice(0, 7), f: stayFees(b, termsFor(b.propertyId)) }));
+  const centsByMonth = (pick: (f: NonNullable<(typeof split)[number]["f"]>) => number) =>
+    byMonth((m) => split.filter((x) => x.month === m).reduce((s, x) => s + (x.f ? pick(x.f) : 0), 0) / 100);
+  const fees = centsByMonth((f) => f.managementFeeCents);
+  const cleaningCharged = centsByMonth((f) => f.cleaningCents);
+  const net = centsByMonth((f) => f.netCents ?? 0);
   const cleaning = byMonth((m) => jobs.filter((j) => j.status === "done" && j.scheduledDate.startsWith(m)).reduce((s, j) => s + (j.cost ?? 0), 0));
   const tax = byMonth((m) => bookings.filter((b) => b.status !== "cancelled" && b.status !== "pending" && b.checkIn.startsWith(m)).reduce((s, b) => s + b.tax, 0));
   const revenue = metrics.map((m) => ({ label: monthLabel(m.month), value: m.revenue }));
@@ -29,8 +33,9 @@ export default async function Accounting() {
 
   const series = [
     { title: "Revenue", hint: "Nights subtotal, prorated by night", points: revenue },
-    { title: "Management fees", hint: "Recorded stays, by check-in month", points: fees },
-    { title: "Owner share", hint: "Recorded nights less our fee, by check-in month; paid by the platform", points: net },
+    { title: "Management fees", hint: "Fixed fee per guest stay + % of recorded nights, by check-in month", points: fees },
+    { title: "Owner share", hint: "Recorded nights less % and fixed fee, by check-in month; paid by the platform", points: net },
+    { title: "Cleaning fees charged", hint: "Per guest stay, passed through for the turnover, by check-in month", points: cleaningCharged },
     { title: "Cleaning cost", hint: "Done jobs, by turnover date", points: cleaning },
     { title: "Lodging tax collected", hint: "By check-in month; remitted to the state", points: tax },
   ];
@@ -57,7 +62,7 @@ export default async function Accounting() {
         ))}
         <Card title="QuickBooks">
           <p className="display text-2xl text-charcoal">Sync coming after launch.</p>
-          <p className="ui mt-2 text-sm text-muted">Until then, use the bookings CSV above for your accountant. Guests pay Airbnb or Vrbo and the platform pays owners, so the planned sync posts our management fee per recorded booking, nightly.</p>
+          <p className="ui mt-2 text-sm text-muted">Until then, use the bookings CSV above for your accountant. Guests pay Airbnb or Vrbo and the platform pays owners, so the planned sync posts our management fee (percentage plus fixed fee) per stay, nightly.</p>
           <p className="ui mt-3 text-xs text-muted">Status: not connected · last run: never</p>
         </Card>
       </div>

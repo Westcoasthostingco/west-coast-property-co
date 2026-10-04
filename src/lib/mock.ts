@@ -26,7 +26,13 @@ export type Property = {
   skiResort?: { name: string; lat: number; lng: number } | null;
 };
 
-export type Owner = { id: string; name: string; email: string; feePercent: number };
+export type Owner = {
+  id: string;
+  name: string;
+  email: string;
+  feePercent: number;     // management fee, percent of the nights subtotal
+  fixedFeeCents: number;  // fixed management fee per guest stay, cents
+};
 
 export type Booking = {
   id: string;
@@ -44,8 +50,8 @@ export type Booking = {
 export type Review = { id: string; propertyId: string; guest: string; rating: number; body: string; status: "published" | "pending" };
 
 export const owners: Owner[] = [
-  { id: "o1", name: "Dana Whitfield", email: "dana@example.com", feePercent: 18 },
-  { id: "o2", name: "Marcus Lee", email: "marcus@example.com", feePercent: 20 },
+  { id: "o1", name: "Dana Whitfield", email: "dana@example.com", feePercent: 18, fixedFeeCents: 5000 },
+  { id: "o2", name: "Marcus Lee", email: "marcus@example.com", feePercent: 20, fixedFeeCents: 0 },
 ];
 
 export const properties: Property[] = [

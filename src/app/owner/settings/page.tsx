@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import AlmostThere from "@/components/owner/AlmostThere";
 import Card from "@/components/owner/Card";
 import PageHeader from "@/components/owner/PageHeader";
-import { getOwnerData, loadOwner } from "@/lib/owner";
+import { feeTermsLabel } from "@/lib/metrics";
+import { feeSentence, getOwnerData, loadOwner } from "@/lib/owner";
 
 export const metadata: Metadata = { title: "Settings" };
 
@@ -16,7 +17,8 @@ const prefs = [
 export default async function OwnerSettings() {
   const owner = await loadOwner();
   if (!owner) return <AlmostThere />;
-  const { properties } = await getOwnerData(owner);
+  const data = await getOwnerData(owner);
+  const { properties } = data;
 
   return (
     <>
@@ -39,9 +41,9 @@ export default async function OwnerSettings() {
         </Card>
 
         <Card title="Management fee">
-          <p className="display text-4xl not-italic text-charcoal">{owner.feePercent}%</p>
+          <p className="display text-4xl not-italic text-charcoal">{feeTermsLabel(owner)}</p>
           <p className="mt-2 text-sm leading-relaxed text-muted">
-            Of the nights subtotal only. Cleaning fees and lodging tax are collected from guests and are never fee-bearing.
+            {feeSentence(data, owner)} The percentage applies to the nights subtotal only; lodging tax is never fee-bearing.
           </p>
         </Card>
 

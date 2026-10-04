@@ -1,6 +1,6 @@
 // Monthly metrics shared by the owner portal and admin so both see identical numbers.
 // Stays are prorated across month boundaries by night.
-import type { Booking, Property } from "./mock";
+import type { Booking, Owner, Property } from "./mock";
 import { feeCents } from "./dates";
 
 export type MonthMetric = {
@@ -57,29 +57,107 @@ export function monthlyMetrics(bookings: Booking[], properties: Property[], mont
 
 export const monthLabel = (month: string) => new Date(month + "-01T00:00:00Z").toLocaleDateString("en-US", { month: "short", timeZone: "UTC" });
 
-// Owner/management split of a stay's recorded nights money, in integer cents, shared by
-// owner statements and the admin dashboard and accounting pages so every surface agrees.
-// The property's fee override wins over the owner's default. Gross is the nights
-// subtotal only. Informational: Airbnb and Vrbo pay the homeowner, not this site.
-export type FeeSplit = { grossCents: number; feeCents: number; netCents: number; feePercent: number };
-export function feeSplit(grossCents: number, propertyFeePercent: number | null | undefined, ownerFeePercent: number): FeeSplit {
-  const feePercent = Number(propertyFeePercent ?? ownerFeePercent);
-  const fee = feeCents(grossCents, feePercent);
-  return { grossCents, feeCents: fee, netCents: grossCents - fee, feePercent };
+// ---- Fees ----
+// Per guest stay the homeowner is charged, in integer cents:
+//   percent fee = fee percent of the nights subtotal (only when the subtotal is recorded)
+//   fixed fee   = fixed management fee per stay (always, for guest stays)
+//   cleaning    = the stay's recorded cleaning fee, else the home's cleaning fee (always)
+//   total fees  = percent fee + fixed fee + cleaning
+// Gross is the nights subtotal only. Where it is recorded, net to owner = gross - percent fee
+// - fixed fee. Cleaning is not part of gross: it passes through to cover the turnover, so it
+// is shown beside net and never reduces it. iCal-imported stays usually carry no money, so
+// they have no gross, percent fee or net, but the fixed fee and cleaning still apply. Owner
+// stays and cancelled or pending stays carry no fees. The home's overrides
+// (properties.fee_percent, properties.fixed_fee_cents) win over the owner's defaults.
+// Shared by owner statements, admin pages and the CSV export so every surface agrees.
+// Informational: Airbnb and Vrbo pay the homeowner, not this site.
+
+// Per-home overrides; null means "use the owner's default".
+export type FeeOverride = { feePercent: number | null; fixedFeeCents: number | null };
+export type FeeOverrides = Record<string, FeeOverride>;
+
+// The terms that apply to one home.
+export type FeeTerms = { feePercent: number; fixedFeeCents: number; cleaningCents: number };
+
+export function feeTerms(
+  owner: Pick<Owner, "feePercent" | "fixedFeeCents"> | undefined,
+  override: FeeOverride | undefined,
+  property: Pick<Property, "cleaningFee"> | undefined,
+): FeeTerms {
+  return {
+    feePercent: Number(override?.feePercent ?? owner?.feePercent ?? 0),
+    fixedFeeCents: Math.round(override?.fixedFeeCents ?? owner?.fixedFeeCents ?? 0),
+    cleaningCents: Math.round((property?.cleaningFee ?? 0) * 100),
+  };
 }
 
-// Money for one stay, in dollars, or null when nothing is recorded (an iCal-imported
-// channel stay, an owner stay, or a cancelled or pending one). Built on feeSplit.
-export type StayMoney = { gross: number; fee: number; net: number; cleaning: number; feePercent: number };
-export function stayMoney(
-  b: Pick<Booking, "source" | "status" | "subtotal" | "total" | "cleaningFee">,
-  propertyFeePercent: number | null | undefined,
-  ownerFeePercent: number,
-): StayMoney | null {
-  if (!isRevenueStay(b) || b.subtotal == null) return null;
-  const split = feeSplit(Math.round(b.subtotal * 100), propertyFeePercent, ownerFeePercent);
+// Builds a propertyId -> FeeTerms lookup from the lists pages already load.
+export function feeTermsLookup(properties: Property[], owners: Pick<Owner, "id" | "feePercent" | "fixedFeeCents">[], overrides: FeeOverrides) {
+  return (propertyId: string): FeeTerms => {
+    const p = properties.find((x) => x.id === propertyId);
+    return feeTerms(owners.find((o) => o.id === p?.ownerId), overrides[propertyId], p);
+  };
+}
+
+// "18% + $50/stay", "18%", "$50/stay"
+export function feeTermsLabel(t: Pick<FeeTerms, "feePercent" | "fixedFeeCents">): string {
+  const fixed = t.fixedFeeCents > 0 ? `${centsLabel(t.fixedFeeCents)}/stay` : "";
+  if (t.feePercent > 0 && fixed) return `${t.feePercent}% + ${fixed}`;
+  return fixed || `${t.feePercent}%`;
+}
+
+// Whole dollars when even, otherwise cents: "$50", "$49.50".
+export const centsLabel = (cents: number) =>
+  (cents / 100).toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: cents % 100 === 0 ? 0 : 2, maximumFractionDigits: 2 });
+
+export const isGuestStay = (b: Pick<Booking, "source" | "status">) => !isOwnerStay(b) && b.status !== "cancelled" && b.status !== "pending";
+
+export type StayFees = {
+  feePercent: number;
+  grossCents: number | null;  // nights subtotal; null when not recorded
+  percentFeeCents: number;    // 0 when gross is not recorded
+  fixedFeeCents: number;
+  cleaningCents: number;      // passed through to cover the turnover
+  managementFeeCents: number; // percent + fixed: our fee
+  totalFeesCents: number;     // percent + fixed + cleaning: everything charged to the homeowner
+  netCents: number | null;    // gross - percent - fixed; null when gross is not recorded
+};
+
+// Fees for one stay, or null when the stay carries none (owner, cancelled or pending stay).
+export function stayFees(b: Pick<Booking, "source" | "status" | "subtotal" | "total" | "cleaningFee">, terms: FeeTerms): StayFees | null {
+  if (!isGuestStay(b)) return null;
+  const grossCents = isRevenueStay(b) && b.subtotal != null ? Math.round(b.subtotal * 100) : null;
+  const percentFeeCents = grossCents != null ? feeCents(grossCents, terms.feePercent) : 0;
+  // A booking's own cleaning fee counts when it has money on file (or a non-zero fee was
+  // recorded); otherwise, as for iCal imports, the home's cleaning fee applies.
+  const ownCleaning = b.cleaningFee != null && (b.subtotal != null || b.cleaningFee > 0);
+  const cleaningCents = ownCleaning ? Math.round((b.cleaningFee as number) * 100) : terms.cleaningCents;
+  const fixedFeeCents = terms.fixedFeeCents;
+  const managementFeeCents = percentFeeCents + fixedFeeCents;
   return {
-    gross: split.grossCents / 100, fee: split.feeCents / 100, net: split.netCents / 100,
-    cleaning: b.cleaningFee ?? 0, feePercent: split.feePercent,
+    feePercent: terms.feePercent, grossCents, percentFeeCents, fixedFeeCents, cleaningCents, managementFeeCents,
+    totalFeesCents: managementFeeCents + cleaningCents,
+    netCents: grossCents != null ? grossCents - managementFeeCents : null,
+  };
+}
+
+// The same figures in dollars for display (money()), converted once from cents.
+export type StayMoney = {
+  feePercent: number;
+  gross: number | null;
+  percentFee: number;
+  fixedFee: number;
+  cleaning: number;
+  managementFee: number;
+  totalFees: number;
+  net: number | null;
+};
+export function stayMoney(b: Pick<Booking, "source" | "status" | "subtotal" | "total" | "cleaningFee">, terms: FeeTerms): StayMoney | null {
+  const f = stayFees(b, terms);
+  if (!f) return null;
+  return {
+    feePercent: f.feePercent, gross: f.grossCents == null ? null : f.grossCents / 100,
+    percentFee: f.percentFeeCents / 100, fixedFee: f.fixedFeeCents / 100, cleaning: f.cleaningCents / 100,
+    managementFee: f.managementFeeCents / 100, totalFees: f.totalFeesCents / 100, net: f.netCents == null ? null : f.netCents / 100,
   };
 }

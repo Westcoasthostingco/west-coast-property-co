@@ -6,6 +6,7 @@ import { supabaseAdmin, supabaseConfigured, supabaseForUser, supabasePublic } fr
 export type { Property, Owner, Booking, Review } from "./mock";
 export { money } from "./mock";
 import type { Property, Owner, Booking, Review } from "./mock";
+import type { FeeOverrides } from "./metrics";
 
 type Client = ReturnType<typeof supabaseAdmin>;
 
@@ -41,6 +42,7 @@ const toOwner = (r: Record<string, unknown>): Owner => ({
   name: r.name as string,
   email: r.email as string,
   feePercent: Number(r.fee_percent),
+  fixedFeeCents: Number(r.fixed_fee_cents ?? 0),
 });
 
 const sources: Record<string, Booking["source"]> = {
@@ -164,18 +166,21 @@ export async function getReviews(): Promise<Review[]> {
   if (!supabaseConfigured) return mock.reviews;
   return (await rows(supabaseAdmin(), "reviews", (q) => q.order("created_at", { ascending: false }))).map(toReview);
 }
-// Per-home management fee overrides (properties.fee_percent; null means use the
-// owner's default). Admin reads all homes; an owner reads only their own (RLS).
-// The public listing view leaves this column out, so it is read from properties.
-export type FeeOverrides = Record<string, number | null>;
+// Per-home management fee overrides (properties.fee_percent and properties.fixed_fee_cents;
+// null means use the owner's default). Admin reads all homes; an owner reads only their
+// own (RLS). The public listing view leaves these columns out, so they are read from properties.
+export type { FeeOverride, FeeOverrides } from "./metrics";
 export async function getFeeOverrides(ownerId?: string): Promise<FeeOverrides> {
   if (!supabaseConfigured) return {};
   const db = ownerId ? supabaseForUser() : supabaseAdmin();
-  let q = db.from("properties").select("id, fee_percent");
+  let q = db.from("properties").select("id, fee_percent, fixed_fee_cents");
   if (ownerId) q = q.eq("owner_id", ownerId);
   const { data, error } = await q;
   if (error) throw new Error(`properties: ${error.message}`);
-  return Object.fromEntries(((data ?? []) as Record<string, unknown>[]).map((r) => [r.id as string, r.fee_percent == null ? null : Number(r.fee_percent)]));
+  return Object.fromEntries(((data ?? []) as Record<string, unknown>[]).map((r) => [r.id as string, {
+    feePercent: r.fee_percent == null ? null : Number(r.fee_percent),
+    fixedFeeCents: r.fixed_fee_cents == null ? null : Number(r.fixed_fee_cents),
+  }]));
 }
 
 // Lookup helpers for tables that join by id.

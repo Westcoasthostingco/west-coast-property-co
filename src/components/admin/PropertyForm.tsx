@@ -47,6 +47,7 @@ export default function PropertyForm({ property: p, owners, cleaners, action }: 
           <Field label="Cleaning fee ($)"><input name="cleaningFee" type="number" min={0} step={1} defaultValue={p?.cleaningFee ?? 0} className={inputClass} /></Field>
           <Field label="Lodging tax (%)" hint="e.g. 10.50; saved as basis points"><input name="taxRatePercent" type="number" min={0} max={100} step={0.01} inputMode="decimal" defaultValue={p ? (p.taxRateBps / 100).toFixed(2) : "0.00"} className={inputClass} /></Field>
           <Field label="Fee override (%)" hint="Blank uses the owner's rate"><input name="feePercentOverride" type="number" min={0} max={100} step={0.5} defaultValue={p?.feePercentOverride ?? ""} className={inputClass} /></Field>
+          <Field label="Fixed fee override per stay ($)" hint="Blank uses the owner's fixed fee"><input name="fixedFeeOverride" type="number" min={0} step={0.01} inputMode="decimal" defaultValue={p?.fixedFeeCentsOverride != null ? p.fixedFeeCentsOverride / 100 : ""} className={inputClass} /></Field>
         </div>
       </Card>
 

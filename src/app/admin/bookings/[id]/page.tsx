@@ -7,7 +7,7 @@ import { addNoteAction, cancelBookingAction } from "@/app/admin/actions";
 import { getAllProperties, getFeeOverrides, getOwners, money } from "@/lib/data";
 import { getAllJobs, getCleaners } from "@/lib/cleaning";
 import { cleanerName, fmtDate, fmtDateTime, getBookingDetail, nightsBetween } from "@/lib/admin";
-import { stayMoney } from "@/lib/metrics";
+import { feeTerms, stayMoney } from "@/lib/metrics";
 import { requireRole } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Booking" };
@@ -23,8 +23,8 @@ export default async function BookingDetailPage({ params, searchParams }: PagePr
   if (!b) notFound();
   const property = props.find((p) => p.id === b.propertyId);
   const owner = owners.find((o) => o.id === property?.ownerId);
-  // Informational split of recorded money; the platform pays the owner, not this site.
-  const split = stayMoney(b, feeOverrides[b.propertyId], owner?.feePercent ?? 0);
+  // Informational fee split (shared math); the platform pays the owner, not this site.
+  const split = stayMoney(b, feeTerms(owner, feeOverrides[b.propertyId], property));
   const job = jobs.find((j) => j.bookingId === b.id);
   const nights = nightsBetween(b.checkIn, b.checkOut);
   const subtotal = b.subtotal ?? Math.max(0, b.total - b.cleaningFee - b.tax);
@@ -62,11 +62,15 @@ export default async function BookingDetailPage({ params, searchParams }: PagePr
           {split ? (
             <dl className="ui text-sm">
               <Row k="Owner" v={owner?.name ?? "Unknown"} />
-              <Row k="Gross (nights)" v={money(split.gross)} />
-              <Row k={`Management fee (${split.feePercent}%)`} v={`− ${money(split.fee)}`} />
-              <Row k="Net to owner" v={money(split.net)} strong />
+              <Row k="Gross (nights)" v={split.gross != null ? money(split.gross) : "Not on file"} />
+              <Row k={`Management fee (${split.feePercent}%)`} v={split.gross != null ? `− ${money(split.percentFee)}` : "n/a"} />
+              <Row k="Fixed fee per stay" v={`− ${money(split.fixedFee)}`} />
+              {split.net != null && <Row k="Net to owner" v={money(split.net)} strong />}
+              <Row k="Cleaning (turnover)" v={money(split.cleaning)} />
+              <Row k="Total charged to owner" v={money(split.totalFees)} strong />
             </dl>
-          ) : <p className="ui text-sm text-muted">{b.source === "Owner stay" ? "Owner stays carry no fee." : "No amounts on file for this stay (imported from the platform calendar, or not active). The platform pays the owner directly."}</p>}
+          ) : <p className="ui text-sm text-muted">{b.source === "Owner stay" ? "Owner stays carry no fee." : "Cancelled and pending stays carry no fee."}</p>}
+          {split && split.gross == null && <p className="ui mt-2 text-[0.7rem] text-muted">No nights amount on file (imported from the platform calendar), so only the fixed fee and cleaning apply.</p>}
           <p className="ui mt-2 text-[0.7rem] text-muted">Airbnb or Vrbo pays the homeowner under its payout rules and the Management Agreement.</p>
           {job && (
             <p className="ui mt-3 border-t border-line pt-2 text-xs text-muted">

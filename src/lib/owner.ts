@@ -5,7 +5,7 @@ import * as mock from "./mock";
 import { requireRole } from "./auth";
 import { getFeeOverrides, getOwnerDashboard, getOwnerForClerkUser, getPublishedReviews, type FeeOverrides } from "./data";
 import type { Booking, Owner, Property, Review } from "./mock";
-import { lastMonths, monthlyMetrics, stayMoney, type MonthMetric } from "./metrics";
+import { centsLabel, feeTerms, lastMonths, monthlyMetrics, stayFees, type FeeTerms, type MonthMetric } from "./metrics";
 import { supabaseConfigured } from "./supabase";
 
 export type { Booking, Owner, Property, Review };
@@ -13,7 +13,7 @@ export type { Booking, Owner, Property, Review };
 export type OwnerData = {
   properties: Property[];
   bookings: Booking[];
-  feeOverrides: FeeOverrides; // per-home fee percent override (null = owner default)
+  feeOverrides: FeeOverrides; // per-home fee percent and fixed fee overrides (null = owner default)
 };
 
 // Gate the page to the owner role and find the owner row for the signed-in
@@ -107,11 +107,14 @@ export type StatementLine = {
   booking: Booking;
   propertyName: string;
   nights: number;
-  recorded: boolean;  // false: no money on file (e.g. an iCal-imported channel stay)
-  gross: number;      // nights subtotal
-  fee: number;        // management fee on gross (property override, else owner percent)
-  cleaning: number;   // cleaning fee on file, passed through to cover the turnover
-  net: number;        // gross minus fee
+  recorded: boolean;   // false: no nights money on file (e.g. an iCal-imported channel stay)
+  feePercent: number;  // the home's percent (override, else owner)
+  gross: number;       // nights subtotal (0 when not recorded)
+  percentFee: number;  // percent of gross (0 when not recorded)
+  fixedFee: number;    // fixed management fee per stay
+  cleaning: number;    // cleaning fee per stay, passed through to cover the turnover
+  totalFees: number;   // percent fee + fixed fee + cleaning
+  net: number;         // gross minus percent and fixed fee (0 when not recorded)
 };
 
 export type Statement = {
@@ -119,33 +122,66 @@ export type Statement = {
   lines: StatementLine[];
   stays: number;
   nights: number;
-  gross: number;
-  fee: number;
-  cleaning: number;
-  net: number;
+  recordedStays: number;
+  gross: number;       // recorded stays only
+  percentFee: number;  // recorded stays only
+  fixedFee: number;    // every guest stay
+  cleaning: number;    // every guest stay
+  totalFees: number;
+  net: number;         // recorded stays only
 };
 
+type FeeOwner = Pick<Owner, "feePercent" | "fixedFeeCents">;
+const termsFor = (data: OwnerData, owner: FeeOwner, propertyId: string): FeeTerms =>
+  feeTerms(owner, data.feeOverrides[propertyId], data.properties.find((p) => p.id === propertyId));
+
 // Owner stays are not revenue and are left off, as are cancelled and pending stays.
-// Stays with recorded money (subtotal/cleaning) show gross, fee and net using the
-// shared cents math in metrics.ts; stays without it show nights only.
-export function statementFor(month: string, data: OwnerData, owner: Pick<Owner, "feePercent">): Statement {
+// Every guest stay carries the fixed fee and cleaning; stays with a recorded nights
+// subtotal also show gross, percent fee and net. Sums are taken in cents (metrics.ts).
+export function statementFor(month: string, data: OwnerData, owner: FeeOwner): Statement {
   const names = new Map(data.properties.map((p) => [p.id, p.name]));
-  const lines: StatementLine[] = data.bookings
-    .filter((b) => b.checkIn.startsWith(month) && b.status !== "cancelled" && b.status !== "pending" && b.source !== "Owner stay")
+  const rows = data.bookings
+    .filter((b) => b.checkIn.startsWith(month))
     .sort((a, b) => a.checkIn.localeCompare(b.checkIn))
-    .map((b) => {
-      const m = stayMoney(b, data.feeOverrides[b.propertyId], owner.feePercent);
-      return {
-        booking: b, propertyName: names.get(b.propertyId) ?? b.propertyId, nights: nightsBetween(b.checkIn, b.checkOut),
-        recorded: m != null, gross: m?.gross ?? 0, fee: m?.fee ?? 0, cleaning: m?.cleaning ?? 0, net: m?.net ?? 0,
-      };
+    .flatMap((b) => {
+      const f = stayFees(b, termsFor(data, owner, b.propertyId));
+      return f ? [{ b, f }] : [];
     });
-  const sum = (k: "nights" | "gross" | "fee" | "cleaning" | "net") => lines.reduce((s, l) => s + l[k], 0);
-  return { month, lines, stays: lines.length, nights: sum("nights"), gross: sum("gross"), fee: sum("fee"), cleaning: sum("cleaning"), net: sum("net") };
+  const sum = (pick: (f: NonNullable<ReturnType<typeof stayFees>>) => number) => rows.reduce((s, r) => s + pick(r.f), 0) / 100;
+  const lines: StatementLine[] = rows.map(({ b, f }) => ({
+    booking: b, propertyName: names.get(b.propertyId) ?? b.propertyId, nights: nightsBetween(b.checkIn, b.checkOut),
+    recorded: f.grossCents != null, feePercent: f.feePercent, gross: (f.grossCents ?? 0) / 100, percentFee: f.percentFeeCents / 100,
+    fixedFee: f.fixedFeeCents / 100, cleaning: f.cleaningCents / 100, totalFees: f.totalFeesCents / 100, net: (f.netCents ?? 0) / 100,
+  }));
+  return {
+    month, lines, stays: lines.length, nights: lines.reduce((s, l) => s + l.nights, 0), recordedStays: lines.filter((l) => l.recorded).length,
+    gross: sum((f) => f.grossCents ?? 0), percentFee: sum((f) => f.percentFeeCents), fixedFee: sum((f) => f.fixedFeeCents),
+    cleaning: sum((f) => f.cleaningCents), totalFees: sum((f) => f.totalFeesCents), net: sum((f) => f.netCents ?? 0),
+  };
 }
 
-export const statements = (data: OwnerData, owner: Pick<Owner, "feePercent">, months = lastMonths(12)) =>
+export const statements = (data: OwnerData, owner: FeeOwner, months = lastMonths(12)) =>
   months.map((m) => statementFor(m, data, owner)).reverse(); // newest first
+
+// Plain-English fee terms for the statement intros, from the owner's actual numbers:
+// "Our fee is 18% of the nights subtotal plus $50 per stay; the cleaning fee of $150 per
+// stay covers the turnover." Per-home overrides are mentioned generically.
+export function feeSentence(data: OwnerData, owner: FeeOwner): string {
+  const percent = Number(owner.feePercent), fixed = owner.fixedFeeCents;
+  const fee = percent > 0 && fixed > 0 ? `${percent}% of the nights subtotal plus ${centsLabel(fixed)} per stay`
+    : fixed > 0 ? `${centsLabel(fixed)} per stay` : `${percent}% of the nights subtotal`;
+  const homes = data.properties;
+  const cleanings = [...new Set(homes.map((p) => Math.round(p.cleaningFee * 100)))];
+  const cleaning = cleanings.length === 1 ? `the cleaning fee of ${centsLabel(cleanings[0])} per stay covers the turnover`
+    : homes.length ? `the cleaning fee per stay (${homes.map((p) => `${centsLabel(Math.round(p.cleaningFee * 100))} at ${p.name}`).join(", ")}) covers the turnover`
+    : "the home's cleaning fee per stay covers the turnover";
+  const overridden = homes.some((p) => {
+    const o = data.feeOverrides[p.id];
+    return (o?.feePercent != null && Number(o.feePercent) !== percent) || (o?.fixedFeeCents != null && o.fixedFeeCents !== fixed);
+  });
+  return `Our fee is ${fee}; ${cleaning}.${overridden ? " Some homes have their own fee terms, and each stay uses its home's terms." : ""}`;
+}
+
 // ---- Invoices ----
 // There is no invoices table yet (architecture step 7). Repairs and supplies we
 // handle are billed to the owner under the Management Agreement; these samples
