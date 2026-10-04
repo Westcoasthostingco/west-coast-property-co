@@ -215,23 +215,23 @@ const PET_AMENITY = /\bpet[- ]friendly\b|\bpets? (allowed|welcome)\b/i;
 export function vacationRentalJsonLd(p: Property, opts: { context?: boolean } = {}): Thing {
   const photo = propertyPhoto(p.slug);
   const petsAllowed = p.amenities.some((a) => PET_AMENITY.test(a));
-  // Coordinates are not part of the Property type today; use them if the data layer adds them.
-  const maybe = p as Property & { lat?: number | null; lng?: number | null };
   const geo =
-    typeof maybe.lat === "number" && typeof maybe.lng === "number"
-      ? { "@type": "GeoCoordinates", latitude: maybe.lat, longitude: maybe.lng }
+    typeof p.lat === "number" && typeof p.lng === "number"
+      ? { "@type": "GeoCoordinates", latitude: p.lat, longitude: p.lng }
       : undefined;
 
   const out: Thing = {
     ...(opts.context === false ? {} : { "@context": "https://schema.org" }),
     "@type": ["VacationRental", "LodgingBusiness"],
+    additionalType: "House",
     "@id": `${propertyUrl(p)}#rental`,
+    identifier: p.slug,
     name: p.name,
     description: p.summary,
     url: propertyUrl(p),
     ...(photo ? { image: [absUrl(photo)] } : {}),
     address: postalAddress(p.city, p.region),
-    ...(geo ? { geo } : {}),
+    ...(geo ? { geo, latitude: geo.latitude, longitude: geo.longitude } : {}),
     brand: { "@id": ORG_ID },
     numberOfRooms: p.bedrooms,
     numberOfBedrooms: p.bedrooms,
@@ -242,10 +242,11 @@ export function vacationRentalJsonLd(p: Property, opts: { context?: boolean } = 
     // No price, offer, payment or reservation action: the platform listing sets prices and takes bookings.
     containsPlace: {
       "@type": "Accommodation",
+      additionalType: "EntirePlace",
       name: p.name,
       numberOfBedrooms: p.bedrooms,
       numberOfBathroomsTotal: p.bathrooms,
-      occupancy: { "@type": "QuantitativeValue", maxValue: p.guests },
+      occupancy: { "@type": "QuantitativeValue", value: p.guests, maxValue: p.guests },
       amenityFeature: p.amenities.map((name) => ({ "@type": "LocationFeatureSpecification", name, value: true })),
     },
     ...(p.reviewCount > 0

@@ -32,6 +32,8 @@ const toProperty = (r: Record<string, unknown>): Property => ({
   taxRateBps: (r.tax_rate_bps as number) ?? 0,
   minNights: (r.min_nights as number) ?? 2,
   tideStationId: (r.tide_station_id as string | null) ?? null,
+  lat: r.lat == null ? null : Number(r.lat),
+  lng: r.lng == null ? null : Number(r.lng),
   skiResort: r.ski_resort_name && r.ski_lat != null && r.ski_lng != null
     ? { name: r.ski_resort_name as string, lat: Number(r.ski_lat), lng: Number(r.ski_lng) }
     : null,
