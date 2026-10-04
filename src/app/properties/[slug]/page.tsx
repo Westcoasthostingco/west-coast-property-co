@@ -5,7 +5,6 @@ import AvailabilityCalendar from "@/components/AvailabilityCalendar";
 import PropertyImage from "@/components/PropertyImage";
 import BookOn, { hasBookingLink } from "@/components/BookOn";
 import JsonLd from "@/components/seo/JsonLd";
-import { TideWidget, SnowWidget } from "@/components/widgets";
 import { getProperty, getProperties, getPublishedReviews, getUnavailableDates } from "@/lib/data";
 import { propertyDescription, propertyPhoto, vacationRentalJsonLd } from "@/lib/seo";
 
@@ -52,12 +51,10 @@ export default async function PropertyPage({ params }: PageProps<"/properties/[s
   if (!p) notFound();
   const [reviews, taken] = await Promise.all([getPublishedReviews(p.id), getUnavailableDates(p.id)]);
   const where = platformNames(p);
-  const hasConditions = Boolean(p.tideStationId || p.skiResort);
   const petsWelcome = p.amenities.some((a) => /pet/i.test(a));
 
   const sections = [
     ["overview", "Overview"],
-    ...(hasConditions ? [["conditions", p.tideStationId ? "Tides" : "Snow"]] : []),
     ["gallery", "Gallery"],
     ["amenities", "Amenities"],
     ["availability", "Availability"],
@@ -119,14 +116,6 @@ export default async function PropertyPage({ params }: PageProps<"/properties/[s
             <BookOn p={p} className="mt-6" />
           </aside>
         </section>
-
-        {/* Live conditions: tide for waterfront homes, snow for mountain homes */}
-        {hasConditions && (
-          <section id="conditions" className="scroll-mt-32 pb-14">
-            <TideWidget stationId={p.tideStationId} />
-            <SnowWidget resort={p.skiResort} />
-          </section>
-        )}
 
         {/* Gallery */}
         <section id="gallery" className="scroll-mt-32 pb-14">

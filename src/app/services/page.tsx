@@ -16,7 +16,7 @@ const services = [
   ["Listing and pricing", "Professional listings on Airbnb and Vrbo, with pricing tuned to the season and the region, plus a showcase page for your home on our site."],
   ["Guest communication", "Fast, personal replies. Check-in details, local tips, and arrival reminders from a real host."],
   ["Cleaning and turnovers", "Scheduled cleaners, inspections after every stay, and small fixes handled before they become big ones."],
-  ["Transparent statements", "Guests book and pay on Airbnb or Vrbo, and payouts follow each platform's schedule. Every stay shows up on a monthly statement, fee included."],
+  ["Transparent statements", "Guests book and pay on Airbnb or Vrbo, and the platform pays you on its own schedule. Every stay shows up on a monthly statement, fee included."],
   ["Owner portal", "See occupancy, revenue trends, upcoming stays, and statements any time, from your phone."],
   ["Co-hosting", "Already listed? We can co-host on your existing accounts and take the day-to-day off your plate."],
 ];

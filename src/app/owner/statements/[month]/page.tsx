@@ -5,7 +5,6 @@ import StatTile from "@/components/StatTile";
 import AlmostThere from "@/components/owner/AlmostThere";
 import DataTable from "@/components/owner/DataTable";
 import PageHeader from "@/components/owner/PageHeader";
-import Pill, { payoutTone } from "@/components/owner/Pill";
 import PrintButton from "@/components/owner/PrintButton";
 import { money } from "@/lib/data";
 import { fmtDate, fmtRange, getOwnerData, isMonthKey, loadOwner, monthTitle, statementFor } from "@/lib/owner";
@@ -24,14 +23,11 @@ export default async function OwnerStatement({ params }: Props) {
   const owner = await loadOwner();
   if (!owner) return <AlmostThere />;
   const data = await getOwnerData(owner);
-  const s = statementFor(month, data);
-  const transfer = (l: (typeof s.lines)[number]) =>
-    l.payout ? (
-      <span className="inline-flex items-center gap-2">
-        <Pill tone={payoutTone(l.payout.status)}>{l.payout.status}</Pill>
-        <span className="text-xs text-muted">{l.payout.stripeTransferId ?? (l.payout.status === "paid" ? "" : fmtDate(l.payout.releaseOn))}</span>
-      </span>
-    ) : <Pill>no payout yet</Pill>;
+  const s = statementFor(month, data, owner);
+  const channels = ["Airbnb", "Vrbo", "Booking.com"];
+  const paidBy = (source: string) => `Paid by ${channels.includes(source) ? source : "Airbnb/Vrbo"}`;
+  const amount = (l: (typeof s.lines)[number], v: number) => (l.recorded ? money(v) : "");
+  const unrecorded = s.lines.filter((l) => !l.recorded).length;
 
   return (
     <>
@@ -45,7 +41,7 @@ export default async function OwnerStatement({ params }: Props) {
       }`}</style>
 
       <PageHeader eyebrow="Statement" title={monthTitle(month)}
-        intro={`Prepared for ${owner.name}. Stays are listed by check-in date. Our fee is ${owner.feePercent}% of the nights subtotal.`}
+        intro={`Prepared for ${owner.name}. Stays are listed by check-in date. Our fee is ${owner.feePercent}% of the nights subtotal, or the home's own rate where one is set.`}
         actions={<>
           <Link href="/owner/statements" className="caps-tight rounded-full border border-line px-4 py-2 text-[0.65rem] text-muted transition hover:border-deep hover:text-deep">All statements</Link>
           <PrintButton />
@@ -57,26 +53,36 @@ export default async function OwnerStatement({ params }: Props) {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile label="Nights revenue" value={money(s.gross)} hint={`${s.stays} ${s.stays === 1 ? "stay" : "stays"}`} />
-        <StatTile label="Management fee" value={money(s.fee)} hint={`${owner.feePercent}% of nights`} />
-        <StatTile label="Cleaning passed through" value={money(s.cleaning)} hint="Not owner revenue" />
-        <StatTile label="Net to you" value={money(s.net)} hint="Before any invoices netted" />
+        <StatTile label="Stays" value={String(s.stays)} hint={`${s.nights} ${s.nights === 1 ? "night" : "nights"}`} />
+        <StatTile label="Nights revenue" value={money(s.gross)} hint="Stays with amounts on file" />
+        <StatTile label="Management fee" value={money(s.fee)} hint="On nights revenue only" />
+        <StatTile label="Net of our fee" value={money(s.net)} hint="Before any invoices" />
       </div>
 
       <DataTable
-        columns={[{ label: "Home", wrap: true }, { label: "Dates" }, { label: "Guest", wrap: true }, { label: "Source" }, { label: "Nights", align: "right" }, { label: "Gross", align: "right" }, { label: "Fee", align: "right" }, { label: "Net", align: "right" }, { label: "Transfer" }]}
+        columns={[{ label: "Home", wrap: true }, { label: "Dates" }, { label: "Guest", wrap: true }, { label: "Source" }, { label: "Nights", align: "right" }, { label: "Gross", align: "right" }, { label: "Fee", align: "right" }, { label: "Net", align: "right" }, { label: "Payment" }]}
         empty="No stays checked in this month."
         rows={s.lines.map((l) => [
           l.propertyName, fmtRange(l.booking.checkIn, l.booking.checkOut), l.booking.guest, l.booking.source,
-          l.nights, money(l.gross), money(l.fee), <span key="n" className="font-medium">{money(l.net)}</span>, transfer(l),
+          l.nights, amount(l, l.gross), amount(l, l.fee), <span key="n" className="font-medium">{amount(l, l.net)}</span>,
+          <span key="p" className="text-xs text-muted">{l.recorded ? "Recorded amounts" : paidBy(l.booking.source)}</span>,
         ])}
-        footer={["Total", "", "", "", s.lines.reduce((n, l) => n + l.nights, 0), money(s.gross), money(s.fee), money(s.net), ""]}
+        footer={["Total", "", "", "", s.nights, money(s.gross), money(s.fee), money(s.net), ""]}
       />
 
-      <p className="text-sm leading-relaxed text-muted">
-        Cleaning fees of {money(s.cleaning)} were collected from guests and passed through to cover turnovers; they are not part of your revenue or our fee.
-        Lodging tax is collected from guests and remitted separately. Repairs and supplies we invoice are netted against your next payout and will show here as a line once that ships.
-      </p>
+      <div className="space-y-2 text-sm leading-relaxed text-muted">
+        <p>
+          Guests pay Airbnb or Vrbo when they book, and the platform pays you directly on its own payout schedule, under its payout rules and your Management Agreement. This statement is a record of the stays; no money is sent from this site.
+        </p>
+        {unrecorded > 0 && (
+          <p>
+            {unrecorded} {unrecorded === 1 ? "stay was" : "stays were"} imported from the platform calendar without amounts, so only the nights are shown. See your Airbnb or Vrbo earnings for those payouts.
+          </p>
+        )}
+        <p>
+          Cleaning fees on file ({money(s.cleaning)}) cover turnovers and are not part of your revenue or our fee. Lodging tax is collected and remitted separately.
+        </p>
+      </div>
     </>
   );
 }

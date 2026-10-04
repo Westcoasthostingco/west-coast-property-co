@@ -69,7 +69,7 @@ export default async function EditProperty({ params, searchParams }: PageProps<"
           </Card>
 
           <Card title="Danger zone">
-            <p className="ui text-xs text-muted">Homes are never deleted here because bookings and payouts reference them. Unpublish instead.</p>
+            <p className="ui text-xs text-muted">Homes are never deleted here because bookings and cleaning records reference them. Unpublish instead.</p>
             <p className={`${dangerButtonClass} mt-3 cursor-not-allowed opacity-60`}>Delete is disabled</p>
           </Card>
         </div>

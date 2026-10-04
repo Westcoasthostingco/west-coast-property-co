@@ -3,33 +3,18 @@
 // mock.ts. Statement math lives here so every owner page agrees with itself.
 import * as mock from "./mock";
 import { requireRole } from "./auth";
-import { getOwnerDashboard, getOwnerForClerkUser, getPublishedReviews } from "./data";
-import type { Booking, Owner, Payout, Property, Review } from "./mock";
-import { lastMonths, monthlyMetrics, type MonthMetric } from "./metrics";
-import { supabaseConfigured, supabaseForUser } from "./supabase";
+import { getFeeOverrides, getOwnerDashboard, getOwnerForClerkUser, getPublishedReviews, type FeeOverrides } from "./data";
+import type { Booking, Owner, Property, Review } from "./mock";
+import { lastMonths, monthlyMetrics, stayMoney, type MonthMetric } from "./metrics";
+import { supabaseConfigured } from "./supabase";
 
-export type { Booking, Owner, Payout, Property, Review };
-
-// A payout plus the Stripe transfer id, which the shared Payout type leaves out.
-export type OwnerPayout = Payout & { stripeTransferId?: string };
+export type { Booking, Owner, Property, Review };
 
 export type OwnerData = {
   properties: Property[];
   bookings: Booking[];
-  payouts: OwnerPayout[];
+  feeOverrides: FeeOverrides; // per-home fee percent override (null = owner default)
 };
-
-const toOwnerPayout = (r: Record<string, unknown>): OwnerPayout => ({
-  id: r.id as string,
-  ownerId: r.owner_id as string,
-  bookingId: r.booking_id as string,
-  gross: (r.gross_cents as number) / 100,
-  fee: (r.fee_cents as number) / 100,
-  net: (r.net_cents as number) / 100,
-  status: r.status as Payout["status"],
-  releaseOn: r.release_on as string,
-  stripeTransferId: (r.stripe_transfer_id as string | null) ?? undefined,
-});
 
 // Gate the page to the owner role and find the owner row for the signed-in
 // user. Returns undefined when the login is not linked yet.
@@ -39,13 +24,10 @@ export async function loadOwner(): Promise<Owner | undefined> {
 }
 
 // Everything the portal needs for one owner: their homes, every stay at those
-// homes, and their payouts (with transfer ids when the database is live).
+// homes, and any per-home fee overrides for statements.
 export async function getOwnerData(owner: Owner): Promise<OwnerData> {
-  const base = await getOwnerDashboard(owner);
-  if (!supabaseConfigured) return base;
-  const { data, error } = await supabaseForUser().from("payouts").select("*").eq("owner_id", owner.id).order("release_on");
-  if (error) throw new Error(`payouts: ${error.message}`);
-  return { ...base, payouts: ((data ?? []) as Record<string, unknown>[]).map(toOwnerPayout) };
+  const [base, feeOverrides] = await Promise.all([getOwnerDashboard(owner), getFeeOverrides(owner.id)]);
+  return { ...base, feeOverrides };
 }
 
 // Published reviews across all of an owner's homes.
@@ -114,64 +96,60 @@ export function upcomingStays(bookings: Booking[], limit = 10): Booking[] {
     .slice(0, limit);
 }
 
-export const scheduledPayoutTotal = (payouts: Payout[]) =>
-  payouts.filter((x) => x.status === "scheduled" || x.status === "processing").reduce((s, x) => s + x.net, 0);
-
 // ---- Statements ----
-// A stay belongs to the statement for the month it checks in, because that is
-// when the payout releases (check-in + 1 day). Trend charts prorate by night
-// instead; the two views answer different questions and are labelled as such.
+// Built from bookings. A stay belongs to the statement for the month it checks in.
+// Trend charts prorate by night instead; the two views answer different questions
+// and are labelled as such. Guests pay Airbnb or Vrbo, and the platform pays the
+// homeowner on its own payout schedule under the Management Agreement, so these
+// figures are a record of the stays, not money sent from this site.
 
 export type StatementLine = {
   booking: Booking;
   propertyName: string;
   nights: number;
+  recorded: boolean;  // false: no money on file (e.g. an iCal-imported channel stay)
   gross: number;      // nights subtotal
-  fee: number;        // management fee on gross
-  cleaning: number;   // passed through: total minus subtotal
+  fee: number;        // management fee on gross (property override, else owner percent)
+  cleaning: number;   // cleaning fee on file, passed through to cover the turnover
   net: number;        // gross minus fee
-  payout?: OwnerPayout;
 };
 
 export type Statement = {
   month: string;
   lines: StatementLine[];
   stays: number;
+  nights: number;
   gross: number;
   fee: number;
   cleaning: number;
   net: number;
 };
 
-// Money on a statement comes only from payout rows, which are written with the same
-// fee logic everywhere (property fee override, cents math). A stay with no payout yet
-// shows $0 and "no payout yet" rather than a recomputed guess. Owner stays are not
-// revenue and are left off; channel stays appear with whatever payout row exists.
-export function statementFor(month: string, data: OwnerData): Statement {
+// Owner stays are not revenue and are left off, as are cancelled and pending stays.
+// Stays with recorded money (subtotal/cleaning) show gross, fee and net using the
+// shared cents math in metrics.ts; stays without it show nights only.
+export function statementFor(month: string, data: OwnerData, owner: Pick<Owner, "feePercent">): Statement {
   const names = new Map(data.properties.map((p) => [p.id, p.name]));
-  const payoutByBooking = new Map(data.payouts.map((x) => [x.bookingId, x]));
   const lines: StatementLine[] = data.bookings
     .filter((b) => b.checkIn.startsWith(month) && b.status !== "cancelled" && b.status !== "pending" && b.source !== "Owner stay")
     .sort((a, b) => a.checkIn.localeCompare(b.checkIn))
     .map((b) => {
-      const payout = payoutByBooking.get(b.id);
-      const live = payout && payout.status !== "reversed" ? payout : undefined;
-      const gross = live?.gross ?? 0;
-      const fee = live?.fee ?? 0;
-      const cleaning = b.subtotal != null ? Math.max(0, b.total - b.subtotal) : 0;
-      return { booking: b, propertyName: names.get(b.propertyId) ?? b.propertyId, nights: nightsBetween(b.checkIn, b.checkOut), gross, fee, cleaning, net: live?.net ?? 0, payout };
+      const m = stayMoney(b, data.feeOverrides[b.propertyId], owner.feePercent);
+      return {
+        booking: b, propertyName: names.get(b.propertyId) ?? b.propertyId, nights: nightsBetween(b.checkIn, b.checkOut),
+        recorded: m != null, gross: m?.gross ?? 0, fee: m?.fee ?? 0, cleaning: m?.cleaning ?? 0, net: m?.net ?? 0,
+      };
     });
-  const sum = (k: "gross" | "fee" | "cleaning" | "net") => lines.reduce((s, l) => s + l[k], 0);
-  return { month, lines, stays: lines.length, gross: sum("gross"), fee: sum("fee"), cleaning: sum("cleaning"), net: sum("net") };
+  const sum = (k: "nights" | "gross" | "fee" | "cleaning" | "net") => lines.reduce((s, l) => s + l[k], 0);
+  return { month, lines, stays: lines.length, nights: sum("nights"), gross: sum("gross"), fee: sum("fee"), cleaning: sum("cleaning"), net: sum("net") };
 }
 
-export const statements = (data: OwnerData, months = lastMonths(12)) =>
-  months.map((m) => statementFor(m, data)).reverse(); // newest first
-
+export const statements = (data: OwnerData, owner: Pick<Owner, "feePercent">, months = lastMonths(12)) =>
+  months.map((m) => statementFor(m, data, owner)).reverse(); // newest first
 // ---- Invoices ----
-// There is no invoices table yet (architecture step 7). At launch, repairs and
-// supplies net against the owner's next payout and appear on the statement;
-// these samples show the shape the page will take once Stripe Invoicing lands.
+// There is no invoices table yet (architecture step 7). Repairs and supplies we
+// handle are billed to the owner under the Management Agreement; these samples
+// show the shape the page will take once invoices are stored.
 
 export type InvoiceLine = { description: string; qty: number; unit: number };
 export type Invoice = {
@@ -197,7 +175,7 @@ export const sampleInvoices = (ownerId: string): Invoice[] => [
     lineItems: [
       { description: "Replace deck light fixture (parts)", qty: 1, unit: 86 },
       { description: "Handyman visit", qty: 1.5, unit: 75 },
-    ], note: "Nets against your next payout." }),
+    ], note: "Billed under your Management Agreement." }),
   withTotal({ id: "inv-1033", ownerId, issuedOn: monthsAgo(1, 3), dueOn: monthsAgo(1, 17), status: "paid",
     lineItems: [
       { description: "Restock linens (2 queen sets)", qty: 2, unit: 64 },

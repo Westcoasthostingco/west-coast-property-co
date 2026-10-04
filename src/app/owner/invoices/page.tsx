@@ -18,11 +18,11 @@ export default async function OwnerInvoices() {
   return (
     <>
       <PageHeader eyebrow="From the management team" title="Invoices"
-        intro="Repairs, supplies and extra services we take care of for your home. At launch these net against your next payout, so there is nothing to do; you can see each one here." />
+        intro="Repairs, supplies and extra services we take care of for your home, billed under your Management Agreement. You can see each one here." />
       <div className="rounded-2xl border border-wave bg-mist px-5 py-4 text-sm leading-relaxed text-charcoal">
         <span className="caps-tight mr-2 text-[0.6rem] text-deep">Open balance</span>
         <span className="ui font-medium">{money(open)}</span>
-        <span className="text-muted"> nets against your next payout. Paying online is coming soon.</span>
+        <span className="text-muted"> is settled as set out in your Management Agreement. We include payment details with each invoice.</span>
       </div>
       <DataTable
         columns={[{ label: "Invoice" }, { label: "Issued" }, { label: "Due" }, { label: "Items", align: "right" }, { label: "Total", align: "right" }, { label: "Status" }]}

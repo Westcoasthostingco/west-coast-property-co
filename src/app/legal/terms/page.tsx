@@ -155,9 +155,9 @@ export default function TermsPage() {
           <Clauses start={4}>
             <li>Our management or co-hosting fee, how it is calculated, and how it is collected are set in your Management Agreement.</li>
             <li>Guests pay the platform, not us. Neither West Coast Hosting Co nor this website collects guest payments or holds guest funds.</li>
-            <li>Platform payouts are paid according to each platform’s payout rules (timing, method, and any co-host payout split the platform offers) and your Management Agreement.</li>
+            <li>Your payouts are paid by the platform, according to its payout rules (timing, method, and any co-host payout split the platform offers) and your Management Agreement. This website has no payout feature: we do not send, hold, or route owner payouts through it, and we do not collect your bank details.</li>
             <li>The cleaning fee shown on a listing is meant to cover the cleaner’s pay for that turnover, as your Management Agreement describes.</li>
-            <li>You receive a monthly statement showing each stay, our fee, and your net, available any time in the owner portal.</li>
+            <li>You receive a monthly statement in the owner portal listing each stay and, where the amounts are on file, our fee and your net. It is a record of the stays, not a payment.</li>
           </Clauses>
         </Sub>
         <Sub title="4. Your own stays and blocked dates">

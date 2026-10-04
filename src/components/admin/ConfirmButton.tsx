@@ -1,7 +1,7 @@
 "use client";
 import type { ReactNode } from "react";
 
-// Submit button that asks before the form posts. Used for cancel and refund.
+// Submit button that asks before the form posts. Used for cancelling a stay.
 export default function ConfirmButton({ message, className, children }: { message: string; className?: string; children: ReactNode }) {
   return (
     <button type="submit" className={className} onClick={(e) => { if (!window.confirm(message)) e.preventDefault(); }}>

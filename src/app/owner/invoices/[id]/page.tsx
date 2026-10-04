@@ -42,12 +42,8 @@ export default async function OwnerInvoice({ params }: Props) {
             <p className="display text-4xl not-italic text-charcoal">{money(invoice.total)}</p>
             <Pill tone={invoiceTone(invoice.status)}>{invoice.status}</Pill>
           </div>
-          <button type="button" disabled aria-describedby="pay-hint"
-            className="caps-tight mt-4 w-full cursor-not-allowed rounded-full bg-deep/40 px-5 py-2 text-[0.7rem] text-white">
-            Pay
-          </button>
-          <p id="pay-hint" className="ui mt-2 text-xs leading-relaxed text-muted">
-            Pay online coming soon; this amount nets against your next payout.
+          <p className="ui mt-3 text-xs leading-relaxed text-muted">
+            Settled as set out in your Management Agreement. Questions about an invoice? Just reply to our email.
           </p>
           {invoice.note && <p className="mt-3 text-sm text-charcoal">{invoice.note}</p>}
         </Card>

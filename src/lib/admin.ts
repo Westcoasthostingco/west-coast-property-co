@@ -3,12 +3,12 @@
 // Writes go through supabaseAdmin() when configured and log to audit_log;
 // without Supabase they return a friendly "sample mode" result and change nothing.
 import * as mock from "./mock";
-import type { Booking, Owner, Payout, Property } from "./mock";
-import { getAllProperties, getBookings, getOwners, getPayouts } from "./data";
+import type { Booking, Owner, Property } from "./mock";
+import { getAllProperties, getBookings, getFeeOverrides, getOwners } from "./data";
+import { stayMoney } from "./metrics";
 import { mockCleaners, mockJobs, type CleaningJob, type CleaningStatus } from "./cleaning";
 import { supabaseAdmin, supabaseConfigured } from "./supabase";
-import { payoutSplit } from "./metrics";
-import { appUrl, feeCents, nightsBetween, releaseDate, stripe, taxCents, todayISO } from "./stripe";
+import { nightsBetween, taxCents, todayISO } from "./dates";
 
 type Row = Record<string, unknown>;
 export type ActionResult = { ok: boolean; message: string; id?: string };
@@ -223,13 +223,13 @@ export async function deletePropertyPhoto(actor: string, photoId: string): Promi
 export type BookingDetail = Booking & {
   guestEmail: string | null; guestPhone: string | null; guestCount: number;
   cleaningFee: number; tax: number; notes: string | null;
-  paymentIntentId: string | null; chargeId: string | null; createdAt: string | null; cancelledAt: string | null;
+  createdAt: string | null; cancelledAt: string | null;
 };
 
 const mockDetail = (b: Booking): BookingDetail => {
   const p = mock.properties.find((x) => x.id === b.propertyId);
   return { ...b, guestEmail: `${b.guest.toLowerCase().replace(/[^a-z]/g, "")}@example.com`, guestPhone: null, guestCount: 2,
-    cleaningFee: p?.cleaningFee ?? 0, tax: 0, notes: null, paymentIntentId: null, chargeId: null, createdAt: null, cancelledAt: null };
+    cleaningFee: p?.cleaningFee ?? 0, tax: 0, notes: null, createdAt: null, cancelledAt: null };
 };
 
 const toDetail = (r: Row): BookingDetail => {
@@ -241,7 +241,6 @@ const toDetail = (r: Row): BookingDetail => {
     subtotal: r.subtotal_cents != null ? (r.subtotal_cents as number) / 100 : undefined, total: ((r.total_cents as number) ?? 0) / 100,
     guestEmail: (r.guest_email as string) ?? null, guestPhone: (r.guest_phone as string) ?? null, guestCount: (r.guest_count as number) ?? 1,
     cleaningFee: ((r.cleaning_fee_cents as number) ?? 0) / 100, tax: ((r.tax_cents as number) ?? 0) / 100, notes: (r.notes as string) ?? null,
-    paymentIntentId: (r.stripe_payment_intent_id as string) ?? null, chargeId: (r.stripe_charge_id as string) ?? null,
     createdAt: (r.created_at as string) ?? null, cancelledAt: (r.cancelled_at as string) ?? null,
   };
 };
@@ -262,18 +261,6 @@ export async function getBookingDetail(id: string): Promise<BookingDetail | unde
   return data ? toDetail(data as Row) : undefined;
 }
 
-export type PayoutDetail = Payout & { lastError: string | null; transferId: string | null };
-export async function getPayoutsDetailed(): Promise<PayoutDetail[]> {
-  if (!supabaseConfigured) return mock.payouts.map((x) => ({ ...x, lastError: null, transferId: null }));
-  const { data, error } = await supabaseAdmin().from("payouts").select("*").order("release_on", { ascending: false });
-  if (error) throw new Error(error.message);
-  return ((data ?? []) as Row[]).map((r) => ({
-    id: r.id as string, ownerId: r.owner_id as string, bookingId: r.booking_id as string, gross: (r.gross_cents as number) / 100,
-    fee: (r.fee_cents as number) / 100, net: (r.net_cents as number) / 100, status: r.status as Payout["status"], releaseOn: r.release_on as string,
-    lastError: (r.last_error as string) ?? null, transferId: (r.stripe_transfer_id as string) ?? null,
-  }));
-}
-
 export async function addBookingNote(actor: string, bookingId: string, note: string): Promise<ActionResult> {
   if (!note.trim()) return { ok: false, message: "Write a note first." };
   if (!supabaseConfigured) return SAMPLE_MODE;
@@ -292,26 +279,9 @@ export async function cancelBooking(actor: string, bookingId: string): Promise<A
   const db = supabaseAdmin();
   const { error } = await db.from("bookings").update({ status: "cancelled", cancelled_at: new Date().toISOString() }).eq("id", bookingId).in("status", ["pending", "confirmed"]);
   if (error) return dbError(error, "Could not cancel");
-  // A scheduled payout for a cancelled stay must not go out. Paid ones need a refund (which reverses via webhook).
-  await db.from("payouts").update({ status: "reversed" }).eq("booking_id", bookingId).eq("status", "scheduled");
   await db.from("cleaning_jobs").update({ status: "skipped" }).eq("booking_id", bookingId).in("status", ["unassigned", "assigned"]);
   await audit(actor, "booking.cancel", "booking", bookingId);
-  return { ok: true, message: "Stay cancelled. Any scheduled payout was held and the turnover skipped." };
-}
-
-export async function refundBooking(actor: string, bookingId: string): Promise<ActionResult> {
-  if (!supabaseConfigured) return SAMPLE_MODE;
-  if (!process.env.STRIPE_SECRET_KEY) return { ok: false, message: "Stripe is not configured, so a refund cannot be issued from here." };
-  const { data } = await supabaseAdmin().from("bookings").select("stripe_payment_intent_id, status").eq("id", bookingId).maybeSingle();
-  const pi = data?.stripe_payment_intent_id as string | null | undefined;
-  if (!pi) return { ok: false, message: "This stay has no Stripe payment to refund (channel or manual booking). Cancel it instead." };
-  try {
-    const refund = await stripe().refunds.create({ payment_intent: pi }, { idempotencyKey: `refund_${bookingId}` });
-    await audit(actor, "booking.refund", "booking", bookingId, { refund_id: refund.id, amount: refund.amount });
-    return { ok: true, message: `Refund ${refund.id} created. Stripe will confirm by webhook; the stay cancels and the payout reverses then.` };
-  } catch (e) {
-    return { ok: false, message: `Stripe refused the refund: ${(e as Error).message}` };
-  }
+  return { ok: true, message: "Stay cancelled here and the turnover skipped. Cancel it on Airbnb or Vrbo too if it was booked there." };
 }
 
 export type ManualBookingInput = {
@@ -343,7 +313,7 @@ export async function createManualBooking(actor: string, input: ManualBookingInp
   const rateCents = ownerStay ? 0 : Math.round((input.nightlyRate ?? (p.nightly_rate_cents as number) / 100) * 100);
   const subtotal = rateCents * nights;
   const cleaning = ownerStay ? 0 : (p.cleaning_fee_cents as number);
-  // Same tax base as checkout (src/lib/checkout.ts): nights subtotal plus cleaning fee.
+  // Tax base: nights subtotal plus cleaning fee (recorded for statements; guests pay on the platform).
   const tax = ownerStay ? 0 : taxCents(subtotal + cleaning, p.tax_rate_bps as number);
   const { data: b, error } = await db.from("bookings").insert({
     property_id: input.propertyId, guest_name: input.guest, guest_email: input.guestEmail || null, guest_phone: input.guestPhone || null,
@@ -353,18 +323,6 @@ export async function createManualBooking(actor: string, input: ManualBookingInp
   if (error || !b) {
     if (error?.code === "23P01") return { ok: false, message: "Those dates overlap another stay at this home. Check the calendar and try again." };
     return dbError(error, "Could not create the booking");
-  }
-  // Owner's share, with the same fee logic as the Stripe webhook (property override over
-  // owners.fee_percent, cents math). Channel stays entered by hand were paid to the channel,
-  // which pays the owner directly, so the row is recorded as 'offline' and never transferred.
-  if (!ownerStay) {
-    const ownerFee = (p.owners as unknown as { fee_percent: number } | null)?.fee_percent ?? 0;
-    const split = payoutSplit(subtotal, p.fee_percent as number | null, Number(ownerFee));
-    const status = ICAL_SOURCES.includes(input.source) ? "offline" : "scheduled";
-    await db.from("payouts").upsert(
-      { owner_id: p.owner_id, booking_id: b.id, gross_cents: split.grossCents, fee_cents: split.feeCents, net_cents: split.netCents, release_on: releaseDate(input.checkIn), status },
-      { onConflict: "booking_id", ignoreDuplicates: true },
-    );
   }
   // Turnover on the check-out day, pre-assigned to the home's default cleaner when one is set.
   const { data: integ } = await db.from("property_integrations").select("default_cleaner_id").eq("property_id", input.propertyId).maybeSingle();
@@ -380,18 +338,18 @@ export async function createManualBooking(actor: string, input: ManualBookingInp
 // ---------------------------------------------------------------------------
 // Owners
 // ---------------------------------------------------------------------------
-export type OwnerDetail = Owner & { clerkUserId: string | null; stripeAccountId: string | null; createdAt: string | null };
+export type OwnerDetail = Owner & { clerkUserId: string | null; createdAt: string | null };
 
 export async function getOwnerDetail(id: string): Promise<OwnerDetail | undefined> {
   if (!supabaseConfigured) {
     const o = mock.owners.find((x) => x.id === id);
-    return o ? { ...o, clerkUserId: null, stripeAccountId: o.payoutsReady ? "acct_sample" : null, createdAt: null } : undefined;
+    return o ? { ...o, clerkUserId: null, createdAt: null } : undefined;
   }
   const { data } = await supabaseAdmin().from("owners").select("*").eq("id", id).maybeSingle();
   if (!data) return undefined;
   const r = data as Row;
-  return { id: r.id as string, name: r.name as string, email: r.email as string, payoutsReady: Boolean(r.payouts_enabled), feePercent: Number(r.fee_percent),
-    clerkUserId: (r.clerk_user_id as string) ?? null, stripeAccountId: (r.stripe_account_id as string) ?? null, createdAt: (r.created_at as string) ?? null };
+  return { id: r.id as string, name: r.name as string, email: r.email as string, feePercent: Number(r.fee_percent),
+    clerkUserId: (r.clerk_user_id as string) ?? null, createdAt: (r.created_at as string) ?? null };
 }
 
 export type OwnerInput = { name: string; email: string; feePercent: number; clerkUserId: string | null };
@@ -468,35 +426,6 @@ export async function getOpenMaintenanceCount(): Promise<number> {
 }
 
 // ---------------------------------------------------------------------------
-// Payouts
-// ---------------------------------------------------------------------------
-export async function runPayoutsNow(actor: string): Promise<ActionResult> {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return { ok: false, message: "CRON_SECRET is not set, so the payout run cannot be triggered from here." };
-  if (!supabaseConfigured) return SAMPLE_MODE;
-  try {
-    const res = await fetch(`${appUrl()}/api/cron/payouts`, { headers: { authorization: `Bearer ${secret}` }, cache: "no-store" });
-    const body = (await res.json().catch(() => ({}))) as { processed?: Record<string, string>; error?: string };
-    if (!res.ok) return { ok: false, message: `Payout run failed: ${body.error ?? res.statusText}` };
-    const entries = Object.values(body.processed ?? {});
-    const paid = entries.filter((v) => v.startsWith("tr_")).length;
-    const failed = entries.length - paid;
-    await audit(actor, "payouts.run", "payouts", null, { paid, failed });
-    return { ok: true, message: entries.length ? `Run complete: ${paid} transferred, ${failed} held or failed.` : "Run complete: nothing was due today." };
-  } catch (e) {
-    return { ok: false, message: `Could not reach the payout job: ${(e as Error).message}` };
-  }
-}
-
-export async function retryPayout(actor: string, payoutId: string): Promise<ActionResult> {
-  if (!supabaseConfigured) return SAMPLE_MODE;
-  const { error } = await supabaseAdmin().from("payouts").update({ status: "scheduled", last_error: null }).eq("id", payoutId).eq("status", "failed");
-  if (error) return dbError(error, "Could not requeue");
-  await audit(actor, "payout.retry", "payout", payoutId);
-  return { ok: true, message: "Payout requeued; it goes out on the next run." };
-}
-
-// ---------------------------------------------------------------------------
 // Reviews
 // ---------------------------------------------------------------------------
 export async function setReviewPublished(actor: string, reviewId: string, published: boolean): Promise<ActionResult> {
@@ -514,7 +443,6 @@ export type IntegrationStatus = { name: string; purpose: string; vars: { name: s
 const present = (name: string) => Boolean(process.env[name]);
 export function integrationStatuses(): IntegrationStatus[] {
   const def: [string, string, string[]][] = [
-    ["Stripe", "Guest payments, Connect payouts, refunds", ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET"]],
     ["Clerk", "Sign-in and roles", ["NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "CLERK_SECRET_KEY", "CLERK_WEBHOOK_SIGNING_SECRET"]],
     ["Supabase", "Database and photo storage", ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY"]],
     ["Resend", "Email: confirmations, statements", ["RESEND_API_KEY", "EMAIL_FROM"]],
@@ -523,7 +451,7 @@ export function integrationStatuses(): IntegrationStatus[] {
     ["Mapbox", "Maps on listings", ["NEXT_PUBLIC_MAPBOX_TOKEN"]],
     ["Turnstile", "Contact form spam protection", ["NEXT_PUBLIC_TURNSTILE_SITE_KEY", "TURNSTILE_SECRET_KEY"]],
     ["QuickBooks", "Accounting sync (after launch)", ["QUICKBOOKS_CLIENT_ID", "QUICKBOOKS_CLIENT_SECRET"]],
-    ["Vercel Cron", "Daily payouts, hold sweep and iCal sync", ["CRON_SECRET"]],
+    ["Vercel Cron", "Daily iCal sync and hold sweep", ["CRON_SECRET"]],
   ];
   return def.map(([name, purpose, vars]) => {
     const v = vars.map((n) => ({ name: n, present: present(n) }));
@@ -541,23 +469,18 @@ const csvCell = (v: unknown) => {
 export const csvLine = (cells: unknown[]) => cells.map(csvCell).join(",") + "\n";
 
 export async function* bookingsCsv(from: string, to: string): AsyncGenerator<string> {
-  const [bookings, props] = await Promise.all([getBookingsDetailed(), getAllProperties()]);
+  const [bookings, props, owners, overrides] = await Promise.all([getBookingsDetailed(), getAllProperties(), getOwners(), getFeeOverrides()]);
   const name = (id: string) => props.find((p) => p.id === id)?.name ?? id;
-  yield csvLine(["id", "property", "guest", "email", "check_in", "check_out", "nights", "source", "status", "subtotal", "cleaning_fee", "tax", "total"]);
+  const ownerOf = (id: string) => owners.find((o) => o.id === props.find((p) => p.id === id)?.ownerId);
+  yield csvLine(["id", "property", "owner", "guest", "email", "check_in", "check_out", "nights", "source", "status", "subtotal", "cleaning_fee", "tax", "total", "fee_percent", "management_fee", "owner_share"]);
   for (const b of bookings) {
     if (b.checkIn < from || b.checkIn > to) continue;
-    yield csvLine([b.id, name(b.propertyId), b.guest, b.guestEmail, b.checkIn, b.checkOut, nightsBetween(b.checkIn, b.checkOut), b.source, b.status,
-      (b.subtotal ?? 0).toFixed(2), b.cleaningFee.toFixed(2), b.tax.toFixed(2), b.total.toFixed(2)]);
-  }
-}
-
-export async function* payoutsCsv(from: string, to: string): AsyncGenerator<string> {
-  const [payouts, owners] = await Promise.all([getPayoutsDetailed(), getOwners()]);
-  const name = (id: string) => owners.find((o) => o.id === id)?.name ?? id;
-  yield csvLine(["id", "owner", "booking_id", "gross", "fee", "net", "release_on", "status", "stripe_transfer_id", "last_error"]);
-  for (const x of payouts) {
-    if (x.releaseOn < from || x.releaseOn > to) continue;
-    yield csvLine([x.id, name(x.ownerId), x.bookingId, x.gross.toFixed(2), x.fee.toFixed(2), x.net.toFixed(2), x.releaseOn, x.status, x.transferId, x.lastError]);
+    const owner = ownerOf(b.propertyId);
+    // Fee split from recorded money only; blank for stays the platform paid without amounts on file.
+    const m = stayMoney(b, overrides[b.propertyId], owner?.feePercent ?? 0);
+    yield csvLine([b.id, name(b.propertyId), owner?.name ?? "", b.guest, b.guestEmail, b.checkIn, b.checkOut, nightsBetween(b.checkIn, b.checkOut), b.source, b.status,
+      (b.subtotal ?? 0).toFixed(2), b.cleaningFee.toFixed(2), b.tax.toFixed(2), b.total.toFixed(2),
+      m ? m.feePercent : "", m ? m.fee.toFixed(2) : "", m ? m.net.toFixed(2) : ""]);
   }
 }
 
@@ -573,4 +496,4 @@ export const fmtDate = (iso: string | null | undefined, opts: Intl.DateTimeForma
   iso ? new Date(iso.slice(0, 10) + "T00:00:00Z").toLocaleDateString("en-US", { ...opts, timeZone: "UTC" }) : "";
 export const fmtDateTime = (iso: string | null | undefined) =>
   iso ? new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/Los_Angeles" }) : "";
-export { getBookings, getPayouts, feeCents, releaseDate, nightsBetween, todayISO };
+export { getBookings, nightsBetween, todayISO };
