@@ -26,35 +26,45 @@ function faqs(properties: Property[]): Faq[] {
   const where = properties.map((p) => `${p.name} is in ${p.city}, Washington and sleeps ${p.guests}`).join("; ");
   return [
     {
-      question: "How do I book one of your homes?",
-      answer: `Book through Airbnb using the button on each home's page${onVrbo.length > 0 ? `; ${joinNames(onVrbo)} ${onVrbo.length > 1 ? "are" : "is"} also on Vrbo` : ""}. You choose dates, pay, and manage your reservation on the platform, under its terms. This website does not take bookings or payments. Christi or Melissa will be in touch before you arrive.`,
+      question: "How do I book one of these homes?",
+      answer: `Each home's page links to its listing on Airbnb${onVrbo.length > 0 ? `, and ${joinNames(onVrbo)} ${onVrbo.length > 1 ? "are" : "is"} also on Vrbo` : ""}. You book with the host, pay, and manage your reservation on the platform, under its terms. This website does not take bookings or payments.`,
     },
     {
       question: "What is included in the price?",
-      answer: `Prices, fees, and taxes are set and shown on each home's Airbnb or Vrbo listing, and you pay them there when you book. Check the listing for the full total for your dates.`,
+      answer: "Prices, fees, and taxes are set and shown on each home's Airbnb or Vrbo listing, and you pay them there when you book. Check the listing for the full total for your dates.",
     },
     {
-      question: "Is there a minimum stay?",
-      answer: "Yes, two nights. Each home's Airbnb or Vrbo listing shows the exact minimum and open dates, and you can search all homes here at once by region, dates, and guest count.",
+      question: "Who hosts my stay?",
+      answer: "The host named on the Airbnb or Vrbo listing. Check-in details, house rules, the cancellation policy, and help during your stay all come from your host through the platform's messages.",
     },
     {
       question: "Are pets allowed?",
       answer:
         petFriendly.length > 0
-          ? `${joinNames(petFriendly)} ${petFriendly.length > 1 ? "are" : "is"} pet friendly. For the other homes, email hello@westcoasthostingco.com before booking and we will let you know what is possible.`
-          : "Email hello@westcoasthostingco.com before booking and we will let you know what is possible for the home you have in mind.",
+          ? `${joinNames(petFriendly)} ${petFriendly.length > 1 ? "list" : "lists"} pets as welcome. For the others, check the house rules on the listing or message the host on the platform before booking.`
+          : "Check the house rules on the listing, or message the host on the platform before booking.",
     },
     {
-      question: "Where are the homes, and who will I be dealing with?",
-      answer: `${where}. Every stay is hosted by Christi Young and Melissa Heckman, the two owners of West Coast Hosting Co, who answer their own phones: 253.278.6818 or 503.860.8115.`,
+      question: "Where are the homes?",
+      answer: `${where}. Use the search above to filter by area, dates, and guest count, then open a home to see its listing.`,
+    },
+    {
+      question: "Who runs this website?",
+      answer: "West Coast Hosting Co, Christi Young and Melissa Heckman of Gig Harbor. Questions about the site or a home's details: hello@westcoasthostingco.com or 253.278.6818. For anything about a reservation, message your host on Airbnb or Vrbo.",
     },
   ];
 }
 
-const pillars = [
-  ["Genuinely reachable", "Two owners, real phone numbers. Guests and owners talk to the people who manage the home."],
-  ["Hands-on with every home", "Inspections, turnovers, and little fixes handled before anyone notices."],
-  ["22 years of combined experience", "Real estate, sales, and short-term rental management, all rooted in Puget Sound."],
+const steps = [
+  ["Explore", "Photos, the view, the neighborhood, and what's nearby, all in one place for each home."],
+  ["Pick your dates", "Choose dates and guests on a home's page and we open its listing with them filled in."],
+  ["Book on Airbnb or Vrbo", "See the live price, the house rules, and the cancellation policy, and book with the host on the platform."],
+];
+
+const regions = [
+  { name: "Gig Harbor", slug: "the-grand-view", blurb: "Waterfront shops and restaurants, with Puget Sound and Mount Rainier on the horizon." },
+  { name: "Hood Canal", slug: "the-leonora-by-the-sea", blurb: "Oyster beaches, Olympic Mountain views, and trailheads into Olympic National Park." },
+  { name: "Randle", slug: "the-bedrock", blurb: "Mountain air and quiet forest near Packwood, Mount Rainier, and White Pass." },
 ];
 
 export default async function Home() {
@@ -68,7 +78,7 @@ export default async function Home() {
         <PropertyImage slug="hero" name="The deck at The Grand View over Puget Sound" priority sizes="100vw" className="absolute inset-0 -z-10" />
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-ink/45 via-ink/15 to-ink/70" />
         <div className="mx-auto flex min-h-[86vh] max-w-7xl flex-col justify-end px-4 pb-14 pt-32 text-white sm:px-6">
-          <p className="caps text-xs text-white/80">Short-term rental management &amp; co-hosting</p>
+          <p className="caps text-xs text-white/80">Vacation homes in Washington</p>
           <h1 className="display mt-3 max-w-4xl text-5xl leading-[1.05] sm:text-7xl">
             Three homes. Three views.<br />One unforgettable Washington.
           </h1>
@@ -82,7 +92,7 @@ export default async function Home() {
       {/* Homes */}
       <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6">
         <div className="flex flex-wrap items-end justify-between gap-6">
-          <SectionHeading eyebrow="Our homes" title="Coast to Cascades" intro="Each home is one we know personally, cared for like our own." />
+          <SectionHeading eyebrow="The homes" title="Coast to Cascades" intro="Three homes, three very different views of Washington. Explore them here, then book on Airbnb or Vrbo." />
           <Link href="/properties" className="caps-tight text-[0.7rem] text-deep hover:text-deep">See all homes →</Link>
         </div>
         <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -90,16 +100,16 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* How we host */}
+      {/* How it works */}
       <section className="bg-mist">
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[1fr_1.1fr]">
           <CoastToCascades className="w-full rounded-3xl shadow-lg shadow-teal/10" />
           <div>
-          <SectionHeading eyebrow="How we host" title="Two friends, real homes, no faceless platform" />
+          <SectionHeading eyebrow="How it works" title="Explore here, book on the platform" />
           <div className="mt-10 grid gap-8 sm:grid-cols-3 lg:grid-cols-1">
-            {pillars.map(([t, d]) => (
+            {steps.map(([t, d], i) => (
               <div key={t}>
-                <h3 className="display text-2xl text-deep">{t}</h3>
+                <h3 className="display text-2xl text-deep"><span className="ui mr-2 text-sm text-wave">{i + 1}</span>{t}</h3>
                 <p className="mt-2 leading-relaxed text-muted">{d}</p>
               </div>
             ))}
@@ -108,25 +118,27 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Owner CTA */}
+      {/* Regions */}
       <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6">
-        <div className="grid items-center gap-10 overflow-hidden rounded-3xl bg-deep text-white md:grid-cols-2">
-          <div className="px-8 py-14 sm:px-14">
-            <p className="caps text-xs text-white/75">For homeowners</p>
-            <h2 className="display mt-3 text-4xl sm:text-5xl">Your home, hosted with care.</h2>
-            <p className="mt-4 max-w-md text-white/85">
-              Listing, pricing, guest messaging, cleaning, and transparent monthly statements. You keep the keys, and the view.
-            </p>
-            <Link href="/services" className="caps-tight mt-8 inline-block rounded-full bg-white px-6 py-3 text-[0.7rem] text-deep hover:bg-cream">What we handle</Link>
-          </div>
-          <PropertyImage slug="the-bedrock" name="The Bedrock" className="h-full min-h-72" />
+        <SectionHeading eyebrow="Find your corner" title="Shoreline, harbor, or mountains" />
+        <div className="mt-12 grid gap-8 md:grid-cols-3">
+          {regions.map((r) => (
+            <Link key={r.name} href={`/properties?region=${encodeURIComponent(r.name)}`} className="group block overflow-hidden rounded-3xl bg-deep text-white">
+              <PropertyImage slug={r.slug} name={r.name} className="aspect-[4/3] transition group-hover:opacity-90" />
+              <div className="px-7 py-7">
+                <h3 className="display text-3xl">{r.name}</h3>
+                <p className="mt-2 text-white/85">{r.blurb}</p>
+                <p className="caps-tight mt-5 text-[0.7rem] text-wave">See homes →</p>
+              </div>
+            </Link>
+          ))}
         </div>
       </section>
 
-      {/* FAQ: the questions guests ask before booking */}
+      {/* FAQ: what visitors ask before booking */}
       <section className="bg-mist">
         <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6">
-          <SectionHeading eyebrow="Good to know" title="Questions before you book" intro="Short answers to what guests ask us most. Anything else, just call." />
+          <SectionHeading eyebrow="Good to know" title="Questions before you book" intro="Short answers to the questions we hear most." />
           <dl className="mt-12 grid gap-x-12 gap-y-10 md:grid-cols-2">
             {questions.map((f) => (
               <div key={f.question}>

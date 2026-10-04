@@ -8,6 +8,7 @@ const nav = [
   ["/owner/statements", "Statements"],
   ["/owner/invoices", "Invoices"],
   ["/owner/settings", "Settings"],
+  ["/owner/terms", "Terms"],
 ] as const;
 
 // Same pattern as AdminNav: pills with aria-current, wrapping to two rows on a phone.

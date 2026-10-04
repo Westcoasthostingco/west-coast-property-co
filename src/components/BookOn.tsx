@@ -26,7 +26,7 @@ export default function BookOn({ p, size = "md", tone = "light", className = "" 
   if (!hasBookingLink(p)) {
     return (
       <div className={`flex flex-wrap gap-3 ${className}`}>
-        <Link href="/contact" className={`${base} ${primary}`}>Ask about dates</Link>
+        <Link href="/contact" className={`${base} ${primary}`}>Ask about this home</Link>
       </div>
     );
   }

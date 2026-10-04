@@ -3,7 +3,7 @@ import { SITE_NAME, TAGLINE } from "@/lib/seo";
 
 // Default social card for every page that does not supply its own.
 // Brand lockup: tracked caps over an italic serif, wave accent, cream background.
-export const alt = `${SITE_NAME}: ${TAGLINE}. Short-term rental management and vacation homes from Hood Canal to Mount Rainier.`;
+export const alt = `${SITE_NAME}: ${TAGLINE}. A showcase of vacation homes from Hood Canal to Mount Rainier.`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

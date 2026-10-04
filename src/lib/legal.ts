@@ -1,16 +1,16 @@
 // Legal and policy page metadata, shared by the footer, the legal pages themselves, and anything that records which policy version was shown.
 // The site is a showcase only: bookings, payments, cancellations and refunds happen on Airbnb or Vrbo, never here.
 export const LEGAL_UPDATED = "2026-10-04";
-export const POLICY_VERSION = "2026-10b";
+export const POLICY_VERSION = "2026-10c";
 
 export type LegalLink = { href: string; label: string };
 
 export const legalLinks: LegalLink[] = [
   { href: "/legal/privacy", label: "Privacy Notice" },
   { href: "/legal/terms", label: "Terms of Use" },
-  { href: "/legal/policies", label: "Policies" },
-  { href: "/legal/policies#cancellation", label: "Booking and Cancellation Policy" },
-  { href: "/legal/policies#damage", label: "Damage and Incidents Policy" },
+  { href: "/legal/policies", label: "Booking Information" },
+  { href: "/legal/policies#cancellation", label: "Booking and Cancellation" },
+  { href: "/legal/policies#damage", label: "Damage and Incidents" },
 ];
 
 export const LEGAL_CONTACT = { email: "hello@westcoasthostingco.com", phone: "253.278.6818", company: "West Coast Hosting Co", location: "Gig Harbor, Washington" };

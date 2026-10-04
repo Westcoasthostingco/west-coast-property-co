@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import ContactForm from "./ContactForm";
 
-export const metadata: Metadata = { title: "Contact" };
+export const metadata: Metadata = { title: "Contact", description: "Questions about the vacation homes shown on West Coast Hosting Co or about this site. Reservations are handled by the host on Airbnb or Vrbo.", alternates: { canonical: "/contact" } };
 
 export default function Contact() {
   return (
@@ -12,7 +12,8 @@ export default function Contact() {
       <div>
         <p className="caps text-xs text-deep">Contact</p>
         <h1 className="display mt-2 text-5xl text-deep">Say hello.</h1>
-        <p className="mt-6 text-lg leading-relaxed">Planning a stay, or wondering what co-hosting would look like for your home? We answer our own phones.</p>
+        <p className="mt-6 text-lg leading-relaxed">Questions about one of the homes or about this site? Send us a note.</p>
+        <p className="mt-3 leading-relaxed text-muted">For anything about a reservation, check-in, or your stay, message your host through Airbnb or Vrbo. That&apos;s the fastest way to reach them.</p>
         <div className="mt-8 space-y-2 text-lg">
           <a href="mailto:hello@westcoasthostingco.com" className="block text-deep hover:underline">hello@westcoasthostingco.com</a>
           <a href="tel:+12532786818" className="block">253.278.6818</a>

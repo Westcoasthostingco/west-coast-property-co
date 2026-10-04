@@ -81,7 +81,7 @@ export default async function PropertyPage({ params, searchParams }: PageProps<"
             {p.reviewCount > 0 && <> · ★ {p.rating.toFixed(1)} from {p.reviewCount} reviews</>}
           </p>
           <BookOn p={p} size="lg" tone="dark" className="mt-8" />
-          <p className="ui mt-3 text-xs text-white/70">Reservations, prices and payment are handled on {where}.</p>
+          <p className="ui mt-3 text-xs text-white/70">You book with the host on {where}, where prices, house rules and payment are handled.</p>
         </div>
       </section>
 
@@ -106,7 +106,7 @@ export default async function PropertyPage({ params, searchParams }: PageProps<"
             <p className="caps text-xs text-deep">The home</p>
             <p className="mt-4 max-w-2xl text-xl leading-relaxed text-charcoal">{p.summary}</p>
             <p className="mt-6 max-w-2xl leading-relaxed text-muted">
-              Hosted and cared for by West Coast Hosting Co. Christi and Melissa look after every stay, from the welcome to the last turnover, and answer their own phones.
+              Listed on {where}. The host, house rules, and cancellation policy are on the listing, and the host looks after your stay from booking to check-out.
             </p>
           </div>
           <aside className="rounded-2xl border border-line bg-white p-6">
@@ -155,15 +155,15 @@ export default async function PropertyPage({ params, searchParams }: PageProps<"
           <h2 className="caps text-xs text-deep">Good to know</h2>
           <dl className="ui mt-5 grid gap-3 text-sm sm:grid-cols-2">
             {[
-              ["Check-in", "After 4:00 pm"], ["Check-out", "By 11:00 am"],
+              ["Check-in", "Usually after 4:00 pm"], ["Check-out", "Usually by 11:00 am"],
               ["Minimum stay", `${p.minNights ?? 2} nights`], ["Sleeps", `${p.guests} guests`],
-              ["Pets", petsWelcome ? "Welcome, mention them when you book" : "Not at this home"], ["Booking and cancellation", `Through ${where}, under the listing's policy`],
+              ["Pets", petsWelcome ? "Listed as welcome, see house rules" : "See the listing's house rules"], ["Booking and cancellation", `Through ${where}, under the listing's policy`],
             ].map(([k, v]) => (
               <div key={k} className="flex justify-between gap-4 rounded-xl border border-line bg-white px-4 py-3"><dt className="text-muted">{k}</dt><dd className="text-right">{v}</dd></div>
             ))}
           </dl>
           <p className="ui mt-3 text-xs text-muted">
-            House rules and guest conduct are in our <Link href="/legal/terms#guests" className="text-deep underline">guest terms</Link> and <Link href="/legal/policies" className="text-deep underline">policies</Link>. The exact address arrives with your booking confirmation.
+            The listing on {where} is what counts: it has the current house rules, check-in times, and cancellation policy, and the host sends the exact address with your booking. See <Link href="/legal/policies" className="text-deep underline">how booking works</Link>.
           </p>
         </section>
 
@@ -184,13 +184,13 @@ export default async function PropertyPage({ params, searchParams }: PageProps<"
         )}
       </div>
 
-      {/* Closing call to book */}
+      {/* Closing link to the listing */}
       <section className="bg-dusk text-cream">
         <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-14 sm:px-6 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="caps text-xs text-wave">Stay at {p.name}</p>
             <h2 className="display mt-2 text-4xl">Pick your dates on {where}.</h2>
-            <p className="mt-3 max-w-xl leading-relaxed text-cream/80">You&apos;ll see live prices and book securely on the platform. Christi or Melissa will be in touch before you arrive.</p>
+            <p className="mt-3 max-w-xl leading-relaxed text-cream/80">You&apos;ll see live prices, the house rules, and the cancellation policy, and book securely with the host on the platform.</p>
           </div>
           <BookOn p={p} size="lg" tone="dark" />
         </div>

@@ -1,6 +1,6 @@
 // Site-wide SEO constants and schema.org JSON-LD builders.
 // Everything here is derived from Property data or the public facts about the
-// business. Street addresses are not public, so addresses stop at locality.
+// site. Street addresses are not public, so addresses stop at locality.
 // The site is a showcase only: guests book on Airbnb (and Vrbo where listed), so
 // nothing here advertises an on-site reservation, offer, or payment.
 import { existsSync } from "node:fs";
@@ -11,7 +11,7 @@ export const SITE_URL = "https://www.westcoasthostingco.com";
 export const SITE_NAME = "West Coast Hosting Co";
 export const TAGLINE = "Coast to Cascades";
 export const DEFAULT_DESCRIPTION =
-  "Short-term rental management, co-hosting, and vacation homes from Hood Canal to Mount Rainier. Gig Harbor, WA. Hosted by Christi and Melissa; book on Airbnb.";
+  "A showcase of vacation homes from Hood Canal to Gig Harbor to Mount Rainier, Washington. Explore each home here, then book on Airbnb or Vrbo.";
 
 export const CONTACT = {
   email: "hello@westcoasthostingco.com",
@@ -23,8 +23,6 @@ export const CONTACT = {
 };
 
 export const FOUNDERS = ["Christi Young", "Melissa Heckman"] as const;
-
-export const SERVICE_AREA = ["Gig Harbor", "Hood Canal", "Randle", "Puget Sound", "Olympic Peninsula", "Mount Rainier", "Washington"];
 
 export const absUrl = (path = "/") => new URL(path, SITE_URL).toString();
 export const propertyUrl = (p: Pick<Property, "slug">) => absUrl(`/properties/${p.slug}`);
@@ -72,14 +70,14 @@ export function propertyLongDescription(p: Property): string {
     `${p.name} is a ${p.bedrooms}-bedroom, ${p.bathrooms}-bathroom vacation home in ${p.city}, Washington that sleeps up to ${p.guests} guests.`,
     p.summary,
     `Amenities include ${list(p.amenities)}.`,
-    `Prices, the cleaning fee, and Washington lodging taxes are set, shown and charged by ${bookingPlatformNames(p)} when you book. Minimum stay is two nights.`,
+    `Prices, fees, and Washington lodging taxes are shown and charged by ${bookingPlatformNames(p)} when you book, and the listing sets the house rules and cancellation policy. Minimum stay is usually ${p.minNights ?? 2} nights.`,
     p.reviewCount > 0 ? `Guests rate it ${p.rating.toFixed(1)} out of 5 across ${p.reviewCount} reviews.` : "",
-    p.tideStationId ? "It is a waterfront home; the listing page shows local tide times." : "",
+    p.tideStationId ? "It is a waterfront home." : "",
     p.skiResort ? `The nearest ski area is ${p.skiResort.name}.` : "",
     bookingPlatforms(p).length > 0
       ? `Book on ${bookingPlatforms(p).map((x) => `${x.name} at ${x.url}`).join(", or on ")}.`
       : "Book on Airbnb.",
-    `The home's page at ${propertyUrl(p)} is a showcase with photos and details; it links to the listing and does not take bookings or payments.`,
+    `The home's page at ${propertyUrl(p)} is a showcase with photos and details; it links to the listing, where you book with the host. This website does not take bookings or payments.`,
   ];
   return bits.filter(Boolean).join(" ");
 }
@@ -133,32 +131,6 @@ export function organizationJsonLd(): Thing {
   };
 }
 
-export function localBusinessJsonLd(): Thing {
-  return {
-    "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    "@id": `${SITE_URL}/#localbusiness`,
-    name: SITE_NAME,
-    url: SITE_URL,
-    image: absUrl("/opengraph-image"),
-    description:
-      "Short-term rental management and co-hosting for vacation homes in Gig Harbor, Hood Canal, and the Mount Rainier area of Washington. Listing, pricing, guest messaging, cleaning, and monthly owner statements.",
-    email: CONTACT.email,
-    telephone: CONTACT.phones[0],
-    address: postalAddress(CONTACT.locality, CONTACT.region),
-    areaServed: SERVICE_AREA.map((name) => ({ "@type": "Place", name })),
-    parentOrganization: { "@id": ORG_ID },
-    knowsAbout: ["Short-term rental management", "Airbnb co-hosting", "Vacation rentals", "Gig Harbor", "Hood Canal", "Mount Rainier"],
-    makesOffer: [
-      "Short-term rental management",
-      "Co-hosting on Airbnb and Vrbo",
-      "Guest communication",
-      "Cleaning and turnover coordination",
-      "Monthly owner statements",
-    ].map((name) => ({ "@type": "Offer", itemOffered: { "@type": "Service", name, provider: { "@id": ORG_ID } } })),
-  };
-}
-
 export function webSiteJsonLd(): Thing {
   return {
     "@context": "https://schema.org",
@@ -197,7 +169,7 @@ export function itemListJsonLd(properties: Property[]): Thing {
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: `${SITE_NAME} vacation homes`,
-    description: "Vacation rentals managed by West Coast Hosting Co in Gig Harbor, Hood Canal, and Randle near Mount Rainier, Washington.",
+    description: "Vacation homes showcased by West Coast Hosting Co in Gig Harbor, Hood Canal, and Randle near Mount Rainier, Washington.",
     url: absUrl("/properties"),
     numberOfItems: properties.length,
     itemListOrder: "https://schema.org/ItemListUnordered",

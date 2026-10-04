@@ -6,8 +6,7 @@ import MobileNav from "./MobileNav";
 import { clerkConfigured, getRole } from "@/lib/auth";
 
 const publicLinks = [
-  { href: "/properties", label: "Stay" },
-  { href: "/services", label: "Owners" },
+  { href: "/properties", label: "Homes" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];
@@ -16,8 +15,8 @@ const portalFor = { admin: { href: "/admin", label: "Admin" }, owner: { href: "/
 
 export default async function SiteHeader() {
   const role = await getRole().catch(() => null);
-  // Decide signed-in state on the server, so the Sign in link renders and works
-  // even before (or without) Clerk's browser script loading.
+  // Decide signed-in state on the server. Signed-out visitors see no sign-in
+  // button: portals are invitation-only and reached from the footer link.
   const userId = clerkConfigured ? await auth().then((a) => a.userId).catch(() => null) : null;
   const portal = role ? portalFor[role] : null;
   return (
@@ -31,11 +30,7 @@ export default async function SiteHeader() {
           <MobileNav links={publicLinks} />
           {clerkConfigured ? (
             <>
-              {!userId ? (
-                // Full page load on purpose: the sign-in page must go through Clerk's middleware fresh.
-                // eslint-disable-next-line @next/next/no-html-link-for-pages
-                <a href="/sign-in" className="rounded-full border border-deep px-4 py-1.5 text-deep transition hover:bg-deep hover:text-white">Sign in</a>
-              ) : (
+              {!userId ? null : (
                 <>
                   {portal ? (
                     <a href={portal.href} className="rounded-full bg-deep px-4 py-1.5 text-white hover:bg-dusk">{portal.label}</a>
@@ -49,9 +44,7 @@ export default async function SiteHeader() {
             </>
           ) : portal ? (
             <a href={portal.href} className="rounded-full bg-deep px-4 py-1.5 text-white hover:bg-dusk">{portal.label}</a>
-          ) : (
-            <Link href="/sign-in" className="rounded-full border border-deep px-4 py-1.5 text-deep transition hover:bg-deep hover:text-white">Sign in</Link>
-          )}
+          ) : null}
         </nav>
       </div>
     </header>
