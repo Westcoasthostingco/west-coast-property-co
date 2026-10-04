@@ -1,6 +1,6 @@
 import Link from "next/link";
 import PropertyImage from "./PropertyImage";
-import { money, type Property } from "@/lib/data";
+import type { Property } from "@/lib/data";
 import ConditionsCard from "./widgets/ConditionsCard";
 
 export default function PropertyCard({ p, wide = false }: { p: Property; wide?: boolean }) {
@@ -14,8 +14,8 @@ export default function PropertyCard({ p, wide = false }: { p: Property; wide?: 
           <p className="ui mt-1 text-xs text-muted">{p.bedrooms} bedrooms · {p.bathrooms} baths · sleeps {p.guests}</p>
         </div>
         <div className="shrink-0 text-right">
-          <p className="ui text-sm font-medium">{money(p.nightlyRate)}<span className="text-xs font-normal text-muted"> /night</span></p>
-          {p.reviewCount > 0 && <p className="ui mt-0.5 text-xs text-muted">★ {p.rating.toFixed(1)} · {p.reviewCount}</p>}
+          {p.reviewCount > 0 && <p className="ui text-sm font-medium">★ {p.rating.toFixed(1)}<span className="text-xs font-normal text-muted"> · {p.reviewCount}</span></p>}
+          <p className="ui mt-0.5 text-xs text-muted">{p.airbnbUrl || p.vrboUrl ? `Book on ${[p.airbnbUrl && "Airbnb", p.vrboUrl && "Vrbo"].filter(Boolean).join(" · ")}` : "Ask about dates"}</p>
         </div>
       </div>
       {/* Live tide or snow conditions for this home, below the name and price */}

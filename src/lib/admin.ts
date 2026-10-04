@@ -55,7 +55,7 @@ export type PropertyDetail = Property & {
 };
 
 const emptyDetail = (p: Property): PropertyDetail => ({
-  ...p, address: "", postalCode: "", description: p.summary, taxRateBps: 0, feePercentOverride: null, minNights: 2, airbnbUrl: p.airbnbUrl ?? "",
+  ...p, address: "", postalCode: "", description: p.summary, taxRateBps: 0, feePercentOverride: null, minNights: 2, airbnbUrl: p.airbnbUrl ?? "", vrboUrl: p.vrboUrl ?? "",
   published: true, doorCode: "", seamDeviceId: "", defaultCleanerId: p.id === "p3" ? "c2" : "c1", icalFeeds: [], photos: [],
 });
 
@@ -83,7 +83,7 @@ export async function getPropertyDetail(id: string): Promise<PropertyDetail | un
     id: r.id as string, slug: r.slug as string, name: r.name as string, city: (r.city as string) ?? "", region: (r.region as string) ?? "",
     bedrooms: (r.bedrooms as number) ?? 0, bathrooms: Number(r.bathrooms ?? 0), guests: (r.max_guests as number) ?? 0,
     nightlyRate: (r.nightly_rate_cents as number) / 100, cleaningFee: ((r.cleaning_fee_cents as number) ?? 0) / 100,
-    summary: (r.summary as string) ?? "", amenities: (r.amenities as string[]) ?? [], ownerId: r.owner_id as string, airbnbUrl: (r.airbnb_url as string) ?? "",
+    summary: (r.summary as string) ?? "", amenities: (r.amenities as string[]) ?? [], ownerId: r.owner_id as string, airbnbUrl: (r.airbnb_url as string) ?? "", vrboUrl: (r.vrbo_url as string) ?? "",
     rating: Number(listing?.rating ?? 0), reviewCount: (listing?.review_count as number) ?? 0,
     address: (r.address as string) ?? "", postalCode: (r.postal_code as string) ?? "", description: (r.description as string) ?? "",
     taxRateBps: (r.tax_rate_bps as number) ?? 0, feePercentOverride: r.fee_percent == null ? null : Number(r.fee_percent),
@@ -111,7 +111,7 @@ export async function getAllIcalFeeds(): Promise<IcalFeed[]> {
 export type PropertyInput = {
   name: string; slug: string; city: string; region: string; address: string; postalCode: string; ownerId: string;
   bedrooms: number; bathrooms: number; maxGuests: number; nightlyRate: number; cleaningFee: number; taxRatePercent: number;
-  minNights: number; feePercentOverride: number | null; amenities: string[]; summary: string; description: string; published: boolean; airbnbUrl: string;
+  minNights: number; feePercentOverride: number | null; amenities: string[]; summary: string; description: string; published: boolean; airbnbUrl: string; vrboUrl: string;
   icalUrls: Partial<Record<BookingSourceKey, string>>; doorCode: string; seamDeviceId: string; defaultCleanerId: string | null;
   tideStationId: string; skiResortName: string; skiLat: number | null; skiLng: number | null;
 };
@@ -135,7 +135,7 @@ export function propertyInputFromForm(fd: FormData): PropertyInput {
     nightlyRate: num(fd.get("nightlyRate")), cleaningFee: num(fd.get("cleaningFee")), taxRatePercent: num(fd.get("taxRatePercent")),
     minNights: num(fd.get("minNights"), 2), feePercentOverride: feeRaw === "" ? null : num(fd.get("feePercentOverride")),
     amenities: str(fd.get("amenities")).split(",").map((a) => a.trim()).filter(Boolean),
-    summary: str(fd.get("summary")), description: str(fd.get("description")), published: fd.get("published") === "on", airbnbUrl: str(fd.get("airbnb_url")),
+    summary: str(fd.get("summary")), description: str(fd.get("description")), published: fd.get("published") === "on", airbnbUrl: str(fd.get("airbnb_url")), vrboUrl: str(fd.get("vrbo_url")),
     icalUrls, doorCode: str(fd.get("doorCode")), seamDeviceId: str(fd.get("seamDeviceId")),
     defaultCleanerId: str(fd.get("defaultCleanerId")) || null,
     tideStationId: str(fd.get("tideStationId")), skiResortName: str(fd.get("skiResortName")),
@@ -163,7 +163,7 @@ export async function saveProperty(actor: string, id: string | null, input: Prop
     owner_id: input.ownerId, bedrooms: input.bedrooms, bathrooms: input.bathrooms, max_guests: input.maxGuests,
     nightly_rate_cents: Math.round(input.nightlyRate * 100), cleaning_fee_cents: Math.round(input.cleaningFee * 100),
     tax_rate_bps: Math.round(input.taxRatePercent * 100), min_nights: input.minNights, fee_percent: input.feePercentOverride,
-    amenities: input.amenities, summary: input.summary || null, description: input.description || null, published: input.published, airbnb_url: input.airbnbUrl || null,
+    amenities: input.amenities, summary: input.summary || null, description: input.description || null, published: input.published, airbnb_url: input.airbnbUrl || null, vrbo_url: input.vrboUrl || null,
     tide_station_id: input.tideStationId || null, ski_resort_name: input.skiResortName || null, ski_lat: input.skiLat, ski_lng: input.skiLng,
   };
   let propertyId = id;

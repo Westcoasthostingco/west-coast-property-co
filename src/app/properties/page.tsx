@@ -6,7 +6,7 @@ import { getProperties, getUnavailableDates } from "@/lib/data";
 import { itemListJsonLd } from "@/lib/seo";
 
 const description =
-  "Three vacation rentals in Washington: The Grand View in Gig Harbor, The Leonora by the Sea on Hood Canal, and The Bedrock near Mount Rainier. Book direct.";
+  "Three vacation rentals in Washington: The Grand View in Gig Harbor, The Leonora by the Sea on Hood Canal, and The Bedrock near Mount Rainier. Book on Airbnb.";
 export const metadata: Metadata = {
   title: "Our homes: vacation rentals in Gig Harbor, Hood Canal & Mount Rainier",
   description,

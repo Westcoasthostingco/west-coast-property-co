@@ -27,7 +27,8 @@ export default function PropertyForm({ property: p, owners, cleaners, action }: 
             <Field label="Postal code"><input name="postalCode" defaultValue={p?.postalCode} className={inputClass} /></Field>
           </div>
           <Field label="Summary" hint="One or two sentences for cards" className="sm:col-span-2"><textarea name="summary" rows={2} defaultValue={p?.summary} className={inputClass} /></Field>
-          <Field label="Airbnb listing URL" hint="Public listing page, linked from the property page" className="sm:col-span-2"><input name="airbnb_url" type="url" defaultValue={p?.airbnbUrl ?? ""} className={inputClass} /></Field>
+          <Field label="Airbnb listing URL" hint="Guests book here: shown as the main Book button on the home's page" className="sm:col-span-2"><input name="airbnb_url" type="url" placeholder="https://www.airbnb.com/rooms/..." defaultValue={p?.airbnbUrl ?? ""} className={inputClass} /></Field>
+          <Field label="Vrbo listing URL" hint="Optional. Adds a Book on Vrbo button" className="sm:col-span-2"><input name="vrbo_url" type="url" placeholder="https://www.vrbo.com/..." defaultValue={p?.vrboUrl ?? ""} className={inputClass} /></Field>
           <Field label="Description" className="sm:col-span-2"><textarea name="description" rows={5} defaultValue={p?.description} className={inputClass} /></Field>
           <Field label="Amenities" hint="Comma separated" className="sm:col-span-2"><input name="amenities" defaultValue={p?.amenities.join(", ")} className={inputClass} /></Field>
           <label className="ui flex items-center gap-2 text-sm text-charcoal">

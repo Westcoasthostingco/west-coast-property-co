@@ -13,10 +13,10 @@ export const metadata: Metadata = {
 };
 
 const services = [
-  ["Listing and pricing", "Professional listings on Airbnb, Vrbo, and our own site, with pricing tuned to the season and the region."],
+  ["Listing and pricing", "Professional listings on Airbnb and Vrbo, with pricing tuned to the season and the region, plus a showcase page for your home on our site."],
   ["Guest communication", "Fast, personal replies. Check-in details, local tips, and arrival reminders from a real host."],
   ["Cleaning and turnovers", "Scheduled cleaners, inspections after every stay, and small fixes handled before they become big ones."],
-  ["Transparent statements", "Guest payments go to your own bank account after check-in. Every booking shows up on a monthly statement, fee included."],
+  ["Transparent statements", "Guests book and pay on Airbnb or Vrbo, and payouts follow each platform's schedule. Every stay shows up on a monthly statement, fee included."],
   ["Owner portal", "See occupancy, revenue trends, upcoming stays, and statements any time, from your phone."],
   ["Co-hosting", "Already listed? We can co-host on your existing accounts and take the day-to-day off your plate."],
 ];
@@ -36,7 +36,7 @@ export default function Services() {
       <div className="mt-16 rounded-3xl bg-mist p-10 text-center">
         <p className="caps text-xs text-deep">Fees</p>
         <p className="display mt-2 text-3xl text-charcoal">A simple percentage of nightly revenue. No setup fees.</p>
-        <p className="mt-3 text-muted">Cleaning fees and lodging taxes pass through to guests. Let&apos;s talk about your home.</p>
+        <p className="mt-3 text-muted">Guests pay cleaning fees and taxes through Airbnb or Vrbo. Let&apos;s talk about your home.</p>
         <Link href="/contact" className="caps-tight mt-6 inline-block rounded-full bg-deep px-6 py-3 text-[0.7rem] text-white hover:bg-dusk">Get in touch</Link>
       </div>
     </main>
