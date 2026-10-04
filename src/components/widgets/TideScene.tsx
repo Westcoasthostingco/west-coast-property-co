@@ -12,7 +12,7 @@ type Props = { events: TideEvent[]; now: number; level: number; className?: stri
 const W = 480, HOUR = 3600_000;
 // Full scene is 480x270. Compact (property cards) is 480x155, 43% shorter, with
 // smaller type and tighter label offsets so the tide range still fits.
-const FULL = { H: 270, TOP: 56, BOTTOM: 238 }, COMPACT = { H: 155, TOP: 50, BOTTOM: 118 };
+const FULL = { H: 270, TOP: 56, BOTTOM: 238 }, COMPACT = { H: 124, TOP: 42, BOTTOM: 96 };
 const C = { deep: "#2f6f86", dusk: "#1e4b5c", teal: "#6ba8bc", sky: "#8fc0ce", wave: "#a8d0dc", mist: "#eef5f7", line: "#dde9ed", charcoal: "#3a4448", muted: "#6b777c", cream: "#fbfdfc", sand: "#e6eef1", pine: "#5a7580" };
 
 function wavePath(period: number, amp: number, width: number) {
@@ -103,12 +103,12 @@ export default function TideScene({ events, now, level, className = "", compact 
         <rect x={60} y={dockY + 4} width={94} height={1.5} opacity={0.4} />
       </g>
       {/* gauge piling with feet ticks */}
-      <rect x={gaugeX} y={dockY - 12} width={7} height={BOTTOM - dockY + 20} rx={1} fill={C.charcoal} opacity={0.75} />
+      <rect x={gaugeX} y={dockY - (compact ? 2 : 12)} width={7} height={BOTTOM - dockY + (compact ? 10 : 20)} rx={1} fill={C.charcoal} opacity={0.75} />
       <g fontFamily="var(--font-poppins)" fontSize={10} fill={C.muted}>
         {ticks.map((ft) => (
           <g key={ft}>
             <line x1={gaugeX + 7} x2={gaugeX + (ft % 2 === 0 ? 13 : 10)} y1={y(ft)} y2={y(ft)} stroke={C.charcoal} strokeWidth={1} opacity={0.7} />
-            {ft % 4 === 0 && <text x={gaugeX + 16} y={y(ft) + 3.5} fill={ft < level ? C.cream : C.muted}>{ft} ft</text>}
+            {!compact && ft % 4 === 0 && <text x={gaugeX + 16} y={y(ft) + 3.5} fill={ft < level ? C.cream : C.muted}>{ft} ft</text>}
           </g>
         ))}
       </g>
