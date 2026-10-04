@@ -86,7 +86,8 @@ export async function getPropertyDetail(id: string): Promise<PropertyDetail | un
     nightlyRate: (r.nightly_rate_cents as number) / 100, cleaningFee: ((r.cleaning_fee_cents as number) ?? 0) / 100,
     summary: (r.summary as string) ?? "", amenities: (r.amenities as string[]) ?? [], ownerId: r.owner_id as string, airbnbUrl: (r.airbnb_url as string) ?? "", vrboUrl: (r.vrbo_url as string) ?? "",
     rating: Number(listing?.rating ?? 0), reviewCount: (listing?.review_count as number) ?? 0,
-    address: (r.address as string) ?? "", postalCode: (r.postal_code as string) ?? "", description: (r.description as string) ?? "",
+    address: (r.address as string) ?? "", postalCode: (r.postal_code as string) ?? "",
+    lat: r.lat == null ? null : Number(r.lat), lng: r.lng == null ? null : Number(r.lng), description: (r.description as string) ?? "",
     taxRateBps: (r.tax_rate_bps as number) ?? 0, feePercentOverride: r.fee_percent == null ? null : Number(r.fee_percent),
     fixedFeeCentsOverride: r.fixed_fee_cents == null ? null : Number(r.fixed_fee_cents),
     minNights: (r.min_nights as number) ?? 2, published: Boolean(r.published),
@@ -111,7 +112,7 @@ export async function getAllIcalFeeds(): Promise<IcalFeed[]> {
 }
 
 export type PropertyInput = {
-  name: string; slug: string; city: string; region: string; address: string; postalCode: string; ownerId: string;
+  name: string; slug: string; city: string; region: string; address: string; postalCode: string; lat: number | null; lng: number | null; ownerId: string;
   bedrooms: number; bathrooms: number; maxGuests: number; nightlyRate: number; cleaningFee: number; taxRatePercent: number;
   minNights: number; feePercentOverride: number | null; fixedFeeOverride: number | null; amenities: string[]; summary: string; description: string; published: boolean; airbnbUrl: string; vrboUrl: string;
   icalUrls: Partial<Record<BookingSourceKey, string>>; doorCode: string; seamDeviceId: string; defaultCleanerId: string | null;
@@ -133,7 +134,8 @@ export function propertyInputFromForm(fd: FormData): PropertyInput {
   for (const s of ICAL_SOURCES) icalUrls[s] = str(fd.get(`ical_${s}`));
   return {
     name, slug: slugify(str(fd.get("slug")) || name), city: str(fd.get("city")), region: str(fd.get("region")) || "WA",
-    address: str(fd.get("address")), postalCode: str(fd.get("postalCode")), ownerId: str(fd.get("ownerId")),
+    address: str(fd.get("address")), postalCode: str(fd.get("postalCode")),
+    lat: str(fd.get("lat")) === "" ? null : num(fd.get("lat")), lng: str(fd.get("lng")) === "" ? null : num(fd.get("lng")), ownerId: str(fd.get("ownerId")),
     bedrooms: num(fd.get("bedrooms")), bathrooms: num(fd.get("bathrooms")), maxGuests: num(fd.get("maxGuests"), 2),
     nightlyRate: num(fd.get("nightlyRate")), cleaningFee: num(fd.get("cleaningFee")), taxRatePercent: num(fd.get("taxRatePercent")),
     minNights: num(fd.get("minNights"), 2), feePercentOverride: feeRaw === "" ? null : num(fd.get("feePercentOverride")),
@@ -154,6 +156,7 @@ export function validateProperty(i: PropertyInput): string | null {
   if (i.nightlyRate <= 0) return "Nightly rate must be above zero.";
   if (i.feePercentOverride != null && (i.feePercentOverride < 0 || i.feePercentOverride > 100)) return "Fee override must be between 0 and 100%.";
   if (i.fixedFeeOverride != null && i.fixedFeeOverride < 0) return "Fixed fee override cannot be negative.";
+  if ((i.lat == null) !== (i.lng == null)) return "Map location needs both latitude and longitude (or leave both blank).";
   const ski = [i.skiResortName !== "", i.skiLat != null, i.skiLng != null];
   if (ski.some(Boolean) && !ski.every(Boolean)) return "Mountain conditions needs the resort name, latitude and longitude together (or leave all three blank).";
   return null;
@@ -165,7 +168,7 @@ export async function saveProperty(actor: string, id: string | null, input: Prop
   if (!supabaseConfigured) return SAMPLE_MODE;
   const db = supabaseAdmin();
   const row = {
-    name: input.name, slug: input.slug, city: input.city, region: input.region, address: input.address || null, postal_code: input.postalCode || null,
+    name: input.name, slug: input.slug, city: input.city, region: input.region, address: input.address || null, postal_code: input.postalCode || null, lat: input.lat, lng: input.lng,
     owner_id: input.ownerId, bedrooms: input.bedrooms, bathrooms: input.bathrooms, max_guests: input.maxGuests,
     nightly_rate_cents: Math.round(input.nightlyRate * 100), cleaning_fee_cents: Math.round(input.cleaningFee * 100),
     tax_rate_bps: Math.round(input.taxRatePercent * 100), min_nights: input.minNights, fee_percent: input.feePercentOverride,

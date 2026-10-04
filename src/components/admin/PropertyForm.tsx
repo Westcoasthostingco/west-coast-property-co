@@ -26,6 +26,10 @@ export default function PropertyForm({ property: p, owners, cleaners, action }: 
             <Field label="Region"><input name="region" defaultValue={p?.region ?? "WA"} className={inputClass} /></Field>
             <Field label="Postal code"><input name="postalCode" defaultValue={p?.postalCode} className={inputClass} /></Field>
           </div>
+          <div className="grid grid-cols-2 gap-4 sm:col-span-2">
+            <Field label="Map latitude" hint="For Google. Approximate is fine (2 decimals ≈ neighborhood)"><input name="lat" type="number" step="any" min={-90} max={90} inputMode="decimal" defaultValue={p?.lat ?? ""} placeholder="47.33" className={inputClass} /></Field>
+            <Field label="Map longitude" hint="Negative for west"><input name="lng" type="number" step="any" min={-180} max={180} inputMode="decimal" defaultValue={p?.lng ?? ""} placeholder="-122.58" className={inputClass} /></Field>
+          </div>
           <Field label="Summary" hint="One or two sentences for cards" className="sm:col-span-2"><textarea name="summary" rows={2} defaultValue={p?.summary} className={inputClass} /></Field>
           <Field label="Airbnb listing URL" hint="Guests book here: shown as the main Book button on the home's page" className="sm:col-span-2"><input name="airbnb_url" type="url" placeholder="https://www.airbnb.com/rooms/..." defaultValue={p?.airbnbUrl ?? ""} className={inputClass} /></Field>
           <Field label="Vrbo listing URL" hint="Optional. Adds a Book on Vrbo button" className="sm:col-span-2"><input name="vrbo_url" type="url" placeholder="https://www.vrbo.com/..." defaultValue={p?.vrboUrl ?? ""} className={inputClass} /></Field>
