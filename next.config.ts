@@ -22,7 +22,10 @@ const csp = [
   // Checkout and Connect onboarding are full-page redirects after a form post.
   "form-action 'self' https://checkout.stripe.com https://connect.stripe.com https://*.clerk.accounts.dev https://clerk.westcoasthostingco.com",
   "object-src 'none'",
-  ...(isDev ? [] : ["upgrade-insecure-requests"]),
+  // upgrade-insecure-requests is omitted while this ships as Report-Only:
+  // browsers ignore it there and log a console warning on every page. Add it
+  // back when the header becomes Content-Security-Policy (HSTS already forces
+  // HTTPS meanwhile).
 ].join("; ");
 
 const securityHeaders = [
