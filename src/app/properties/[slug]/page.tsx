@@ -9,8 +9,16 @@ import { todayISO } from "@/lib/stripe";
 import { getProperty, getProperties, getPublishedReviews, getUnavailableDates } from "@/lib/data";
 import { propertyDescription, propertyPhoto, vacationRentalJsonLd } from "@/lib/seo";
 
+// Pre-render known homes at build time. If the database can't be reached during
+// the build, return none: pages then render on first request instead of failing
+// the whole deployment.
 export async function generateStaticParams() {
-  return (await getProperties()).map((p) => ({ slug: p.slug }));
+  try {
+    return (await getProperties()).map((p) => ({ slug: p.slug }));
+  } catch (e) {
+    console.warn("generateStaticParams: could not load properties, rendering on demand", e);
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: PageProps<"/properties/[slug]">): Promise<Metadata> {

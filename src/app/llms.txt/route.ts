@@ -1,4 +1,4 @@
-import { getProperties, money } from "@/lib/data";
+import { getPropertiesForStaticFiles, money } from "@/lib/data";
 import { CONTACT, FOUNDERS, SITE_NAME, SITE_URL, TAGLINE, absUrl, propertyLongDescription, propertyUrl } from "@/lib/seo";
 
 // llms.txt (https://llmstxt.org): a plain-text map of the site for AI assistants
@@ -6,7 +6,7 @@ import { CONTACT, FOUNDERS, SITE_NAME, SITE_URL, TAGLINE, absUrl, propertyLongDe
 export const revalidate = 3600;
 
 export async function GET() {
-  const properties = await getProperties();
+  const properties = await getPropertiesForStaticFiles();
 
   const homes = properties.map((p) => {
     const facts = [
