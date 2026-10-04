@@ -6,6 +6,7 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import type { Property } from "./mock";
+import { getListingContent } from "./listing-content";
 
 export const SITE_URL = "https://www.westcoasthostingco.com";
 export const SITE_NAME = "West Coast Hosting Co";
@@ -69,6 +70,7 @@ export function propertyLongDescription(p: Property): string {
   const bits = [
     `${p.name} is a ${p.bedrooms}-bedroom, ${p.bathrooms}-bathroom vacation home in ${p.city}, Washington that sleeps up to ${p.guests} guests.`,
     p.summary,
+    ...(getListingContent(p.slug)?.about.slice(1) ?? []),
     `Amenities include ${list(p.amenities)}.`,
     `Prices, fees, and Washington lodging taxes are shown and charged by ${bookingPlatformNames(p)} when you book, and the listing sets the house rules and cancellation policy. Minimum stay is usually ${p.minNights ?? 2} nights.`,
     p.reviewCount > 0 ? `Guests rate it ${p.rating.toFixed(1)} out of 5 across ${p.reviewCount} reviews.` : "",
@@ -186,6 +188,12 @@ const PET_AMENITY = /\bpet[- ]friendly\b|\bpets? (allowed|welcome)\b/i;
 
 export function vacationRentalJsonLd(p: Property, opts: { context?: boolean } = {}): Thing {
   const photo = propertyPhoto(p.slug);
+  const content = getListingContent(p.slug);
+  const images = [...(photo ? [absUrl(photo)] : []), ...(content?.photos ?? []).slice(0, 11).map((ph) => absUrl(ph.src))];
+  const beds = (content?.sleeping ?? []).flatMap((s) =>
+    s.beds.split(/,\s*/).map((b) => b.match(/^(\d+)\s+(.+?)\s+beds?$/i)).filter((m): m is RegExpMatchArray => Boolean(m))
+      .map((m) => ({ "@type": "BedDetails", numberOfBeds: Number(m[1]), typeOfBed: m[2].replace(/^\w/, (x) => x.toUpperCase()) })),
+  );
   const petsAllowed = p.amenities.some((a) => PET_AMENITY.test(a));
   const geo =
     typeof p.lat === "number" && typeof p.lng === "number"
@@ -201,7 +209,7 @@ export function vacationRentalJsonLd(p: Property, opts: { context?: boolean } = 
     name: p.name,
     description: p.summary,
     url: propertyUrl(p),
-    ...(photo ? { image: [absUrl(photo)] } : {}),
+    ...(images.length ? { image: images } : {}),
     address: postalAddress(p.city, p.region),
     ...(geo ? { geo, latitude: geo.latitude, longitude: geo.longitude } : {}),
     brand: { "@id": ORG_ID },
@@ -219,6 +227,7 @@ export function vacationRentalJsonLd(p: Property, opts: { context?: boolean } = 
       numberOfBedrooms: p.bedrooms,
       numberOfBathroomsTotal: p.bathrooms,
       occupancy: { "@type": "QuantitativeValue", value: p.guests, maxValue: p.guests },
+      ...(beds.length ? { bed: beds } : {}),
       amenityFeature: p.amenities.map((name) => ({ "@type": "LocationFeatureSpecification", name, value: true })),
     },
     ...(p.reviewCount > 0
