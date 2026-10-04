@@ -1,7 +1,7 @@
 // Data layer. Reads from Supabase when configured, otherwise from the sample
 // data in mock.ts so the site runs locally and in previews without keys.
 import * as mock from "./mock";
-import { supabaseAdmin, supabaseConfigured, supabaseForUser } from "./supabase";
+import { supabaseAdmin, supabaseConfigured, supabaseForUser, supabasePublic } from "./supabase";
 
 export type { Property, Owner, Booking, Review, Payout } from "./mock";
 export { money } from "./mock";
@@ -95,18 +95,30 @@ async function rows(client: Client, table: string, filter?: (q: Query) => Query)
 
 export async function getProperties(): Promise<Property[]> {
   if (!supabaseConfigured) return mock.properties;
-  return (await rows(supabaseForUser(), "property_listings")).map(toProperty);
+  return (await rows(supabasePublic(), "property_listings")).map(toProperty);
+}
+
+// For build-time files (sitemap, llms.txt): if the database can't be reached
+// during a build, fall back to the bundled list of homes (the same three homes)
+// instead of failing the deployment. Both files revalidate later.
+export async function getPropertiesForStaticFiles(): Promise<Property[]> {
+  try {
+    return await getProperties();
+  } catch (e) {
+    console.warn("getPropertiesForStaticFiles: database unavailable, using bundled homes", e);
+    return mock.properties;
+  }
 }
 
 export async function getProperty(slug: string): Promise<Property | undefined> {
   if (!supabaseConfigured) return mock.properties.find((p) => p.slug === slug);
-  const r = await rows(supabaseForUser(), "property_listings", (q) => q.eq("slug", slug));
+  const r = await rows(supabasePublic(), "property_listings", (q) => q.eq("slug", slug));
   return r[0] ? toProperty(r[0]) : undefined;
 }
 
 export async function getPublishedReviews(propertyId: string): Promise<Review[]> {
   if (!supabaseConfigured) return mock.reviews.filter((r) => r.propertyId === propertyId && r.status === "published");
-  return (await rows(supabaseForUser(), "reviews", (q) => q.eq("property_id", propertyId).eq("published", true))).map(toReview);
+  return (await rows(supabasePublic(), "reviews", (q) => q.eq("property_id", propertyId).eq("published", true))).map(toReview);
 }
 
 export type Stay = { propertyId: string; checkIn: string; checkOut: string };
@@ -116,7 +128,7 @@ export async function getUnavailableDates(propertyId?: string): Promise<Stay[]> 
       .filter((b) => (b.status === "pending" || b.status === "confirmed") && (!propertyId || b.propertyId === propertyId))
       .map((b) => ({ propertyId: b.propertyId, checkIn: b.checkIn, checkOut: b.checkOut }));
   }
-  const r = await rows(supabaseForUser(), "property_unavailable_dates", (q) => (propertyId ? q.eq("property_id", propertyId) : q));
+  const r = await rows(supabasePublic(), "property_unavailable_dates", (q) => (propertyId ? q.eq("property_id", propertyId) : q));
   return r.map((x) => ({ propertyId: x.property_id as string, checkIn: x.check_in as string, checkOut: x.check_out as string }));
 }
 

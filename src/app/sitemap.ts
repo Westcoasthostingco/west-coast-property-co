@@ -1,10 +1,10 @@
 import type { MetadataRoute } from "next";
-import { getProperties } from "@/lib/data";
+import { getPropertiesForStaticFiles } from "@/lib/data";
 import { absUrl, propertyPhoto, propertyUrl } from "@/lib/seo";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
-  const properties = await getProperties();
+  const properties = await getPropertiesForStaticFiles();
 
   const statics: MetadataRoute.Sitemap = [
     { url: absUrl("/"), lastModified: now, changeFrequency: "weekly", priority: 1 },

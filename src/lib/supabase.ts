@@ -14,6 +14,14 @@ export const supabaseConfigured = Boolean(url && anonKey);
 // error page instead of leaving a click hanging with no feedback.
 const timedFetch: typeof fetch = (input, init) => fetch(input, { ...init, signal: init?.signal ?? AbortSignal.timeout(10_000) });
 
+// Plain anon client for public pages (listings, published reviews, availability).
+// It never touches the Clerk session, so it works at build time (static params,
+// metadata) and shows signed-in visitors the same public data as everyone else.
+export function supabasePublic(): SupabaseClient {
+  if (!url || !anonKey) throw new Error("Supabase env vars are not set");
+  return createClient(url, anonKey, { auth: { persistSession: false }, global: { fetch: timedFetch } });
+}
+
 // Per-request client that forwards the Clerk session token, so Supabase row
 // level security sees the signed-in user (auth.jwt()->>'sub' = Clerk user id).
 // Requires Clerk to be added as a third-party auth provider in Supabase.
