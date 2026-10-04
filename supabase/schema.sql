@@ -3,6 +3,10 @@
 -- Add Clerk as a third-party auth provider in Supabase so RLS can read the
 -- Clerk user id from the session token: auth.jwt()->>'sub'.
 -- Money is stored in integer cents.
+-- Legacy: guests book and pay on Airbnb/Vrbo, which pay homeowners directly. The app
+-- no longer uses Stripe or owner payouts. The payouts and stripe_events tables, the
+-- payout_status type and the stripe_* / payouts_enabled columns are kept as history
+-- only; app code neither reads nor writes them.
 
 create extension if not exists "pgcrypto";
 create extension if not exists btree_gist with schema extensions;
@@ -125,6 +129,7 @@ create table bookings (
 );
 -- 'completed' is derived: status = 'confirmed' and check_out < current_date.
 
+-- Legacy (unused by the app since owner payouts were removed).
 create table payouts (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references owners(id),
@@ -205,7 +210,7 @@ create table maintenance_tickets (
   resolved_at timestamptz
 );
 
--- Stripe webhook idempotency: insert the event id first; a duplicate means skip.
+-- Legacy (unused): Stripe webhook idempotency from the removed checkout.
 create table stripe_events (
   id text primary key,
   type text not null,
@@ -239,7 +244,7 @@ create trigger payouts_touch before update on payouts
 
 -- bookings -> cleaning_jobs: every confirmed stay (direct, manual or imported from a
 -- channel feed) has a turnover on its check-out day; a cancelled stay (admin, channel
--- feed removal or full Stripe refund) has its open turnover skipped. App code does the
+-- feed removal) has its open turnover skipped. App code does the
 -- same inline; this makes it hold for any path that forgets.
 create or replace function sync_cleaning_job() returns trigger language plpgsql as $$
 begin

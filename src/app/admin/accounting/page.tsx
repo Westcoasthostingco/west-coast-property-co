@@ -1,25 +1,27 @@
 import type { Metadata } from "next";
 import TimeSeries from "@/components/charts/TimeSeries";
 import { Card, PageHeader, ghostButtonClass } from "@/components/admin/ui";
-import { getAllProperties, money } from "@/lib/data";
+import { getAllProperties, getFeeOverrides, getOwners, money } from "@/lib/data";
 import { getAllJobs } from "@/lib/cleaning";
-import { getBookingsDetailed, getPayoutsDetailed } from "@/lib/admin";
-import { lastMonths, monthLabel, monthlyMetrics } from "@/lib/metrics";
+import { getBookingsDetailed } from "@/lib/admin";
+import { lastMonths, monthLabel, monthlyMetrics, stayMoney } from "@/lib/metrics";
 import { requireRole } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Accounting" };
 
 export default async function Accounting() {
   await requireRole("admin"); // S1: pages must not rely on the layout for auth
-  const [props, bookings, payouts, jobs] = await Promise.all([getAllProperties(), getBookingsDetailed(), getPayoutsDetailed(), getAllJobs()]);
+  const [props, bookings, owners, feeOverrides, jobs] = await Promise.all([getAllProperties(), getBookingsDetailed(), getOwners(), getFeeOverrides(), getAllJobs()]);
   const months = lastMonths(12);
   const metrics = monthlyMetrics(bookings, props, months);
   const from = `${months[0]}-01`, to = new Date().toISOString().slice(0, 10);
 
   const byMonth = (pick: (m: string) => number) => months.map((m) => ({ label: monthLabel(m), value: Math.round(pick(m)) }));
-  const live = payouts.filter((x) => x.status !== "reversed");
-  const fees = byMonth((m) => live.filter((x) => x.releaseOn.startsWith(m)).reduce((s, x) => s + x.fee, 0));
-  const net = byMonth((m) => live.filter((x) => x.releaseOn.startsWith(m)).reduce((s, x) => s + x.net, 0));
+  // Fee split per stay from recorded booking money (iCal-imported stays have none).
+  const ownerFee = (propertyId: string) => owners.find((o) => o.id === props.find((p) => p.id === propertyId)?.ownerId)?.feePercent ?? 0;
+  const split = bookings.map((b) => ({ month: b.checkIn.slice(0, 7), m: stayMoney(b, feeOverrides[b.propertyId], ownerFee(b.propertyId)) }));
+  const fees = byMonth((m) => split.filter((x) => x.month === m).reduce((s, x) => s + (x.m?.fee ?? 0), 0));
+  const net = byMonth((m) => split.filter((x) => x.month === m).reduce((s, x) => s + (x.m?.net ?? 0), 0));
   const cleaning = byMonth((m) => jobs.filter((j) => j.status === "done" && j.scheduledDate.startsWith(m)).reduce((s, j) => s + (j.cost ?? 0), 0));
   const tax = byMonth((m) => bookings.filter((b) => b.status !== "cancelled" && b.status !== "pending" && b.checkIn.startsWith(m)).reduce((s, b) => s + b.tax, 0));
   const revenue = metrics.map((m) => ({ label: monthLabel(m.month), value: m.revenue }));
@@ -27,8 +29,8 @@ export default async function Accounting() {
 
   const series = [
     { title: "Revenue", hint: "Nights subtotal, prorated by night", points: revenue },
-    { title: "Management fees", hint: "Earned on payouts released in month", points: fees },
-    { title: "Net to owners", hint: "Payouts released in month", points: net },
+    { title: "Management fees", hint: "Recorded stays, by check-in month", points: fees },
+    { title: "Owner share", hint: "Recorded nights less our fee, by check-in month; paid by the platform", points: net },
     { title: "Cleaning cost", hint: "Done jobs, by turnover date", points: cleaning },
     { title: "Lodging tax collected", hint: "By check-in month; remitted to the state", points: tax },
   ];
@@ -39,7 +41,6 @@ export default async function Accounting() {
         actions={
           <>
             <a href={`/api/admin/export?kind=bookings&from=${from}&to=${to}`} className={ghostButtonClass} download>Bookings CSV</a>
-            <a href={`/api/admin/export?kind=payouts&from=${from}&to=${to}`} className={ghostButtonClass} download>Payouts CSV</a>
           </>
         } />
 
@@ -56,7 +57,7 @@ export default async function Accounting() {
         ))}
         <Card title="QuickBooks">
           <p className="display text-2xl text-charcoal">Sync coming after launch.</p>
-          <p className="ui mt-2 text-sm text-muted">Until then, use the CSV exports above for your accountant. The planned sync posts one journal entry per booking (gross to owner funds payable, fee to revenue, tax to liability) and one per payout, nightly.</p>
+          <p className="ui mt-2 text-sm text-muted">Until then, use the bookings CSV above for your accountant. Guests pay Airbnb or Vrbo and the platform pays owners, so the planned sync posts our management fee per recorded booking, nightly.</p>
           <p className="ui mt-3 text-xs text-muted">Status: not connected · last run: never</p>
         </Card>
       </div>

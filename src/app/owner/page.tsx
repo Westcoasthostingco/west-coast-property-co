@@ -7,9 +7,9 @@ import DataTable from "@/components/owner/DataTable";
 import HeadlineTiles from "@/components/owner/HeadlineTiles";
 import PageHeader from "@/components/owner/PageHeader";
 import Pill, { stayTone } from "@/components/owner/Pill";
-import { money, nameMap } from "@/lib/data";
+import { nameMap } from "@/lib/data";
 import { lastMonths, monthLabel, monthlyMetrics } from "@/lib/metrics";
-import { fmtRange, getOwnerData, headline, loadOwner, nightsBetween, percent, scheduledPayoutTotal, upcomingStays } from "@/lib/owner";
+import { fmtRange, getOwnerData, headline, loadOwner, monthTitle, nightsBetween, percent, statementFor, thisMonth, upcomingStays } from "@/lib/owner";
 
 export const metadata: Metadata = { title: "Overview" };
 
@@ -18,28 +18,18 @@ export default async function OwnerOverview() {
   if (!owner) return <AlmostThere />;
 
   const data = await getOwnerData(owner);
-  const { properties, bookings, payouts } = data;
+  const { properties, bookings } = data;
   const propertyName = nameMap(properties);
   const h = headline(bookings, properties);
   const trend = monthlyMetrics(bookings, properties, lastMonths(12));
   const upcoming = upcomingStays(bookings);
-  const scheduled = scheduledPayoutTotal(payouts);
+  const month = statementFor(thisMonth(), data, owner);
   const firstName = owner.name.split(" ")[0];
 
   return (
     <>
       <PageHeader eyebrow="Owner portal" title={`Welcome back, ${firstName}`}
         intro={properties.length === 1 ? `Here is how ${properties[0].name} is doing this month.` : `Here is how your ${properties.length} homes are doing this month.`} />
-
-      {!owner.payoutsReady && (
-        <form action="/api/stripe/connect/onboard" method="post"
-          className="flex flex-col gap-3 rounded-2xl border border-wave bg-mist px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm leading-relaxed text-charcoal">
-            Payouts are not set up yet. Add your bank details with Stripe and your share of each stay arrives the day after check-in.
-          </p>
-          <button type="submit" className="caps-tight shrink-0 rounded-full bg-deep px-5 py-2 text-[0.7rem] text-white transition hover:bg-dusk">Set up payouts</button>
-        </form>
-      )}
 
       <HeadlineTiles h={h} />
 
@@ -72,10 +62,11 @@ export default async function OwnerOverview() {
           />
         </section>
         <div className="space-y-4">
-          <Card title="Scheduled payouts">
-            <p className="display text-4xl not-italic text-charcoal">{money(scheduled)}</p>
-            <p className="ui mt-1 text-xs text-muted">
-              {owner.payoutsReady ? "Released the day after each check-in." : "Held until payouts are set up."}
+          <Card title={monthTitle(thisMonth())}>
+            <p className="display text-4xl not-italic text-charcoal">{month.stays} {month.stays === 1 ? "stay" : "stays"}</p>
+            <p className="ui mt-1 text-xs text-muted">{month.nights} guest {month.nights === 1 ? "night" : "nights"} checking in this month.</p>
+            <p className="mt-3 text-xs leading-relaxed text-muted">
+              Guests pay Airbnb or Vrbo, and the platform pays you on its payout schedule under your Management Agreement.
             </p>
             <Link href="/owner/statements" className="caps-tight mt-4 inline-block text-[0.65rem] text-deep hover:underline">See statements</Link>
           </Card>

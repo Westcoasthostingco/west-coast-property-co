@@ -154,7 +154,7 @@ export function localBusinessJsonLd(): Thing {
       "Co-hosting on Airbnb and Vrbo",
       "Guest communication",
       "Cleaning and turnover coordination",
-      "Owner statements and payouts",
+      "Monthly owner statements",
     ].map((name) => ({ "@type": "Offer", itemOffered: { "@type": "Service", name, provider: { "@id": ORG_ID } } })),
   };
 }

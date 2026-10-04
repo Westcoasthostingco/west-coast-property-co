@@ -3,10 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ConfirmButton from "@/components/admin/ConfirmButton";
 import { Card, Field, Notice, PageHeader, Pill, buttonClass, dangerButtonClass, ghostButtonClass, inputClass } from "@/components/admin/ui";
-import { addNoteAction, cancelBookingAction, refundBookingAction } from "@/app/admin/actions";
-import { getAllProperties, getOwners, money, nameMap } from "@/lib/data";
+import { addNoteAction, cancelBookingAction } from "@/app/admin/actions";
+import { getAllProperties, getFeeOverrides, getOwners, money } from "@/lib/data";
 import { getAllJobs, getCleaners } from "@/lib/cleaning";
-import { cleanerName, fmtDate, fmtDateTime, getBookingDetail, getPayoutsDetailed, nightsBetween } from "@/lib/admin";
+import { cleanerName, fmtDate, fmtDateTime, getBookingDetail, nightsBetween } from "@/lib/admin";
+import { stayMoney } from "@/lib/metrics";
 import { requireRole } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Booking" };
@@ -18,10 +19,12 @@ const Row = ({ k, v, strong = false }: { k: string; v: React.ReactNode; strong?:
 export default async function BookingDetailPage({ params, searchParams }: PageProps<"/admin/bookings/[id]">) {
   await requireRole("admin"); // S1: pages must not rely on the layout for auth
   const [{ id }, sp] = await Promise.all([params, searchParams]);
-  const [b, props, owners, payouts, jobs, cleaners] = await Promise.all([getBookingDetail(id), getAllProperties(), getOwners(), getPayoutsDetailed(), getAllJobs(), getCleaners()]);
+  const [b, props, owners, feeOverrides, jobs, cleaners] = await Promise.all([getBookingDetail(id), getAllProperties(), getOwners(), getFeeOverrides(), getAllJobs(), getCleaners()]);
   if (!b) notFound();
   const property = props.find((p) => p.id === b.propertyId);
-  const payout = payouts.find((x) => x.bookingId === b.id);
+  const owner = owners.find((o) => o.id === property?.ownerId);
+  // Informational split of recorded money; the platform pays the owner, not this site.
+  const split = stayMoney(b, feeOverrides[b.propertyId], owner?.feePercent ?? 0);
   const job = jobs.find((j) => j.bookingId === b.id);
   const nights = nightsBetween(b.checkIn, b.checkOut);
   const subtotal = b.subtotal ?? Math.max(0, b.total - b.cleaningFee - b.tax);
@@ -52,20 +55,19 @@ export default async function BookingDetailPage({ params, searchParams }: PagePr
             <Row k="Lodging tax" v={money(b.tax)} />
             <Row k="Guest total" v={money(b.total)} strong />
           </dl>
-          <p className="ui mt-2 text-[0.7rem] text-muted">{b.paymentIntentId ? `Stripe ${b.paymentIntentId}` : "No Stripe payment on file (channel or manual)."}</p>
+          <p className="ui mt-2 text-[0.7rem] text-muted">Recorded for statements. Guests pay on Airbnb or Vrbo; nothing is charged here.</p>
         </Card>
 
-        <Card title="Owner payout">
-          {payout ? (
+        <Card title="Owner split">
+          {split ? (
             <dl className="ui text-sm">
-              <Row k="Owner" v={nameMap(owners)(payout.ownerId)} />
-              <Row k="Gross (nights)" v={money(payout.gross)} />
-              <Row k="Management fee" v={`− ${money(payout.fee)}`} />
-              <Row k="Net to owner" v={money(payout.net)} strong />
-              <Row k="Release" v={<span>{fmtDate(payout.releaseOn, { month: "short", day: "numeric", year: "numeric" })} <Pill value={payout.status} /></span>} />
-              {payout.lastError && <p className="mt-1 text-xs text-[#b6633a]">{payout.lastError}</p>}
+              <Row k="Owner" v={owner?.name ?? "Unknown"} />
+              <Row k="Gross (nights)" v={money(split.gross)} />
+              <Row k={`Management fee (${split.feePercent}%)`} v={`− ${money(split.fee)}`} />
+              <Row k="Net to owner" v={money(split.net)} strong />
             </dl>
-          ) : <p className="ui text-sm text-muted">No payout row. {b.source === "Owner stay" ? "Owner stays carry no payout." : "A payout is created when payment is confirmed."}</p>}
+          ) : <p className="ui text-sm text-muted">{b.source === "Owner stay" ? "Owner stays carry no fee." : "No amounts on file for this stay (imported from the platform calendar, or not active). The platform pays the owner directly."}</p>}
+          <p className="ui mt-2 text-[0.7rem] text-muted">Airbnb or Vrbo pays the homeowner under its payout rules and the Management Agreement.</p>
           {job && (
             <p className="ui mt-3 border-t border-line pt-2 text-xs text-muted">
               Turnover {fmtDate(job.scheduledDate)} · {cleanerName(job.cleanerId, cleaners)} · <Pill value={job.status} /> · <Link href="/admin/cleaning" className="text-deep hover:underline">board</Link>
@@ -85,19 +87,14 @@ export default async function BookingDetailPage({ params, searchParams }: PagePr
 
         <Card title="Actions">
           <div className="flex flex-col gap-2">
-            <form action={refundBookingAction.bind(null, b.id)}>
-              <ConfirmButton className={`${dangerButtonClass} w-full`} message={`Refund ${money(b.total)} to ${b.guest} in full? Stripe will cancel the stay and reverse the owner payout when the refund settles.`}>
-                Refund in full{!b.paymentIntentId && " (no Stripe payment)"}
-              </ConfirmButton>
-            </form>
             <form action={cancelBookingAction.bind(null, b.id)}>
-              <ConfirmButton className={`${ghostButtonClass} w-full`} message={`Cancel this stay without a refund? Scheduled payouts are held and the turnover is skipped.`}>
+              <ConfirmButton className={`${dangerButtonClass} w-full`} message={`Cancel this stay here? The turnover is skipped. Cancel it on Airbnb or Vrbo too if it was booked there.`}>
                 Cancel stay{!active && " (already inactive)"}
               </ConfirmButton>
             </form>
             <Link href={`/admin/calendar?month=${b.checkIn.slice(0, 7)}`} className={`${ghostButtonClass} w-full`}>Open on calendar</Link>
           </div>
-          <p className="ui mt-3 text-[0.7rem] text-muted">Partial refunds: issue them in the Stripe dashboard; the webhook only acts on full refunds.</p>
+          <p className="ui mt-3 text-[0.7rem] text-muted">Refunds and changes happen on the platform the guest booked on.</p>
         </Card>
       </div>
     </>

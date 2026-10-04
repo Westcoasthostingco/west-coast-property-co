@@ -11,7 +11,7 @@ export default async function NewOwner({ searchParams }: PageProps<"/admin/owner
   const sp = await searchParams;
   return (
     <>
-      <PageHeader eyebrow="Owners" title="New owner" intro="Add the owner before their homes. They set up Stripe payouts themselves from the owner portal." />
+      <PageHeader eyebrow="Owners" title="New owner" intro="Add the owner before their homes. Airbnb and Vrbo pay owners directly, so there is nothing to set up for payments." />
       <Notice searchParams={sp} />
       <OwnerForm action={saveOwnerAction.bind(null, null)} />
     </>

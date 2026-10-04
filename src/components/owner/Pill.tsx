@@ -11,9 +11,6 @@ export default function Pill({ children, tone = "neutral" }: { children: React.R
   return <span className={`caps-tight inline-block rounded-full px-2.5 py-1 text-[0.6rem] ${tones[tone]}`}>{children}</span>;
 }
 
-export const payoutTone = (status: string): Tone =>
-  status === "paid" ? "good" : status === "failed" || status === "reversed" ? "attention" : "neutral";
-
 export const stayTone = (status: string): Tone =>
   status === "confirmed" || status === "completed" ? "good" : status === "cancelled" ? "attention" : "neutral";
 

@@ -56,14 +56,9 @@ export async function GET() {
       SUPABASE_SERVICE_ROLE_KEY: env("SUPABASE_SERVICE_ROLE_KEY"),
       database,
     },
-    stripe: {
-      STRIPE_SECRET_KEY: env("STRIPE_SECRET_KEY"),
-      STRIPE_WEBHOOK_SECRET: env("STRIPE_WEBHOOK_SECRET"),
-      STRIPE_CONNECT_WEBHOOK_SECRET: env("STRIPE_CONNECT_WEBHOOK_SECRET"),
-    },
     CRON_SECRET: env("CRON_SECRET"),
     // Names (never values) of related variables this deployment can see, to
     // catch typos or a missing Production tick in Vercel.
-    variableNamesSeen: Object.keys(process.env).filter((k) => /SUPABASE|STRIPE|CLERK|CRON/i.test(k)).sort(),
+    variableNamesSeen: Object.keys(process.env).filter((k) => /SUPABASE|CLERK|CRON/i.test(k)).sort(),
   }, { headers: { "Cache-Control": "no-store" } });
 }

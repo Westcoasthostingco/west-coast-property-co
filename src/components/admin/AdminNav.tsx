@@ -9,7 +9,6 @@ const nav: [string, string][] = [
   ["/admin/cleaning", "Cleaning"],
   ["/admin/properties", "Properties"],
   ["/admin/owners", "Owners"],
-  ["/admin/payouts", "Payouts"],
   ["/admin/accounting", "Accounting"],
   ["/admin/reviews", "Reviews"],
   ["/admin/settings/integrations", "Integrations"],

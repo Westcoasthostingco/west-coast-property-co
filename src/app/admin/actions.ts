@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth";
 import {
   addBookingNote, assignCleaner, cancelBooking, createManualBooking, deletePropertyPhoto, manualBookingFromForm,
-  ownerInputFromForm, propertyInputFromForm, refundBooking, retryPayout, runPayoutsNow, saveOwner, saveProperty,
+  ownerInputFromForm, propertyInputFromForm, saveOwner, saveProperty,
   setJobStatus, setReviewPublished, uploadPropertyPhoto, type ActionResult,
 } from "@/lib/admin";
 import type { CleaningStatus } from "@/lib/cleaning";
@@ -63,11 +63,6 @@ export async function cancelBookingAction(bookingId: string) {
   finish(`/admin/bookings/${bookingId}`, await cancelBooking(who, bookingId));
 }
 
-export async function refundBookingAction(bookingId: string) {
-  const who = await actor();
-  finish(`/admin/bookings/${bookingId}`, await refundBooking(who, bookingId));
-}
-
 export async function createBookingAction(fd: FormData) {
   const who = await actor();
   const r = await createManualBooking(who, manualBookingFromForm(fd));
@@ -96,17 +91,6 @@ export async function setJobStatusAction(fd: FormData) {
   const valid: CleaningStatus[] = ["unassigned", "assigned", "in_progress", "done", "skipped"];
   const r = valid.includes(status) ? await setJobStatus(who, jobId, status) : { ok: false, message: "Unknown status." };
   finish(safeReturn(fd.get("return"), "/admin/cleaning"), r);
-}
-
-// ---- Payouts ----
-export async function runPayoutsAction() {
-  const who = await actor();
-  finish("/admin/payouts", await runPayoutsNow(who));
-}
-
-export async function retryPayoutAction(payoutId: string) {
-  const who = await actor();
-  finish("/admin/payouts", await retryPayout(who, payoutId));
 }
 
 // ---- Reviews ----

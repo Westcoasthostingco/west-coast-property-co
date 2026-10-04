@@ -45,7 +45,7 @@ export default function PrivacyPage() {
           <Bullets>
             <li>Contact details, the address and description of your home, and the terms of our management agreement.</li>
             <li>Portal sign-in details handled by Clerk, and what you view in the owner portal (stays, statements, calendar).</li>
-            <li>Only if you use a payout feature in the owner portal: the bank and tax details it needs, entered directly with our payment provider. We keep only the provider’s account reference and payout status, not your full bank or tax ID number.</li>
+            <li>We do not collect your bank account details. Airbnb and Vrbo pay you directly and collect what they need for that under their own privacy policies.</li>
           </Bullets>
         </Sub>
         <Sub title="Cleaners">
@@ -73,7 +73,7 @@ export default function PrivacyPage() {
           <li>To answer your questions and contact form messages.</li>
           <li>To prepare for and support stays booked on Airbnb or Vrbo: sending check-in instructions, access codes, and arrival reminders.</li>
           <li>To run each home: scheduling turnovers, assigning cleaners, documenting condition, and fixing problems.</li>
-          <li>To pay cleaners, handle any homeowner payouts, and produce monthly owner statements.</li>
+          <li>To pay cleaners and produce monthly owner statements.</li>
           <li>To keep the business records Washington and the IRS require.</li>
           <li>To handle incidents, file damage claims through the platform, and resolve disputes.</li>
           <li>To keep the site and portals secure and to understand, in aggregate, how the site is used.</li>
@@ -85,8 +85,7 @@ export default function PrivacyPage() {
       <Section id="third-parties" title="Third parties and processors">
         <p>We use a short list of providers to run the business. Each one handles data on our instructions and under its own security program.</p>
         <Bullets>
-          <li><strong>Airbnb and Vrbo</strong>: guests book and pay on these platforms, which collect booking and payment details under their own privacy policies. As host or co-host, we receive the reservation details described above and share availability back through calendar sync.</li>
-          <li><strong>Stripe</strong>: only if a homeowner uses the payout feature, through Stripe Connect, including the identity and tax information Stripe collects from that owner. We do not use Stripe, or any other processor, to take guest payments.</li>
+          <li><strong>Airbnb and Vrbo</strong>: guests book and pay on these platforms, which collect booking and payment details under their own privacy policies, and the platforms pay homeowners directly. We do not use a payment processor. As host or co-host, we receive the reservation details described above and share availability back through calendar sync.</li>
           <li><strong>Clerk</strong>: sign-in and account security for the owner, cleaner, and admin portals.</li>
           <li><strong>Supabase</strong>: our database, where homes, stay records, statements, cleaning jobs, and job photos live.</li>
           <li><strong>Vercel</strong>: website hosting and privacy-friendly analytics.</li>
@@ -100,7 +99,7 @@ export default function PrivacyPage() {
 
       <Section id="retention" title="How long we keep it">
         <Bullets>
-          <li>Stay, statement, and payout records: seven years, to match tax and accounting requirements.</li>
+          <li>Stay and statement records: seven years, to match tax and accounting requirements.</li>
           <li>Contact form messages, guest messages, and incident photos: until any question or dispute is resolved, then up to two years.</li>
           <li>Cleaning job photos: twelve months, unless tied to a damage claim.</li>
           <li>Owner and cleaner account details: for the life of our relationship, then as needed for final statements and tax reporting.</li>

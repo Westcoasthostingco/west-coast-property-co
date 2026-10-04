@@ -4,8 +4,9 @@ import { notFound } from "next/navigation";
 import OwnerForm from "@/components/admin/OwnerForm";
 import { Card, DataTable, Notice, PageHeader, Pill } from "@/components/admin/ui";
 import { saveOwnerAction } from "@/app/admin/actions";
-import { getAllProperties, getBookings, money, nameMap } from "@/lib/data";
-import { fmtDate, getOwnerDetail, getPayoutsDetailed } from "@/lib/admin";
+import { getAllProperties, getBookings, getFeeOverrides, money, nameMap } from "@/lib/data";
+import { fmtDate, getOwnerDetail, nightsBetween } from "@/lib/admin";
+import { isOwnerStay, stayMoney } from "@/lib/metrics";
 import { requireRole } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Owner" };
@@ -13,13 +14,17 @@ export const metadata: Metadata = { title: "Owner" };
 export default async function OwnerPage({ params, searchParams }: PageProps<"/admin/owners/[id]">) {
   await requireRole("admin"); // S1: pages must not rely on the layout for auth
   const [{ id }, sp] = await Promise.all([params, searchParams]);
-  const [o, props, payouts, bookings] = await Promise.all([getOwnerDetail(id), getAllProperties(), getPayoutsDetailed(), getBookings()]);
+  const [o, props, bookings, feeOverrides] = await Promise.all([getOwnerDetail(id), getAllProperties(), getBookings(), getFeeOverrides()]);
   if (!o) notFound();
   const homes = props.filter((p) => p.ownerId === o.id);
-  const mine = payouts.filter((x) => x.ownerId === o.id).sort((a, b) => b.releaseOn.localeCompare(a.releaseOn));
-  const propertyOf = (bookingId: string) => nameMap(props)(bookings.find((b) => b.id === bookingId)?.propertyId ?? "");
-  const paid = mine.filter((x) => x.status === "paid").reduce((s, x) => s + x.net, 0);
-  const scheduled = mine.filter((x) => x.status === "scheduled").reduce((s, x) => s + x.net, 0);
+  const homeIds = new Set(homes.map((p) => p.id));
+  const propertyName = nameMap(props);
+  // Guest stays at this owner's homes, newest first. Money only where it is recorded on the booking.
+  const stays = bookings
+    .filter((b) => homeIds.has(b.propertyId) && b.status !== "cancelled" && b.status !== "pending" && !isOwnerStay(b))
+    .sort((a, b) => b.checkIn.localeCompare(a.checkIn))
+    .map((b) => ({ b, m: stayMoney(b, feeOverrides[b.propertyId], o.feePercent) }));
+  const feesToDate = stays.reduce((s, x) => s + (x.m?.fee ?? 0), 0);
 
   return (
     <>
@@ -31,29 +36,25 @@ export default async function OwnerPage({ params, searchParams }: PageProps<"/ad
         <div className="space-y-4">
           <OwnerForm owner={o} action={saveOwnerAction.bind(null, o.id)} />
           <section className="space-y-2">
-            <h2 className="caps-tight text-[0.68rem] text-deep">Recent payouts</h2>
-            <DataTable head={["Release", "Home", "Gross", "Fee", "Net", "Status"]} empty="No payouts yet."
-              rows={mine.slice(0, 15).map((x) => [
-                <Link key="b" href={`/admin/bookings/${x.bookingId}`} className="hover:text-deep">{fmtDate(x.releaseOn, { month: "short", day: "numeric", year: "numeric" })}</Link>,
-                propertyOf(x.bookingId), money(x.gross), money(x.fee), money(x.net),
-                <span key="s"><Pill value={x.status} />{x.lastError && <span className="ml-2 text-xs text-[#b6633a]">{x.lastError}</span>}</span>,
+            <h2 className="caps-tight text-[0.68rem] text-deep">Recent stays</h2>
+            <DataTable head={["Check-in", "Home", "Source", "Nights", "Gross", "Fee", "Net", "Status"]} empty="No stays yet."
+              rows={stays.slice(0, 15).map(({ b, m }) => [
+                <Link key="b" href={`/admin/bookings/${b.id}`} className="hover:text-deep">{fmtDate(b.checkIn, { month: "short", day: "numeric", year: "numeric" })}</Link>,
+                propertyName(b.propertyId), b.source, nightsBetween(b.checkIn, b.checkOut),
+                m ? money(m.gross) : "Paid by platform", m ? money(m.fee) : "", m ? money(m.net) : "",
+                <Pill key="s" value={b.status} />,
               ])} />
           </section>
         </div>
 
         <div className="space-y-4">
-          <Card title="Stripe Connect">
-            <div className="flex items-center justify-between">
-              <span className="ui text-sm">{o.payoutsReady ? "Payouts enabled" : o.stripeAccountId ? "Onboarding incomplete" : "Not started"}</span>
-              <Pill value={o.payoutsReady ? "configured" : "pending"} />
-            </div>
-            <dl className="ui mt-3 space-y-1 text-xs text-muted">
-              <div className="flex justify-between"><dt>Account</dt><dd className="text-charcoal">{o.stripeAccountId ?? "—"}</dd></div>
-              <div className="flex justify-between"><dt>Clerk</dt><dd className="text-charcoal">{o.clerkUserId ? "linked" : "not linked"}</dd></div>
-              <div className="flex justify-between"><dt>Paid to date</dt><dd className="text-charcoal">{money(paid)}</dd></div>
-              <div className="flex justify-between"><dt>Scheduled</dt><dd className="text-charcoal">{money(scheduled)}</dd></div>
+          <Card title="Account">
+            <dl className="ui space-y-1 text-xs text-muted">
+              <div className="flex justify-between"><dt>Portal login (Clerk)</dt><dd className="text-charcoal">{o.clerkUserId ? "linked" : "not linked"}</dd></div>
+              <div className="flex justify-between"><dt>Stays on record</dt><dd className="text-charcoal">{stays.length}</dd></div>
+              <div className="flex justify-between"><dt>Management fees, recorded stays</dt><dd className="text-charcoal">{money(feesToDate)}</dd></div>
             </dl>
-            {!o.payoutsReady && <p className="ui mt-3 text-xs text-muted">The owner finishes Stripe onboarding from their portal (Set up payouts). Transfers hold until then and retry daily.</p>}
+            <p className="ui mt-3 text-xs text-muted">Airbnb and Vrbo pay the owner directly under their payout rules and the Management Agreement.</p>
           </Card>
           <Card title="Homes">
             {homes.length === 0 && <p className="ui text-sm text-muted">No homes yet.</p>}

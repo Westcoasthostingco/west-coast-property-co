@@ -1,7 +1,7 @@
 // Monthly metrics shared by the owner portal and admin so both see identical numbers.
 // Stays are prorated across month boundaries by night.
 import type { Booking, Property } from "./mock";
-import { feeCents } from "./stripe";
+import { feeCents } from "./dates";
 
 export type MonthMetric = {
   month: string;          // YYYY-MM
@@ -57,12 +57,29 @@ export function monthlyMetrics(bookings: Booking[], properties: Property[], mont
 
 export const monthLabel = (month: string) => new Date(month + "-01T00:00:00Z").toLocaleDateString("en-US", { month: "short", timeZone: "UTC" });
 
-// Owner payout split, in integer cents, shared by checkout (Stripe webhook), manual
-// bookings and statements so every surface agrees. The property's fee override wins
-// over the owner's default. Gross is the nights subtotal only.
-export type PayoutSplit = { grossCents: number; feeCents: number; netCents: number; feePercent: number };
-export function payoutSplit(grossCents: number, propertyFeePercent: number | null | undefined, ownerFeePercent: number): PayoutSplit {
+// Owner/management split of a stay's recorded nights money, in integer cents, shared by
+// owner statements and the admin dashboard and accounting pages so every surface agrees.
+// The property's fee override wins over the owner's default. Gross is the nights
+// subtotal only. Informational: Airbnb and Vrbo pay the homeowner, not this site.
+export type FeeSplit = { grossCents: number; feeCents: number; netCents: number; feePercent: number };
+export function feeSplit(grossCents: number, propertyFeePercent: number | null | undefined, ownerFeePercent: number): FeeSplit {
   const feePercent = Number(propertyFeePercent ?? ownerFeePercent);
   const fee = feeCents(grossCents, feePercent);
   return { grossCents, feeCents: fee, netCents: grossCents - fee, feePercent };
+}
+
+// Money for one stay, in dollars, or null when nothing is recorded (an iCal-imported
+// channel stay, an owner stay, or a cancelled or pending one). Built on feeSplit.
+export type StayMoney = { gross: number; fee: number; net: number; cleaning: number; feePercent: number };
+export function stayMoney(
+  b: Pick<Booking, "source" | "status" | "subtotal" | "total" | "cleaningFee">,
+  propertyFeePercent: number | null | undefined,
+  ownerFeePercent: number,
+): StayMoney | null {
+  if (!isRevenueStay(b) || b.subtotal == null) return null;
+  const split = feeSplit(Math.round(b.subtotal * 100), propertyFeePercent, ownerFeePercent);
+  return {
+    gross: split.grossCents / 100, fee: split.feeCents / 100, net: split.netCents / 100,
+    cleaning: b.cleaningFee ?? 0, feePercent: split.feePercent,
+  };
 }
