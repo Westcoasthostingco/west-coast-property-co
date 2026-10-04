@@ -8,7 +8,7 @@ const label = "caps-tight block text-[0.6rem] text-deep";
 export default function ContactForm({ turnstileSiteKey }: { turnstileSiteKey?: string }) {
   const [state, action, pending] = useActionState<ContactState, FormData>(sendContact, {});
   if (state.ok && !state.error) {
-    return <div className="rounded-3xl border border-line bg-white p-8"><p className="display text-3xl text-deep">Got it.</p><p className="mt-2 text-muted">We&apos;ll be in touch soon, usually the same day.</p></div>;
+    return <div className="rounded-3xl border border-line bg-white p-8"><p className="display text-3xl text-deep">Got it.</p><p className="mt-2 text-muted">We&apos;ll reply by email soon.</p></div>;
   }
   return (
     <form action={action} className="rounded-3xl border border-line bg-white p-8 shadow-lg shadow-teal/10">
@@ -16,10 +16,10 @@ export default function ContactForm({ turnstileSiteKey }: { turnstileSiteKey?: s
         <label className={label}>Name<input required name="name" className={field} /></label>
         <label className={label}>Email<input required name="email" type="email" className={field} /></label>
       </div>
-      <label className={`${label} mt-4`}>I&apos;m a
+      <label className={`${label} mt-4`}>About
         <select name="kind" className={field}>
-          <option>guest planning a stay</option>
-          <option>homeowner interested in management</option>
+          <option>question about a home</option>
+          <option>question about this website</option>
           <option>something else</option>
         </select>
       </label>

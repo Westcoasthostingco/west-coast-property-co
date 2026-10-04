@@ -101,7 +101,7 @@ export default function CheckDates({ name, airbnbUrl, vrboUrl, maxGuests, minNig
               <>
                 <p className="caps-tight text-[0.6rem] text-muted">Your stay</p>
                 <p className="display mt-2 text-3xl text-charcoal/70">Choose your dates</p>
-                <p className="ui mt-2 text-xs text-muted">{minNights}-night minimum · check-in after 4 pm · check-out by 11 am</p>
+                <p className="ui mt-2 text-xs text-muted">Usually a {minNights}-night minimum · times and house rules on the listing</p>
               </>
             )}
           </div>
@@ -118,9 +118,9 @@ export default function CheckDates({ name, airbnbUrl, vrboUrl, maxGuests, minNig
               </a>
             )}
             {!links.airbnb && !links.vrbo && (
-              <Link href="/contact" className={`${btn} bg-deep text-white hover:bg-dusk`}>Ask about these dates</Link>
+              <Link href="/contact" className={`${btn} bg-deep text-white hover:bg-dusk`}>Ask about this home</Link>
             )}
-            <p className="ui text-center text-[0.7rem] text-muted">You book and pay on the platform. Opens in a new tab.</p>
+            <p className="ui text-center text-[0.7rem] text-muted">You book with the host and pay on the platform. Opens in a new tab.</p>
           </div>
         </div>
       </div>

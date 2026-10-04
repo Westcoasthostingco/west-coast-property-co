@@ -7,7 +7,7 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import { clerkConfigured } from "@/lib/auth";
 import JsonLd from "@/components/seo/JsonLd";
-import { DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL, TAGLINE, localBusinessJsonLd, organizationJsonLd } from "@/lib/seo";
+import { DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL, TAGLINE, organizationJsonLd } from "@/lib/seo";
 
 const playfair = Playfair_Display({ variable: "--font-playfair", subsets: ["latin"], style: ["italic", "normal"], weight: ["400", "500"] });
 const poppins = Poppins({ variable: "--font-poppins", subsets: ["latin"], weight: ["300", "400", "500", "600"] });
@@ -44,7 +44,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <SiteFooter />
         </Provider>
         <Analytics />
-        <JsonLd data={[organizationJsonLd(), localBusinessJsonLd()]} />
+        <JsonLd data={organizationJsonLd()} />
       </body>
     </html>
   );

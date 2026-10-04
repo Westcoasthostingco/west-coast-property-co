@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import PropertyCard from "@/components/PropertyCard";
 import SearchBar from "@/components/SearchBar";
 import JsonLd from "@/components/seo/JsonLd";
@@ -6,13 +7,13 @@ import { getProperties } from "@/lib/data";
 import { itemListJsonLd } from "@/lib/seo";
 
 const description =
-  "Three vacation rentals in Washington: The Grand View in Gig Harbor, The Leonora by the Sea on Hood Canal, and The Bedrock near Mount Rainier. Book on Airbnb.";
+  "Three vacation homes in Washington: The Grand View in Gig Harbor, The Leonora by the Sea on Hood Canal, and The Bedrock near Mount Rainier. Book on Airbnb or Vrbo.";
 export const metadata: Metadata = {
-  title: "Our homes: vacation rentals in Gig Harbor, Hood Canal & Mount Rainier",
+  title: "Vacation homes in Gig Harbor, Hood Canal & Mount Rainier",
   description,
   alternates: { canonical: "/properties" },
-  openGraph: { type: "website", url: "/properties", title: "Our homes | West Coast Hosting Co", description },
-  twitter: { card: "summary_large_image", title: "Our homes | West Coast Hosting Co", description },
+  openGraph: { type: "website", url: "/properties", title: "The homes | West Coast Hosting Co", description },
+  twitter: { card: "summary_large_image", title: "The homes | West Coast Hosting Co", description },
 };
 
 const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? "";
@@ -36,8 +37,8 @@ export default async function Properties({ searchParams }: PageProps<"/propertie
   return (
     <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
       <JsonLd data={itemListJsonLd(all)} />
-      <p className="caps text-xs text-deep">Stay with us</p>
-      <h1 className="display mt-2 text-5xl text-charcoal">Our homes</h1>
+      <p className="caps text-xs text-deep">Vacation homes in Washington</p>
+      <h1 className="display mt-2 text-5xl text-charcoal">The homes</h1>
       <div className="mt-8"><SearchBar compact defaults={{ region, check_in: checkIn, check_out: checkOut, guests: guests ? String(guests) : "2" }} /></div>
       <p className="ui mt-6 text-sm text-muted">
         {list.length} {list.length === 1 ? "home" : "homes"}{guests ? ` for ${guests} ${guests === 1 ? "guest" : "guests"}` : ""}
@@ -47,7 +48,7 @@ export default async function Properties({ searchParams }: PageProps<"/propertie
         {list.map((p) => <PropertyCard key={p.id} p={p} query={query} />)}
       </div>
       {list.length === 0 && (
-        <p className="mt-10 text-muted">No home sleeps that many guests in that area. Try fewer guests or another area, or <a href="/contact" className="text-deep underline">ask us</a>.</p>
+        <p className="mt-10 text-muted">No home sleeps that many guests in that area. Try fewer guests or another area, or see <Link href="/properties" className="text-deep underline">all homes</Link>.</p>
       )}
     </main>
   );

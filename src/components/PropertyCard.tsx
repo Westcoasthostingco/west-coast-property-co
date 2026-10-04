@@ -15,7 +15,7 @@ export default function PropertyCard({ p, wide = false, query }: { p: Property; 
         </div>
         <div className="shrink-0 text-right">
           {p.reviewCount > 0 && <p className="ui text-sm font-medium">★ {p.rating.toFixed(1)}<span className="text-xs font-normal text-muted"> · {p.reviewCount}</span></p>}
-          <p className="ui mt-0.5 text-xs text-muted">{p.airbnbUrl || p.vrboUrl ? `Book on ${[p.airbnbUrl && "Airbnb", p.vrboUrl && "Vrbo"].filter(Boolean).join(" · ")}` : "Ask about dates"}</p>
+          <p className="ui mt-0.5 text-xs text-muted">{p.airbnbUrl || p.vrboUrl ? `Book on ${[p.airbnbUrl && "Airbnb", p.vrboUrl && "Vrbo"].filter(Boolean).join(" · ")}` : "Listing coming soon"}</p>
         </div>
       </div>
       {/* Live tide or snow conditions for this home, below the name */}
