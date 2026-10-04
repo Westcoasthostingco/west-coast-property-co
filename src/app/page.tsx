@@ -6,7 +6,7 @@ import SearchBar from "@/components/SearchBar";
 import SectionHeading from "@/components/SectionHeading";
 import CoastToCascades from "@/components/art/CoastToCascades";
 import JsonLd from "@/components/seo/JsonLd";
-import { getProperties, money, type Property } from "@/lib/data";
+import { getProperties, type Property } from "@/lib/data";
 import { DEFAULT_DESCRIPTION, SITE_NAME, TAGLINE, faqJsonLd, webSiteJsonLd, type Faq } from "@/lib/seo";
 
 const homeTitle = `${SITE_NAME} | ${TAGLINE} Vacation Rentals`;
@@ -20,23 +20,22 @@ export const metadata: Metadata = {
 
 // Answers are built from live property data so they stay true as homes change.
 function faqs(properties: Property[]): Faq[] {
-  const names = properties.map((p) => p.name);
   const joinNames = (xs: string[]) => (xs.length > 1 ? `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}` : xs.join(""));
+  const onVrbo = properties.filter((p) => p.vrboUrl).map((p) => p.name);
   const petFriendly = properties.filter((p) => p.amenities.some((a) => /pet[- ]friendly|pets? (allowed|welcome)/i.test(a))).map((p) => p.name);
-  const cheapest = properties.reduce<Property | undefined>((m, p) => (!m || p.nightlyRate < m.nightlyRate ? p : m), undefined);
   const where = properties.map((p) => `${p.name} is in ${p.city}, Washington and sleeps ${p.guests}`).join("; ");
   return [
     {
       question: "How do I book one of your homes?",
-      answer: `Book direct on each home's page: choose your dates and number of guests, then pay securely with Stripe. Christi or Melissa will be in touch before you arrive. ${joinNames(names)} are also listed on Airbnb if you prefer to book there.`,
+      answer: `Book through Airbnb using the button on each home's page${onVrbo.length > 0 ? `; ${joinNames(onVrbo)} ${onVrbo.length > 1 ? "are" : "is"} also on Vrbo` : ""}. You choose dates, pay, and manage your reservation on the platform, under its terms. This website does not take bookings or payments. Christi or Melissa will be in touch before you arrive.`,
     },
     {
       question: "What is included in the price?",
-      answer: `The nightly rate plus one cleaning fee per stay${cheapest ? `; rates start at ${money(cheapest.nightlyRate)} a night` : ""}. Washington lodging tax is added at checkout. There is no separate booking fee when you reserve direct with us.`,
+      answer: `Prices, fees, and taxes are set and shown on each home's Airbnb or Vrbo listing, and you pay them there when you book. Check the listing for the full total for your dates.`,
     },
     {
       question: "Is there a minimum stay?",
-      answer: "Yes, two nights. The availability calendar on each home's page shows open dates, and you can search all homes at once by region, dates, and guest count.",
+      answer: "Yes, two nights. Each home's Airbnb or Vrbo listing shows the exact minimum and open dates, and you can search all homes here at once by region, dates, and guest count.",
     },
     {
       question: "Are pets allowed?",

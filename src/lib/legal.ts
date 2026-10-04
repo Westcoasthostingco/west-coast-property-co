@@ -1,6 +1,7 @@
-// Legal and policy page metadata, shared by the footer, checkout acceptance, and the pages themselves.
-export const LEGAL_UPDATED = "2026-10-01";
-export const POLICY_VERSION = "2026-10";
+// Legal and policy page metadata, shared by the footer, the legal pages themselves, and anything that records which policy version was shown.
+// The site is a showcase only: bookings, payments, cancellations and refunds happen on Airbnb or Vrbo, never here.
+export const LEGAL_UPDATED = "2026-10-04";
+export const POLICY_VERSION = "2026-10b";
 
 export type LegalLink = { href: string; label: string };
 

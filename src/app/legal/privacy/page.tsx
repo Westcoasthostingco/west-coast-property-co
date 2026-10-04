@@ -19,30 +19,33 @@ const sections: LegalSection[] = [
 
 export default function PrivacyPage() {
   return (
-    <LegalLayout eyebrow="Legal" title="Privacy Notice" sections={sections} intro="We are a two-person company, and we treat your information the way we would want ours treated: we collect what a stay or a working relationship needs, we keep it with reputable providers, and we never sell it.">
+    <LegalLayout eyebrow="Legal" title="Privacy Notice" sections={sections} intro="We are a two-person company, and we treat your information the way we would want ours treated: we collect what hosting a stay or a working relationship needs, we keep it with reputable providers, and we never sell it.">
       <Section id="who-we-are" title="Who we are">
-        <p>West Coast Hosting Co is a short-term rental management and co-hosting company based in Gig Harbor, Washington, run by Christi Young and Melissa Heckman. We host guests at homes we manage for their owners, including The Grand View in Gig Harbor, The Leonora by the Sea on Hood Canal, and The Bedrock in Randle near Mount Rainier. This notice covers westcoasthostingco.com, our booking checkout, the owner and cleaner portals, and the email and text messages we send.</p>
+        <p>West Coast Hosting Co is a short-term rental management and co-hosting company based in Gig Harbor, Washington, run by Christi Young and Melissa Heckman. We host guests at homes we manage for their owners, including The Grand View in Gig Harbor, The Leonora by the Sea on Hood Canal, and The Bedrock in Randle near Mount Rainier. This notice covers westcoasthostingco.com, the owner and cleaner portals, the email and text messages we send, and the information we handle as host or co-host for stays booked on Airbnb or Vrbo.</p>
+        <p>Our website is a showcase only. It does not take reservations or payments. When you book one of the homes, Airbnb or Vrbo collects your booking and payment details under its own privacy policy, and shares with us only what we need to host your stay.</p>
         <p>For the purposes of privacy law, West Coast Hosting Co is the “controller” of the information described here, meaning we decide why and how it is used.</p>
       </Section>
 
       <Section id="what-we-collect" title="What we collect">
         <p>What we hold about you depends on how you work with us.</p>
+        <Sub title="Anyone who contacts us">
+          <Bullets>
+            <li>What you send through the contact form or by email, text, or phone: your name, email address, phone number if you give it, whether you are a guest or a homeowner, and your message.</li>
+          </Bullets>
+        </Sub>
         <Sub title="Guests">
           <Bullets>
-            <li>Your name, email address, and phone number, so we can confirm the stay and reach you about arrival.</li>
-            <li>Stay details: the home, check-in and check-out dates, number of guests, and any notes you send us (for example, a late arrival or a pet where the listing allows pets).</li>
-            <li>Payment: your card is entered on a Stripe-hosted checkout page. We never see or store your full card number. Stripe gives us the last four digits, the card brand, and the payment status.</li>
-            <li>Messages between you and us, including through Airbnb, Vrbo, or Booking.com if you booked there.</li>
+            <li>Your booking details are primarily collected by Airbnb or Vrbo under their own privacy policies. When we act as host or co-host, the platform shares with us what we need to manage your stay: your name, the home, check-in and check-out dates, number of guests, and messages between you and us. Depending on the platform, this may include a phone number.</li>
+            <li>Anything you choose to tell us, for example a late arrival or a pet where the listing allows pets.</li>
             <li>If something goes wrong during a stay, photos and notes documenting the issue (see our <Link href="/legal/policies#damage" className="text-deep hover:underline">Damage and Incidents Policy</Link>).</li>
           </Bullets>
-          <p>Guests do not need an account. We identify your booking by your email address and confirmation.</p>
+          <p>We never receive or store your payment card details; payment is handled entirely by the platform. Guests do not need an account on our site.</p>
         </Sub>
         <Sub title="Homeowners">
           <Bullets>
             <li>Contact details, the address and description of your home, and the terms of our management agreement.</li>
-            <li>Bank account details for payouts. These are entered directly with Stripe Connect, and we hold only Stripe’s account reference and payout status.</li>
-            <li>Tax identification you provide to Stripe for payout reporting. We do not store your Social Security or tax ID number ourselves.</li>
-            <li>Portal sign-in details handled by Clerk, and what you view in the owner portal (bookings, statements, calendar).</li>
+            <li>Portal sign-in details handled by Clerk, and what you view in the owner portal (stays, statements, calendar).</li>
+            <li>Only if you use a payout feature in the owner portal: the bank and tax details it needs, entered directly with our payment provider. We keep only the provider’s account reference and payout status, not your full bank or tax ID number.</li>
           </Bullets>
         </Sub>
         <Sub title="Cleaners">
@@ -67,36 +70,38 @@ export default function PrivacyPage() {
 
       <Section id="how-we-use-it" title="How we use it">
         <Bullets>
-          <li>To take and confirm bookings, hold dates, process payment, and send check-in instructions, access codes, and arrival reminders.</li>
+          <li>To answer your questions and contact form messages.</li>
+          <li>To prepare for and support stays booked on Airbnb or Vrbo: sending check-in instructions, access codes, and arrival reminders.</li>
           <li>To run each home: scheduling turnovers, assigning cleaners, documenting condition, and fixing problems.</li>
-          <li>To pay homeowners and cleaners and to produce monthly owner statements.</li>
-          <li>To collect and remit lodging taxes and keep the business records Washington and the IRS require.</li>
-          <li>To answer questions, handle incidents and refunds, and resolve disputes.</li>
+          <li>To pay cleaners, handle any homeowner payouts, and produce monthly owner statements.</li>
+          <li>To keep the business records Washington and the IRS require.</li>
+          <li>To handle incidents, file damage claims through the platform, and resolve disputes.</li>
           <li>To keep the site and portals secure and to understand, in aggregate, how the site is used.</li>
-          <li>To send occasional notes about returning-guest offers or news from the homes, only if you booked directly with us. Every such email has an unsubscribe link, and we stop when you ask.</li>
+          <li>To send occasional news from the homes, only if you ask us to. Every such email has an unsubscribe link, and we stop when you ask.</li>
         </Bullets>
-        <p>We rely on our contract with you (the booking, the management agreement, or the contractor agreement), our legitimate interest in running a small hospitality business safely, and legal obligations around tax and record-keeping. Where consent is required, we ask for it.</p>
+        <p>We rely on our contract with you (the management agreement or the contractor agreement), our role as host or co-host of a stay you booked on a platform, our legitimate interest in running a small hospitality business safely, and legal obligations around tax and record-keeping. Where consent is required, we ask for it.</p>
       </Section>
 
       <Section id="third-parties" title="Third parties and processors">
         <p>We use a short list of providers to run the business. Each one handles data on our instructions and under its own security program.</p>
         <Bullets>
-          <li><strong>Stripe</strong>: guest payments, refunds, and payouts to homeowners through Stripe Connect, including the identity and tax information Stripe collects from owners.</li>
+          <li><strong>Airbnb and Vrbo</strong>: guests book and pay on these platforms, which collect booking and payment details under their own privacy policies. As host or co-host, we receive the reservation details described above and share availability back through calendar sync.</li>
+          <li><strong>Stripe</strong>: only if a homeowner uses the payout feature, through Stripe Connect, including the identity and tax information Stripe collects from that owner. We do not use Stripe, or any other processor, to take guest payments.</li>
           <li><strong>Clerk</strong>: sign-in and account security for the owner, cleaner, and admin portals.</li>
-          <li><strong>Supabase</strong>: our database, where bookings, properties, payouts, cleaning jobs, and job photos live.</li>
+          <li><strong>Supabase</strong>: our database, where homes, stay records, statements, cleaning jobs, and job photos live.</li>
           <li><strong>Vercel</strong>: website hosting and privacy-friendly analytics.</li>
-          <li><strong>Resend</strong>: sends our transactional emails, such as booking confirmations.</li>
-          <li><strong>Airbnb, Vrbo, and Booking.com</strong>: when a home is listed there, we sync calendars so dates are not double-booked. The platform shares your reservation details with us under its own privacy policy, and we share availability back. We do not send direct-booking guest details to those platforms.</li>
+          <li><strong>Resend</strong>: sends our emails, such as contact form messages and portal notices.</li>
+          <li><strong>Cloudflare Turnstile</strong>: checks that contact form submissions come from a person, not a bot.</li>
           <li><strong>Google Workspace</strong>: our email, shared documents, and signed agreements.</li>
         </Bullets>
-        <p>We also share information when the law requires it (for example, lodging tax filings or a valid legal request), to protect a guest, owner, cleaner, or home from harm, or with a buyer if the business is ever sold, in which case this notice would continue to apply.</p>
+        <p>We also share information when the law requires it (for example, tax filings or a valid legal request), to protect a guest, owner, cleaner, or home from harm, or with a buyer if the business is ever sold, in which case this notice would continue to apply.</p>
         <p className="font-medium">We do not sell personal information, and we do not share it for targeted advertising.</p>
       </Section>
 
       <Section id="retention" title="How long we keep it">
         <Bullets>
-          <li>Booking, payment, and payout records: seven years, to match tax and accounting requirements.</li>
-          <li>Guest messages and incident photos: until any dispute is resolved, then up to two years.</li>
+          <li>Stay, statement, and payout records: seven years, to match tax and accounting requirements.</li>
+          <li>Contact form messages, guest messages, and incident photos: until any question or dispute is resolved, then up to two years.</li>
           <li>Cleaning job photos: twelve months, unless tied to a damage claim.</li>
           <li>Owner and cleaner account details: for the life of our relationship, then as needed for final statements and tax reporting.</li>
           <li>Server logs and analytics: Vercel keeps raw logs briefly; analytics are aggregated and not tied to you.</li>
@@ -105,7 +110,7 @@ export default function PrivacyPage() {
       </Section>
 
       <Section id="security" title="Security">
-        <p>All traffic to our site is encrypted. Card details never touch our servers. Portal access is protected by Clerk sign-in, and our database enforces row-level rules so an owner sees only their homes and a cleaner only their jobs. Only Christi and Melissa have administrative access, and we review it periodically. No system is perfectly secure; if a breach ever affects you, we will tell you promptly and as the law requires.</p>
+        <p>All traffic to our site is encrypted. We do not handle guest card details at all. Portal access is protected by Clerk sign-in, and our database enforces row-level rules so an owner sees only their homes and a cleaner only their jobs. Only Christi and Melissa have administrative access, and we review it periodically. No system is perfectly secure; if a breach ever affects you, we will tell you promptly and as the law requires.</p>
       </Section>
 
       <Section id="your-rights" title="Your rights">
@@ -116,7 +121,7 @@ export default function PrivacyPage() {
           <li>Delete your information, subject to records we must keep for tax, accounting, or an open dispute.</li>
           <li>Stop sending you marketing email.</li>
         </Bullets>
-        <p>Email <a href="mailto:hello@westcoasthostingco.com" className="text-deep hover:underline">hello@westcoasthostingco.com</a> and we will respond within 30 days. We may ask you to confirm your identity (usually by replying from the email on the booking).</p>
+        <p>Email <a href="mailto:hello@westcoasthostingco.com" className="text-deep hover:underline">hello@westcoasthostingco.com</a> and we will respond within 30 days. We may ask you to confirm your identity (usually by replying from the email address we have for you, or through the platform’s messages).</p>
         <Sub title="Washington residents">
           <p>Washington does not yet have a general consumer privacy law, but the rights above are available to you regardless. As noted, we collect no consumer health data under the My Health My Data Act.</p>
         </Sub>
@@ -124,12 +129,12 @@ export default function PrivacyPage() {
           <p>If you live in California, you may also ask what categories of information we collect and why, request deletion, and ask us not to “sell” or “share” your information. We do not sell or share personal information as the CCPA defines those terms, and we will never treat you differently for exercising your rights. You can appoint someone to make a request for you with written permission.</p>
         </Sub>
         <Sub title="Guests from elsewhere">
-          <p>If you booked from outside the United States, your information is processed in the United States. The rights above apply to you too, and we will honor requests under your home jurisdiction’s law to the extent it applies to a small US business.</p>
+          <p>If you contact us or stay with us from outside the United States, your information is processed in the United States. The rights above apply to you too, and we will honor requests under your home jurisdiction’s law to the extent it applies to a small US business.</p>
         </Sub>
       </Section>
 
       <Section id="children" title="Children">
-        <p>Our site and booking checkout are for adults. The booking guest must be at least 18. We do not knowingly collect information from children under 13, and if we learn we have, we delete it. Families are welcome at our homes; we learn a child is part of a stay only through the guest count or a note you choose to send.</p>
+        <p>Our site and portals are for adults, and the guest who books a stay must be at least 18. We do not knowingly collect information from children under 13, and if we learn we have, we delete it. Families are welcome at our homes; we learn a child is part of a stay only through the guest count or a note you choose to send.</p>
       </Section>
 
       <Section id="contact" title="Contact">
@@ -137,7 +142,7 @@ export default function PrivacyPage() {
       </Section>
 
       <Section id="changes" title="Changes to this notice">
-        <p>When we change this notice, we update the date at the top. If a change is significant, for example a new category of information or a new kind of recipient, we will email current guests, owners, and cleaners before it takes effect. Earlier versions are available on request.</p>
+        <p>When we change this notice, we update the date at the top. If a change is significant, for example a new category of information or a new kind of recipient, we will email current owners and cleaners before it takes effect. Earlier versions are available on request.</p>
       </Section>
     </LegalLayout>
   );

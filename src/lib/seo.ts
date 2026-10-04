@@ -1,16 +1,17 @@
 // Site-wide SEO constants and schema.org JSON-LD builders.
 // Everything here is derived from Property data or the public facts about the
 // business. Street addresses are not public, so addresses stop at locality.
+// The site is a showcase only: guests book on Airbnb (and Vrbo where listed), so
+// nothing here advertises an on-site reservation, offer, or payment.
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import type { Property } from "./mock";
-import { money } from "./mock";
 
 export const SITE_URL = "https://www.westcoasthostingco.com";
 export const SITE_NAME = "West Coast Hosting Co";
 export const TAGLINE = "Coast to Cascades";
 export const DEFAULT_DESCRIPTION =
-  "Short-term rental management, co-hosting, and three vacation homes from Hood Canal to Mount Rainier. Gig Harbor, WA. Book direct with Christi and Melissa.";
+  "Short-term rental management, co-hosting, and vacation homes from Hood Canal to Mount Rainier. Gig Harbor, WA. Hosted by Christi and Melissa; book on Airbnb.";
 
 export const CONTACT = {
   email: "hello@westcoasthostingco.com",
@@ -41,10 +42,22 @@ export function propertyPhoto(slug: string): string | null {
 const list = (items: string[]) =>
   items.length <= 1 ? items.join("") : `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
 
+/** Booking platform listings for a home, in display order. Every home has an Airbnb listing; Vrbo only where a link exists. */
+export function bookingPlatforms(p: Pick<Property, "airbnbUrl" | "vrboUrl">): { name: "Airbnb" | "Vrbo"; url: string }[] {
+  const out: { name: "Airbnb" | "Vrbo"; url: string }[] = [];
+  if (p.airbnbUrl) out.push({ name: "Airbnb", url: p.airbnbUrl });
+  if (p.vrboUrl) out.push({ name: "Vrbo", url: p.vrboUrl });
+  return out;
+}
+
+/** "Airbnb" or "Airbnb or Vrbo", for copy. Falls back to Airbnb, where every home is listed. */
+export const bookingPlatformNames = (p: Pick<Property, "airbnbUrl" | "vrboUrl">) =>
+  bookingPlatforms(p).map((x) => x.name).join(" or ") || "Airbnb";
+
 /** A 140 to 160 character description for a property page, written for people. */
 export function propertyDescription(p: Property): string {
   const base = `${p.name} is a ${p.bedrooms}-bedroom, ${p.bathrooms}-bath vacation rental in ${p.city}, WA sleeping ${p.guests}.`;
-  const rate = `From ${money(p.nightlyRate)} a night, book direct.`;
+  const rate = `Book on ${bookingPlatformNames(p)}.`;
   for (let n = Math.min(3, p.amenities.length); n >= 1; n--) {
     const s = `${base} ${p.amenities.slice(0, n).join(", ")}. ${rate}`;
     if (s.length <= 160) return s;
@@ -59,11 +72,14 @@ export function propertyLongDescription(p: Property): string {
     `${p.name} is a ${p.bedrooms}-bedroom, ${p.bathrooms}-bathroom vacation home in ${p.city}, Washington that sleeps up to ${p.guests} guests.`,
     p.summary,
     `Amenities include ${list(p.amenities)}.`,
-    `Rates start at ${money(p.nightlyRate)} per night plus a ${money(p.cleaningFee)} cleaning fee; Washington lodging tax is added at checkout. Minimum stay is two nights.`,
+    `Prices, the cleaning fee, and Washington lodging taxes are set, shown and charged by ${bookingPlatformNames(p)} when you book. Minimum stay is two nights.`,
     p.reviewCount > 0 ? `Guests rate it ${p.rating.toFixed(1)} out of 5 across ${p.reviewCount} reviews.` : "",
     p.tideStationId ? "It is a waterfront home; the listing page shows local tide times." : "",
     p.skiResort ? `The nearest ski area is ${p.skiResort.name}.` : "",
-    `Book direct at ${propertyUrl(p)} (secure payment by Stripe)${p.airbnbUrl ? `, or on Airbnb at ${p.airbnbUrl}` : ""}.`,
+    bookingPlatforms(p).length > 0
+      ? `Book on ${bookingPlatforms(p).map((x) => `${x.name} at ${x.url}`).join(", or on ")}.`
+      : "Book on Airbnb.",
+    `The home's page at ${propertyUrl(p)} is a showcase with photos and details; it links to the listing and does not take bookings or payments.`,
   ];
   return bits.filter(Boolean).join(" ");
 }
@@ -223,9 +239,7 @@ export function vacationRentalJsonLd(p: Property, opts: { context?: boolean } = 
     occupancy: { "@type": "QuantitativeValue", minValue: 1, maxValue: p.guests, unitText: "guests" },
     ...(petsAllowed ? { petsAllowed: true } : {}),
     amenityFeature: p.amenities.map((name) => ({ "@type": "LocationFeatureSpecification", name, value: true })),
-    priceRange: `From ${money(p.nightlyRate)} per night`,
-    currenciesAccepted: "USD",
-    paymentAccepted: "Credit card",
+    // No price, offer, payment or reservation action: the platform listing sets prices and takes bookings.
     containsPlace: {
       "@type": "Accommodation",
       name: p.name,
@@ -237,7 +251,7 @@ export function vacationRentalJsonLd(p: Property, opts: { context?: boolean } = 
     ...(p.reviewCount > 0
       ? { aggregateRating: { "@type": "AggregateRating", ratingValue: p.rating, reviewCount: p.reviewCount, bestRating: 5, worstRating: 1 } }
       : {}),
-    ...(p.airbnbUrl ? { sameAs: [p.airbnbUrl] } : {}),
+    ...(bookingPlatforms(p).length > 0 ? { sameAs: bookingPlatforms(p).map((x) => x.url) } : {}),
   };
   return out;
 }

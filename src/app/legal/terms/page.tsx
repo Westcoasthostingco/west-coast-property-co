@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import LegalLayout, { Callout, Clauses, Section, Sub, type LegalSection } from "@/components/legal/LegalLayout";
 
-export const metadata: Metadata = { title: "Terms of Use", description: "Terms for guests, homeowners, and cleaners who use West Coast Hosting Co's website, booking checkout, and portals." };
+export const metadata: Metadata = { title: "Terms of Use", description: "Terms for guests, homeowners, and cleaners who use West Coast Hosting Co's website and portals. Reservations are made and paid on Airbnb or Vrbo." };
 
 const sections: LegalSection[] = [
   { id: "everyone", title: "Part A: Everyone" },
@@ -18,27 +18,31 @@ export default function TermsPage() {
   return (
     <LegalLayout eyebrow="Legal" title="Terms of Use" sections={sections} intro="These terms are in four parts. Part A applies to everyone who uses our site or portals. Parts B, C, and D add the terms that apply to you as a guest, a homeowner, or a cleaner. We have tried to write them the way we would explain them across a kitchen table.">
       <Section id="everyone" kicker="Part A" title="Everyone">
+        <Callout>
+          <p><strong>What we do, and what this site is.</strong> West Coast Hosting Co provides hosting and co-hosting services to homeowners. This website is informational: it shows the homes we care for and how to reach us. It does not accept reservations or payments.</p>
+          <p className="mt-3">Every reservation is made, paid, changed, cancelled, and refunded through a third-party platform, Airbnb or Vrbo, under that platform’s terms and policies. Those platform terms govern the booking itself. These Terms of Use cover your use of this site and portals, and how guests are expected to treat a home while staying there.</p>
+        </Callout>
         <Sub title="1. Acceptance">
           <Clauses>
-            <li>By using westcoasthostingco.com, booking a stay, signing in to a portal, or working with us as an owner or cleaner, you agree to these Terms of Use, our <P href="/legal/privacy">Privacy Notice</P>, and our <P href="/legal/policies">Policies</P>. If you do not agree, please do not use the site or book with us.</li>
+            <li>By using westcoasthostingco.com, staying at one of the homes, signing in to a portal, or working with us as an owner or cleaner, you agree to these Terms of Use, our <P href="/legal/privacy">Privacy Notice</P>, and our <P href="/legal/policies">Policies</P>. If you do not agree, please do not use the site.</li>
             <li>“We,” “us,” and “West Coast Hosting Co” mean West Coast Hosting Co of Gig Harbor, Washington, run by Christi Young and Melissa Heckman. “Home” means a property we manage, such as The Grand View, The Leonora by the Sea, or The Bedrock.</li>
           </Clauses>
         </Sub>
         <Sub title="2. Eligibility">
           <Clauses start={3}>
-            <li>You must be at least 18 years old and able to enter a binding agreement to book a stay, open a portal account, or contract with us.</li>
+            <li>You must be at least 18 years old and able to enter a binding agreement to open a portal account or contract with us. The platform you book on sets its own eligibility rules for guests, and the guest who books must be at least 18.</li>
           </Clauses>
         </Sub>
         <Sub title="3. Accounts and roles">
           <Clauses start={4}>
-            <li>Guests book by email and do not need an account. Homeowners, cleaners, and our own admins sign in through a secure portal. Each account carries one role (owner, cleaner, or admin) and sees only what that role needs.</li>
+            <li>Guests do not need an account on this site; you book and manage your reservation in your Airbnb or Vrbo account. Homeowners, cleaners, and our own admins sign in through a secure portal. Each account carries one role (owner, cleaner, or admin) and sees only what that role needs.</li>
             <li>Keep your sign-in private and tell us right away if you think someone else has used it. You are responsible for activity under your account until you tell us.</li>
             <li>We may suspend or close an account that breaks these terms, puts a home or a person at risk, or has been inactive for more than a year after our relationship ends.</li>
           </Clauses>
         </Sub>
         <Sub title="4. Acceptable use">
           <Clauses start={7}>
-            <li>Use the site and portals only for their purpose: learning about and booking the homes, managing your home, or completing cleaning jobs.</li>
+            <li>Use the site and portals only for their purpose: learning about the homes and finding their Airbnb or Vrbo listings, managing your home, or completing cleaning jobs.</li>
             <li>Do not scrape the site, probe or overload it, upload malicious code, misrepresent who you are, or try to reach data that is not yours.</li>
             <li>Do not copy guest, owner, or cleaner information out of the portals except to do your own job.</li>
           </Clauses>
@@ -51,14 +55,14 @@ export default function TermsPage() {
         </Sub>
         <Sub title="6. Disclaimers">
           <Clauses start={12}>
-            <li>The site, listings, calendars, and portals are provided “as is.” We work hard to keep availability, pricing, and descriptions accurate, but calendars sync from several platforms and mistakes can happen. If a booking is accepted in error, our remedy is set out in Part B.</li>
+            <li>The site, descriptions, calendars, and portals are provided “as is.” We work hard to keep descriptions accurate, but any price or availability shown here is for information only and may be out of date. The Airbnb or Vrbo listing at the time you book is what counts. If a stay is affected by a calendar error, the platform’s policies and Part B apply.</li>
             <li>Tide, weather, trail, and ski-area information shown on the site comes from third parties and is for planning only.</li>
           </Clauses>
         </Sub>
         <Sub title="7. Limitation of liability">
           <Clauses start={14}>
             <li>To the extent Washington law allows, West Coast Hosting Co, its owners, and the homeowners we represent are not liable for indirect, incidental, or consequential losses, such as lost vacation time, travel costs, or lost income, arising from the site or a stay.</li>
-            <li>For a stay, our total liability to a guest is limited to the amount that guest paid us for that stay. For an owner or cleaner, it is limited to the fees we earned from, or the pay we owed on, the matter in dispute over the previous twelve months.</li>
+            <li>For a stay, our total liability to a guest is limited to the amount paid for that stay through the platform, less anything the platform has already refunded. For an owner or cleaner, it is limited to the fees we earned from, or the pay we owed on, the matter in dispute over the previous twelve months.</li>
             <li>Nothing here limits liability for death or personal injury caused by negligence, for fraud, or for anything that cannot lawfully be limited.</li>
           </Clauses>
         </Sub>
@@ -81,24 +85,24 @@ export default function TermsPage() {
         </Sub>
         <Sub title="11. Changes and contact">
           <Clauses start={22}>
-            <li>We may update these terms. The date at the top shows the current version. For an existing booking, the terms in force when you booked apply. For owners and cleaners, we will email material changes at least 30 days before they take effect.</li>
+            <li>We may update these terms. The date at the top shows the current version. For an existing booking, the terms in force when you booked apply, alongside the platform’s terms. For owners and cleaners, we will email material changes at least 30 days before they take effect.</li>
             <li>Contact us at <a href="mailto:hello@westcoasthostingco.com" className="text-deep hover:underline">hello@westcoasthostingco.com</a> or 253.278.6818.</li>
           </Clauses>
         </Sub>
       </Section>
 
       <Section id="guests" kicker="Part B" title="Guests">
-        <Callout><p>Booking one of our homes gives you a <strong>license to occupy</strong> it for the dates shown. It is not a lease or a tenancy, and Washington landlord-tenant law does not apply. You agree to leave at check-out time on the last day of your stay.</p></Callout>
-        <Sub title="1. Pricing and what you pay">
+        <Callout><p>Staying in one of our homes gives you a <strong>license to occupy</strong> it for the dates of your reservation. It is not a lease or a tenancy, and Washington landlord-tenant law does not apply. You agree to leave at check-out time on the last day of your stay.</p></Callout>
+        <Sub title="1. Booking through Airbnb or Vrbo">
           <Clauses>
-            <li>Your price is made of a nightly rate, a cleaning fee set for the home, and lodging tax at the rate for that home’s city and county. The total shown at checkout is the full amount; there are no service or booking fees added later.</li>
-            <li>Payment is made in full at booking through Stripe’s secure checkout. We never see your full card number. If a payment fails or the checkout session expires, the dates are released after 30 minutes.</li>
-            <li>Bookings made on Airbnb, Vrbo, or Booking.com are paid through that platform and follow its pricing and fee rules.</li>
+            <li>Every home is booked on Airbnb, and some on Vrbo too; the buttons on each home’s page take you to its listing. Your reservation is made with the platform, and the platform’s terms govern it.</li>
+            <li>The price, fees, taxes, payment, changes, cancellations, and refunds are all handled by the platform under its own rules and the cancellation policy shown on the listing when you book. We do not take payment, hold your money, or issue refunds ourselves.</li>
+            <li>We will never ask you to pay us directly, by wire, app, gift card, or any other way outside the platform. If anyone asks you to, it is not us; please report it to the platform and let us know.</li>
           </Clauses>
         </Sub>
-        <Sub title="2. Who is booking">
+        <Sub title="2. Who is staying">
           <Clauses start={4}>
-            <li>The person who books must be at least 18, must stay at the home for the whole reservation, and is responsible for everyone in the party. We may ask for a photo ID matching the booking name before sending access codes.</li>
+            <li>The person who books must be at least 18, must stay at the home for the whole reservation, and is responsible for everyone in the party. We may ask you to confirm your identity through the platform before we send access codes.</li>
             <li>Tell us the true number of guests. Each home has a maximum, and it is there for septic systems, fire safety, and the neighbors as much as for comfort.</li>
           </Clauses>
         </Sub>
@@ -107,24 +111,30 @@ export default function TermsPage() {
             <li>No parties or events. Our homes are in residential neighborhoods, on the water, and in the woods, and we want to keep the neighbors happy.</li>
             <li>Quiet hours are 10:00 pm to 8:00 am. Sound travels across water and through the trees.</li>
             <li>No smoking or vaping inside any home or within 25 feet of it. Fire season rules in Lewis County and Mason County may ban outdoor fires entirely; we will tell you if so.</li>
-            <li>Pets are welcome only where the listing allows pets, with the number and type disclosed at booking. An undisclosed pet, or a pet at a home that does not allow them, leads to an excess cleaning fee and may end the stay.</li>
+            <li>Pets are welcome only where the listing allows pets, with the number and type disclosed when you book. An undisclosed pet, or a pet at a home that does not allow them, may lead to a cleaning claim through the platform and may end the stay.</li>
             <li>Follow the posted instructions for the hot tub, wood stove, fire pit, and dock where a home has them. Children must be supervised near water at all times.</li>
-            <li>Treat the home as you found it. Report breakages or problems within 24 hours so we can fix them quickly and so you are not blamed for something you did not do.</li>
+            <li>Treat the home as you found it. Report breakages or problems within 24 hours, through the platform’s messages or by text to 253.278.6818, so we can fix them quickly and so you are not blamed for something you did not do.</li>
           </Clauses>
         </Sub>
         <Sub title="4. Check-in, check-out, and access">
           <Clauses start={12}>
-            <li>Check-in is 4:00 pm and check-out is 11:00 am unless your confirmation says otherwise. Early check-in or late check-out is sometimes possible; ask us. Leaving late without arrangement may be charged at an hourly rate because our cleaners work to a window.</li>
-            <li>Your door code is personal to your booking. Do not share it beyond your party, and do not let anyone who is not on the booking stay overnight.</li>
+            <li>Check-in is 4:00 pm and check-out is 11:00 am unless your listing or reservation says otherwise. Early check-in or late check-out is sometimes possible; ask us. Our cleaners work to a window, so please do not stay late without arranging it first.</li>
+            <li>Your door code is personal to your reservation. Do not share it beyond your party, and do not let anyone who is not on the reservation stay overnight.</li>
           </Clauses>
         </Sub>
-        <Sub title="5. If we have to cancel">
+        <Sub title="5. Damage and refunds">
           <Clauses start={14}>
-            <li>Rarely, we may need to cancel: a double-booking caused by a calendar sync error, a safety issue such as a failed water system or wildfire evacuation order, or the home becoming unavailable. If so, we refund everything you paid in full, and we will do our best to find you a comparable stay at one of our homes or nearby.</li>
+            <li>Damage, missing items, and excess cleaning are handled through the platform’s own process, such as Airbnb’s Resolution Center or Vrbo’s damage process. We may file a claim there on the homeowner’s behalf, with photos and costs. This is in addition to any rights the homeowner has under the law.</li>
+            <li>Any refund, for any reason, is decided and paid by the platform under its rules.</li>
           </Clauses>
         </Sub>
-        <Sub title="6. Related policies">
-          <p>Refunds when you cancel are set out in the <P href="/legal/policies#cancellation">Booking and Cancellation Policy</P>. Damage, excess cleaning, lost keys, and card charges after a stay are set out in the <P href="/legal/policies#damage">Damage, Deposits and Incidents Policy</P>. Late arrivals and no-shows are in the <P href="/legal/policies#no-shows">No-Shows and Late Arrivals</P> section. By booking, you accept all three.</p>
+        <Sub title="6. If we have to cancel">
+          <Clauses start={16}>
+            <li>Rarely, we may need to cancel: a double-booking caused by a calendar sync error, a safety issue such as a failed water system or wildfire evacuation order, or the home becoming unavailable. If so, the cancellation and your refund go through the platform under its host cancellation rules, and we will do our best to help you find a comparable stay at one of our homes or nearby.</li>
+          </Clauses>
+        </Sub>
+        <Sub title="7. Related policies">
+          <p>How cancellations and refunds work is summarized in the <P href="/legal/policies#cancellation">Booking, Cancellation and Refunds</P> policy. Damage, excess cleaning, and lost keys are covered in the <P href="/legal/policies#damage">Damage and Incidents Policy</P>. Late arrivals and no-shows are in the <P href="/legal/policies#no-shows">No-Shows and Late Arrivals</P> section. By staying at one of our homes, you accept all three.</p>
         </Sub>
       </Section>
 
@@ -132,52 +142,51 @@ export default function TermsPage() {
         <p>This part summarizes how we work with the owners of the homes we manage. Your signed Management Agreement is the full contract, and if these terms and that agreement differ, the agreement wins.</p>
         <Sub title="1. The co-hosting relationship">
           <Clauses>
-            <li>You own the home and keep the keys and the view. We market it, take bookings, talk to guests, schedule cleaning and small repairs, and report to you. We act as your agent for those tasks and nothing more; we do not take title, a lease, or any interest in the property.</li>
-            <li>You authorize us to list the home on our site and, if agreed, on Airbnb, Vrbo, and Booking.com, to accept bookings on your behalf, and to send guests access codes and house information.</li>
+            <li>You own the home and keep the keys and the view. We market it, manage its Airbnb and Vrbo listings, accept reservations made on those platforms, talk to guests, schedule cleaning and small repairs, and report to you. We act as your agent for those tasks and nothing more; we do not take title, a lease, or any interest in the property.</li>
+            <li>You authorize us to list the home on Airbnb and, if agreed, on Vrbo, either on your accounts as co-host or on ours as host, to accept reservations there on your behalf, and to send guests access codes and house information. You also allow us to feature the home on our website as an informational showcase that links to those listings. The website does not take bookings or payments.</li>
           </Clauses>
         </Sub>
         <Sub title="2. Pricing">
           <Clauses start={3}>
-            <li>We set nightly rates, minimum stays, cleaning fees, and seasonal pricing using market data and our experience, within any floor or guardrails we agree in writing. You can ask for a change at any time and we will apply it to new bookings.</li>
+            <li>We set nightly rates, minimum stays, cleaning fees, and seasonal pricing on the platform listings using market data and our experience, within any floor or guardrails we agree in writing. You can ask for a change at any time and we will apply it to new bookings.</li>
           </Clauses>
         </Sub>
         <Sub title="3. Fees and money">
           <Clauses start={4}>
-            <li>Our management fee is a percentage of the nights revenue (the nightly rate times nights booked) for each stay. The percentage is set in your Management Agreement.</li>
-            <li>The cleaning fee a guest pays is a pass-through: it is not your revenue and we take no fee on it. It covers the cleaner’s pay for that turnover.</li>
-            <li>Lodging tax a guest pays is likewise a pass-through that we collect and remit; it is not revenue to you or to us.</li>
-            <li>Card processing costs are absorbed by us out of our fee, not deducted from your share.</li>
-            <li>For direct bookings, your share (nights revenue minus our fee) is sent to the bank account you connect through Stripe Connect. The transfer is released the day after the guest checks in, and Stripe typically lands it in your account within a couple of business days after that. If a stay is fully refunded, the transfer for that stay is reversed.</li>
-            <li>For platform bookings, the platform pays out under its own schedule, and our fee is invoiced or netted as your Management Agreement provides.</li>
-            <li>You receive a monthly statement showing each booking, the fee, and your net, available any time in the owner portal.</li>
+            <li>Our management or co-hosting fee, how it is calculated, and how it is collected are set in your Management Agreement.</li>
+            <li>Guests pay the platform, not us. Neither West Coast Hosting Co nor this website collects guest payments or holds guest funds.</li>
+            <li>Platform payouts are paid according to each platform’s payout rules (timing, method, and any co-host payout split the platform offers) and your Management Agreement.</li>
+            <li>The cleaning fee shown on a listing is meant to cover the cleaner’s pay for that turnover, as your Management Agreement describes.</li>
+            <li>You receive a monthly statement showing each stay, our fee, and your net, available any time in the owner portal.</li>
           </Clauses>
         </Sub>
         <Sub title="4. Your own stays and blocked dates">
-          <Clauses start={11}>
-            <li>It is your home. Block dates for yourself, family, or friends through the portal or by asking us. Please give as much notice as you can, and avoid blocking dates that are already booked. Owner stays carry no management fee; a turnover clean after an owner stay is billed at the cleaner’s rate.</li>
+          <Clauses start={9}>
+            <li>It is your home. Block dates for yourself, family, or friends through the portal or by asking us. Please give as much notice as you can, and avoid blocking dates that are already booked. Fees for owner stays, and for the turnover clean after one, follow your Management Agreement.</li>
           </Clauses>
         </Sub>
         <Sub title="5. Maintenance and repairs">
-          <Clauses start={12}>
+          <Clauses start={10}>
             <li>Repairs and replacements under $250 per item that are needed to keep a stay on track (a broken toaster, a plumber for a clog, a replacement hot tub filter) proceed without asking you, and appear on your statement with the receipt.</li>
             <li>Anything over $250, or any non-urgent improvement, we bring to you first with a quote. In a genuine emergency that threatens the home or a guest (a burst pipe, no heat in winter at The Bedrock, a failed well pump), we act first and call you immediately.</li>
             <li>We maintain a list of trusted local tradespeople, but you may name your own.</li>
           </Clauses>
         </Sub>
         <Sub title="6. Insurance">
-          <Clauses start={15}>
+          <Clauses start={13}>
             <li>You carry property and liability insurance that expressly covers short-term rental use, including guest injury, and you name us as an additional insured where your carrier allows. A standard homeowner policy often excludes paying guests; please check. See the <P href="/legal/policies#insurance">Insurance Policy</P> for the specifics.</li>
+            <li>Platform host protections, such as Airbnb’s AirCover for Hosts, have their own limits and conditions and are not a substitute for your own insurance.</li>
             <li>We carry general liability insurance for our own operations. We are not an insurer of your home or its contents.</li>
           </Clauses>
         </Sub>
-        <Sub title="7. Taxes">
-          <Clauses start={17}>
-            <li>You are responsible for income tax on your rental revenue. Payouts through Stripe Connect are reported to the IRS as Stripe and the law require.</li>
-            <li>We collect lodging and occupancy taxes from guests on direct bookings and remit them to the Washington Department of Revenue and any local authority where we are registered to do so. Platforms generally collect and remit these on platform bookings. You remain responsible for any property taxes or registrations attached to the home itself, such as a city short-term rental permit.</li>
+        <Sub title="7. Taxes, licenses, and permits">
+          <Clauses start={16}>
+            <li>Airbnb and Vrbo collect and remit Washington lodging and occupancy taxes on bookings made through them, where they are required to. We do not collect or remit lodging tax, because no bookings are made with us directly.</li>
+            <li>You remain responsible for any remaining tax, licensing, and permit obligations for your home, such as income tax on your rental revenue, property tax, and any business license, short-term rental permit, or registration that the state, your city, or your county requires. We are happy to point you to the right office.</li>
           </Clauses>
         </Sub>
         <Sub title="8. Ending the relationship">
-          <Clauses start={19}>
+          <Clauses start={18}>
             <li>Either of us may end the relationship with 30 days’ written notice. Bookings already confirmed at the time of notice are honored and managed by us to completion, with our fee, unless you and we agree otherwise in writing. We return keys, hand over the listing accounts you own, and send a final statement within 30 days of the last managed stay.</li>
           </Clauses>
         </Sub>
