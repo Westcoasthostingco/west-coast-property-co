@@ -46,7 +46,7 @@ function faqs(properties: Property[]): Faq[] {
     },
     {
       question: "Where are the homes?",
-      answer: `${where}. Use the search above to filter by area, dates, and guest count, then open a home to see its listing.`,
+      answer: `${where}. Use the search above to filter by area and guest count, then open a home to see its listing.`,
     },
     {
       question: "Who runs this website?",
@@ -57,8 +57,8 @@ function faqs(properties: Property[]): Faq[] {
 
 const steps = [
   ["Explore", "Photos, the view, the neighborhood, and what's nearby, all in one place for each home."],
-  ["Pick your dates", "Choose dates and guests on a home's page and we open its listing with them filled in."],
-  ["Book on Airbnb or Vrbo", "See the live price, the house rules, and the cancellation policy, and book with the host on the platform."],
+  ["Open the listing", "Each home links to its Airbnb or Vrbo listing, where the live calendar and prices are."],
+  ["Book with the host", "Check the house rules and cancellation policy, then book with the host on the platform."],
 ];
 
 const regions = [

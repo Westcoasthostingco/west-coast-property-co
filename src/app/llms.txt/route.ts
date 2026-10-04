@@ -28,8 +28,8 @@ This website is a showcase only. It shows photos, details, and local context for
 
 ## Key pages
 
-- [Home](${absUrl("/")}): Overview of the three homes, how booking works, a search by area, dates, and guests, and answers to common questions.
-- [The homes](${absUrl("/properties")}): Every home on the site, filterable by area (Gig Harbor, Hood Canal, Randle), dates, and guest count.
+- [Home](${absUrl("/")}): Overview of the three homes, how booking works, a search by area and guest count, and answers to common questions.
+- [The homes](${absUrl("/properties")}): Every home on the site, filterable by area (Gig Harbor, Hood Canal, Randle) and guest count.
 - [About](${absUrl("/about")}): Who Christi and Melissa are and why they built the site.
 - [Contact](${absUrl("/contact")}): Email and phone for questions about the homes or the site. Reservation questions go to the host on Airbnb or Vrbo.
 - [Privacy notice](${absUrl("/legal/privacy")}): How visitor information is handled.
