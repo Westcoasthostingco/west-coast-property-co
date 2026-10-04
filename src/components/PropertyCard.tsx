@@ -4,10 +4,10 @@ import type { Property } from "@/lib/data";
 import { getListingContent } from "@/lib/listing-content";
 import ConditionsCard from "./widgets/ConditionsCard";
 
-export default function PropertyCard({ p, wide = false, query }: { p: Property; wide?: boolean; query?: string }) {
+export default function PropertyCard({ p, wide = false }: { p: Property; wide?: boolean }) {
   const listing = getListingContent(p.slug)?.listingRating;
   return (
-    <Link href={`/properties/${p.slug}${query ? `?${query}` : ""}`} className="group block">
+    <Link href={`/properties/${p.slug}`} className="group block">
       <PropertyImage slug={p.slug} name={p.name} className={`rounded-2xl transition group-hover:opacity-95 ${wide ? "aspect-[4/3]" : "aspect-[5/4]"}`} />
       <div className="mt-3 flex items-start justify-between gap-3">
         <div>

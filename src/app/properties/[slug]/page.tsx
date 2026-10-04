@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import CheckDates from "@/components/CheckDates";
 import PropertyImage from "@/components/PropertyImage";
+import Amenities from "@/components/Amenities";
 import BookOn, { hasBookingLink } from "@/components/BookOn";
 import JsonLd from "@/components/seo/JsonLd";
 import { getProperty, getProperties, getPublishedReviews } from "@/lib/data";
@@ -47,11 +47,8 @@ function platformNames(p: { airbnbUrl?: string | null; vrboUrl?: string | null }
   return names.length ? names.join(" or ") : "us";
 }
 
-const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? "";
-
-export default async function PropertyPage({ params, searchParams }: PageProps<"/properties/[slug]">) {
+export default async function PropertyPage({ params }: PageProps<"/properties/[slug]">) {
   const { slug } = await params;
-  const sp = await searchParams;
   const p = await getProperty(slug);
   if (!p) notFound();
   const reviews = await getPublishedReviews(p.id);
@@ -65,7 +62,6 @@ export default async function PropertyPage({ params, searchParams }: PageProps<"
     ["gallery", "Photos"],
     ...(c?.sleeping.length ? [["sleeping", "Sleeping"]] : []),
     ["amenities", "Amenities"],
-    ["dates", "Dates & price"],
     ["details", "Good to know"],
     ...(c ? [["location", "Location"]] : []),
     ...(reviews.length ? [["reviews", "Reviews"]] : []),
@@ -192,37 +188,12 @@ export default async function PropertyPage({ params, searchParams }: PageProps<"
         <section id="amenities" className="scroll-mt-32 pb-14">
           <h2 className="caps text-xs text-deep">Amenities</h2>
           {c ? (
-            <>
-              <div className="mt-5 grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
-                {c.amenityGroups.map((g) => (
-                  <div key={g.title}>
-                    <h3 className="ui text-sm font-medium text-charcoal">{g.title}</h3>
-                    <ul className="ui mt-2 space-y-1.5 text-sm text-muted">
-                      {g.items.map((a) => <li key={a} className="flex items-start gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-wave" />{a}</li>)}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-              {c.notIncluded.length > 0 && <p className="ui mt-6 text-xs text-muted">Not included: {c.notIncluded.join(", ")}.</p>}
-            </>
+            <Amenities groups={c.amenityGroups} notIncluded={c.notIncluded} />
           ) : (
             <ul className="ui mt-5 grid grid-cols-2 gap-y-3 text-sm sm:grid-cols-3">
               {p.amenities.map((a) => <li key={a} className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-wave" />{a}</li>)}
             </ul>
           )}
-        </section>
-
-        {/* Dates and price: opens the platform listing with the dates filled in */}
-        <section id="dates" className="scroll-mt-32 pb-14">
-          <CheckDates
-            name={p.name}
-            airbnbUrl={p.airbnbUrl}
-            vrboUrl={p.vrboUrl}
-            maxGuests={p.guests}
-            minNights={p.minNights ?? 2}
-            today={new Date().toISOString().slice(0, 10)}
-            initial={{ checkIn: str(sp.check_in), checkOut: str(sp.check_out), guests: Number(str(sp.guests)) || undefined }}
-          />
         </section>
 
         {/* Good to know */}
