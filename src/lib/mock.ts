@@ -17,6 +17,7 @@ export type Property = {
   rating: number;
   reviewCount: number;
   airbnbUrl?: string | null;
+  vrboUrl?: string | null;
   /** NOAA CO-OPS tide station id for waterfront homes (null = no tide widget). */
   taxRateBps?: number;      // lodging tax, basis points
   minNights?: number;

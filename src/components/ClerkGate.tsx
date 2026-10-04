@@ -14,18 +14,22 @@ function frontendHost() {
 
 // Technical details for the failure message, read from the page itself: which
 // Clerk script the page tried to load and whether it ran.
+function readDiagnostics(): string | null {
+  if (typeof window === "undefined") return null;
+  const tag = document.querySelector<HTMLScriptElement>("script[data-clerk-js-script], script[src*='clerk-js'], script[src*='clerk.browser']");
+  const w = window as unknown as { Clerk?: { loaded?: boolean; version?: string } };
+  return [
+    `page: ${location.host}`,
+    `script: ${tag?.src ?? "not added to page"}`,
+    `script ran: ${w.Clerk ? "yes" : "no"}`,
+    w.Clerk ? `clerk loaded: ${w.Clerk.loaded ? "yes" : "no"}${w.Clerk.version ? ` (v${w.Clerk.version})` : ""}` : null,
+  ].filter(Boolean).join(" · ");
+}
+
+// The failure message only renders in the browser (after Clerk fails or times
+// out), so the details can be read once when it first renders.
 function useDiagnostics() {
-  const [info, setInfo] = useState<string | null>(null);
-  useEffect(() => {
-    const tag = document.querySelector<HTMLScriptElement>("script[data-clerk-js-script], script[src*='clerk-js'], script[src*='clerk.browser']");
-    const w = window as unknown as { Clerk?: { loaded?: boolean; version?: string } };
-    setInfo([
-      `page: ${location.host}`,
-      `script: ${tag?.src ?? "not added to page"}`,
-      `script ran: ${w.Clerk ? "yes" : "no"}`,
-      w.Clerk ? `clerk loaded: ${w.Clerk.loaded ? "yes" : "no"}${w.Clerk.version ? ` (v${w.Clerk.version})` : ""}` : null,
-    ].filter(Boolean).join(" · "));
-  }, []);
+  const [info] = useState(readDiagnostics);
   return info;
 }
 
