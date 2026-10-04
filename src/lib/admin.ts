@@ -5,7 +5,7 @@
 import * as mock from "./mock";
 import type { Booking, Owner, Property } from "./mock";
 import { getAllProperties, getBookings, getFeeOverrides, getOwners } from "./data";
-import { stayMoney } from "./metrics";
+import { feeTermsLookup, stayFees } from "./metrics";
 import { mockCleaners, mockJobs, type CleaningJob, type CleaningStatus } from "./cleaning";
 import { supabaseAdmin, supabaseConfigured } from "./supabase";
 import { nightsBetween, taxCents, todayISO } from "./dates";
@@ -45,6 +45,7 @@ export type PropertyDetail = Property & {
   description: string;
   taxRateBps: number;
   feePercentOverride: number | null;
+  fixedFeeCentsOverride: number | null; // properties.fixed_fee_cents; null = owner's fixed fee
   minNights: number;
   published: boolean;
   doorCode: string;
@@ -55,7 +56,7 @@ export type PropertyDetail = Property & {
 };
 
 const emptyDetail = (p: Property): PropertyDetail => ({
-  ...p, address: "", postalCode: "", description: p.summary, taxRateBps: 0, feePercentOverride: null, minNights: 2, airbnbUrl: p.airbnbUrl ?? "", vrboUrl: p.vrboUrl ?? "",
+  ...p, address: "", postalCode: "", description: p.summary, taxRateBps: 0, feePercentOverride: null, fixedFeeCentsOverride: null, minNights: 2, airbnbUrl: p.airbnbUrl ?? "", vrboUrl: p.vrboUrl ?? "",
   published: true, doorCode: "", seamDeviceId: "", defaultCleanerId: p.id === "p3" ? "c2" : "c1", icalFeeds: [], photos: [],
 });
 
@@ -87,6 +88,7 @@ export async function getPropertyDetail(id: string): Promise<PropertyDetail | un
     rating: Number(listing?.rating ?? 0), reviewCount: (listing?.review_count as number) ?? 0,
     address: (r.address as string) ?? "", postalCode: (r.postal_code as string) ?? "", description: (r.description as string) ?? "",
     taxRateBps: (r.tax_rate_bps as number) ?? 0, feePercentOverride: r.fee_percent == null ? null : Number(r.fee_percent),
+    fixedFeeCentsOverride: r.fixed_fee_cents == null ? null : Number(r.fixed_fee_cents),
     minNights: (r.min_nights as number) ?? 2, published: Boolean(r.published),
     tideStationId: (r.tide_station_id as string | null) ?? null,
     skiResort: r.ski_resort_name && r.ski_lat != null && r.ski_lng != null ? { name: r.ski_resort_name as string, lat: Number(r.ski_lat), lng: Number(r.ski_lng) } : null,
@@ -111,7 +113,7 @@ export async function getAllIcalFeeds(): Promise<IcalFeed[]> {
 export type PropertyInput = {
   name: string; slug: string; city: string; region: string; address: string; postalCode: string; ownerId: string;
   bedrooms: number; bathrooms: number; maxGuests: number; nightlyRate: number; cleaningFee: number; taxRatePercent: number;
-  minNights: number; feePercentOverride: number | null; amenities: string[]; summary: string; description: string; published: boolean; airbnbUrl: string; vrboUrl: string;
+  minNights: number; feePercentOverride: number | null; fixedFeeOverride: number | null; amenities: string[]; summary: string; description: string; published: boolean; airbnbUrl: string; vrboUrl: string;
   icalUrls: Partial<Record<BookingSourceKey, string>>; doorCode: string; seamDeviceId: string; defaultCleanerId: string | null;
   tideStationId: string; skiResortName: string; skiLat: number | null; skiLng: number | null;
 };
@@ -126,6 +128,7 @@ export const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-"
 export function propertyInputFromForm(fd: FormData): PropertyInput {
   const name = str(fd.get("name"));
   const feeRaw = str(fd.get("feePercentOverride"));
+  const fixedRaw = str(fd.get("fixedFeeOverride"));
   const icalUrls: Partial<Record<BookingSourceKey, string>> = {};
   for (const s of ICAL_SOURCES) icalUrls[s] = str(fd.get(`ical_${s}`));
   return {
@@ -134,6 +137,7 @@ export function propertyInputFromForm(fd: FormData): PropertyInput {
     bedrooms: num(fd.get("bedrooms")), bathrooms: num(fd.get("bathrooms")), maxGuests: num(fd.get("maxGuests"), 2),
     nightlyRate: num(fd.get("nightlyRate")), cleaningFee: num(fd.get("cleaningFee")), taxRatePercent: num(fd.get("taxRatePercent")),
     minNights: num(fd.get("minNights"), 2), feePercentOverride: feeRaw === "" ? null : num(fd.get("feePercentOverride")),
+    fixedFeeOverride: fixedRaw === "" ? null : num(fd.get("fixedFeeOverride")),
     amenities: str(fd.get("amenities")).split(",").map((a) => a.trim()).filter(Boolean),
     summary: str(fd.get("summary")), description: str(fd.get("description")), published: fd.get("published") === "on", airbnbUrl: str(fd.get("airbnb_url")), vrboUrl: str(fd.get("vrbo_url")),
     icalUrls, doorCode: str(fd.get("doorCode")), seamDeviceId: str(fd.get("seamDeviceId")),
@@ -148,6 +152,8 @@ export function validateProperty(i: PropertyInput): string | null {
   if (!i.slug) return "Slug is required.";
   if (!i.ownerId) return "Pick an owner.";
   if (i.nightlyRate <= 0) return "Nightly rate must be above zero.";
+  if (i.feePercentOverride != null && (i.feePercentOverride < 0 || i.feePercentOverride > 100)) return "Fee override must be between 0 and 100%.";
+  if (i.fixedFeeOverride != null && i.fixedFeeOverride < 0) return "Fixed fee override cannot be negative.";
   const ski = [i.skiResortName !== "", i.skiLat != null, i.skiLng != null];
   if (ski.some(Boolean) && !ski.every(Boolean)) return "Mountain conditions needs the resort name, latitude and longitude together (or leave all three blank).";
   return null;
@@ -163,6 +169,7 @@ export async function saveProperty(actor: string, id: string | null, input: Prop
     owner_id: input.ownerId, bedrooms: input.bedrooms, bathrooms: input.bathrooms, max_guests: input.maxGuests,
     nightly_rate_cents: Math.round(input.nightlyRate * 100), cleaning_fee_cents: Math.round(input.cleaningFee * 100),
     tax_rate_bps: Math.round(input.taxRatePercent * 100), min_nights: input.minNights, fee_percent: input.feePercentOverride,
+    fixed_fee_cents: input.fixedFeeOverride == null ? null : Math.round(input.fixedFeeOverride * 100),
     amenities: input.amenities, summary: input.summary || null, description: input.description || null, published: input.published, airbnb_url: input.airbnbUrl || null, vrbo_url: input.vrboUrl || null,
     tide_station_id: input.tideStationId || null, ski_resort_name: input.skiResortName || null, ski_lat: input.skiLat, ski_lng: input.skiLng,
   };
@@ -349,21 +356,22 @@ export async function getOwnerDetail(id: string): Promise<OwnerDetail | undefine
   if (!data) return undefined;
   const r = data as Row;
   return { id: r.id as string, name: r.name as string, email: r.email as string, feePercent: Number(r.fee_percent),
-    clerkUserId: (r.clerk_user_id as string) ?? null, createdAt: (r.created_at as string) ?? null };
+    fixedFeeCents: Number(r.fixed_fee_cents ?? 0), clerkUserId: (r.clerk_user_id as string) ?? null, createdAt: (r.created_at as string) ?? null };
 }
 
-export type OwnerInput = { name: string; email: string; feePercent: number; clerkUserId: string | null };
+export type OwnerInput = { name: string; email: string; feePercent: number; fixedFee: number; clerkUserId: string | null }; // fixedFee in dollars
 export const ownerInputFromForm = (fd: FormData): OwnerInput => ({
-  name: str(fd.get("name")), email: str(fd.get("email")).toLowerCase(), feePercent: num(fd.get("feePercent"), 18), clerkUserId: str(fd.get("clerkUserId")) || null,
+  name: str(fd.get("name")), email: str(fd.get("email")).toLowerCase(), feePercent: num(fd.get("feePercent"), 18), fixedFee: num(fd.get("fixedFee"), 0), clerkUserId: str(fd.get("clerkUserId")) || null,
 });
 
 export async function saveOwner(actor: string, id: string | null, input: OwnerInput): Promise<ActionResult> {
   if (!input.name) return { ok: false, message: "Name is required." };
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(input.email)) return { ok: false, message: "Enter a valid email." };
   if (input.feePercent < 0 || input.feePercent > 100) return { ok: false, message: "Fee percent must be between 0 and 100." };
+  if (input.fixedFee < 0) return { ok: false, message: "Fixed fee cannot be negative." };
   if (!supabaseConfigured) return SAMPLE_MODE;
   const db = supabaseAdmin();
-  const row = { name: input.name, email: input.email, fee_percent: input.feePercent, clerk_user_id: input.clerkUserId };
+  const row = { name: input.name, email: input.email, fee_percent: input.feePercent, fixed_fee_cents: Math.round(input.fixedFee * 100), clerk_user_id: input.clerkUserId };
   let ownerId = id;
   if (ownerId) {
     const { error } = await db.from("owners").update(row).eq("id", ownerId);
@@ -373,7 +381,7 @@ export async function saveOwner(actor: string, id: string | null, input: OwnerIn
     if (error || !data) return dbError(error, error?.code === "23505" ? "That email is already an owner" : "Could not create");
     ownerId = data.id as string;
   }
-  await audit(actor, id ? "owner.update" : "owner.create", "owner", ownerId, { email: input.email, fee_percent: input.feePercent });
+  await audit(actor, id ? "owner.update" : "owner.create", "owner", ownerId, { email: input.email, fee_percent: input.feePercent, fixed_fee_cents: Math.round(input.fixedFee * 100) });
   return { ok: true, message: id ? "Saved." : "Owner created.", id: ownerId };
 }
 
@@ -472,15 +480,20 @@ export async function* bookingsCsv(from: string, to: string): AsyncGenerator<str
   const [bookings, props, owners, overrides] = await Promise.all([getBookingsDetailed(), getAllProperties(), getOwners(), getFeeOverrides()]);
   const name = (id: string) => props.find((p) => p.id === id)?.name ?? id;
   const ownerOf = (id: string) => owners.find((o) => o.id === props.find((p) => p.id === id)?.ownerId);
-  yield csvLine(["id", "property", "owner", "guest", "email", "check_in", "check_out", "nights", "source", "status", "subtotal", "cleaning_fee", "tax", "total", "fee_percent", "management_fee", "owner_share"]);
+  const termsFor = feeTermsLookup(props, owners, overrides);
+  const usd = (cents: number | null | undefined) => (cents == null ? "" : (cents / 100).toFixed(2));
+  // guest_* columns are what was recorded on the booking; the fee columns are what the
+  // homeowner is charged (shared math in metrics.ts). owner_net is blank without a recorded subtotal.
+  yield csvLine(["id", "property", "owner", "guest", "email", "check_in", "check_out", "nights", "source", "status",
+    "guest_subtotal", "guest_cleaning_fee", "guest_tax", "guest_total", "fee_percent", "percent_fee", "fixed_fee", "cleaning_fee", "total_fees", "owner_net"]);
   for (const b of bookings) {
     if (b.checkIn < from || b.checkIn > to) continue;
     const owner = ownerOf(b.propertyId);
-    // Fee split from recorded money only; blank for stays the platform paid without amounts on file.
-    const m = stayMoney(b, overrides[b.propertyId], owner?.feePercent ?? 0);
+    // Blank fee columns: owner, cancelled or pending stays (no fees).
+    const f = stayFees(b, termsFor(b.propertyId));
     yield csvLine([b.id, name(b.propertyId), owner?.name ?? "", b.guest, b.guestEmail, b.checkIn, b.checkOut, nightsBetween(b.checkIn, b.checkOut), b.source, b.status,
-      (b.subtotal ?? 0).toFixed(2), b.cleaningFee.toFixed(2), b.tax.toFixed(2), b.total.toFixed(2),
-      m ? m.feePercent : "", m ? m.fee.toFixed(2) : "", m ? m.net.toFixed(2) : ""]);
+      b.subtotal != null ? b.subtotal.toFixed(2) : "", b.cleaningFee.toFixed(2), b.tax.toFixed(2), b.total.toFixed(2),
+      f ? f.feePercent : "", f && f.grossCents != null ? usd(f.percentFeeCents) : "", usd(f?.fixedFeeCents), usd(f?.cleaningCents), usd(f?.totalFeesCents), usd(f?.netCents)]);
   }
 }
 

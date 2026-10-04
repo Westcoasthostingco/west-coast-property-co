@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import AvailabilityCalendar from "@/components/AvailabilityCalendar";
+import CheckDates from "@/components/CheckDates";
 import PropertyImage from "@/components/PropertyImage";
 import BookOn, { hasBookingLink } from "@/components/BookOn";
 import JsonLd from "@/components/seo/JsonLd";
-import { getProperty, getProperties, getPublishedReviews, getUnavailableDates } from "@/lib/data";
+import { getProperty, getProperties, getPublishedReviews } from "@/lib/data";
 import { propertyDescription, propertyPhoto, vacationRentalJsonLd } from "@/lib/seo";
 
 // Each home's page is its own microsite: a showcase of the home with links to
@@ -45,11 +45,14 @@ function platformNames(p: { airbnbUrl?: string | null; vrboUrl?: string | null }
   return names.length ? names.join(" or ") : "us";
 }
 
-export default async function PropertyPage({ params }: PageProps<"/properties/[slug]">) {
+const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? "";
+
+export default async function PropertyPage({ params, searchParams }: PageProps<"/properties/[slug]">) {
   const { slug } = await params;
+  const sp = await searchParams;
   const p = await getProperty(slug);
   if (!p) notFound();
-  const [reviews, taken] = await Promise.all([getPublishedReviews(p.id), getUnavailableDates(p.id)]);
+  const reviews = await getPublishedReviews(p.id);
   const where = platformNames(p);
   const petsWelcome = p.amenities.some((a) => /pet/i.test(a));
 
@@ -57,7 +60,7 @@ export default async function PropertyPage({ params }: PageProps<"/properties/[s
     ["overview", "Overview"],
     ["gallery", "Gallery"],
     ["amenities", "Amenities"],
-    ["availability", "Availability"],
+    ["dates", "Dates & price"],
     ["details", "Good to know"],
     ...(reviews.length ? [["reviews", "Reviews"]] : []),
   ];
@@ -134,11 +137,17 @@ export default async function PropertyPage({ params }: PageProps<"/properties/[s
           </ul>
         </section>
 
-        {/* Availability */}
-        <section id="availability" className="scroll-mt-32 pb-14">
-          <h2 className="caps text-xs text-deep">Availability</h2>
-          <p className="ui mt-2 text-xs text-muted">Synced from our booking calendars. Final availability and prices are shown on {where}.</p>
-          <div className="mt-5"><AvailabilityCalendar stays={taken} minNights={p.minNights ?? 2} /></div>
+        {/* Dates and price: opens the platform listing with the dates filled in */}
+        <section id="dates" className="scroll-mt-32 pb-14">
+          <CheckDates
+            name={p.name}
+            airbnbUrl={p.airbnbUrl}
+            vrboUrl={p.vrboUrl}
+            maxGuests={p.guests}
+            minNights={p.minNights ?? 2}
+            today={new Date().toISOString().slice(0, 10)}
+            initial={{ checkIn: str(sp.check_in), checkOut: str(sp.check_out), guests: Number(str(sp.guests)) || undefined }}
+          />
         </section>
 
         {/* Good to know */}

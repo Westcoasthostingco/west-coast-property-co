@@ -5,7 +5,7 @@ import { Card, DataTable, Empty, PageHeader, Pill } from "@/components/admin/ui"
 import { getAllProperties, getBookings, getFeeOverrides, getOwners, money, nameMap } from "@/lib/data";
 import { getAllJobs } from "@/lib/cleaning";
 import { addDays, fmtDate, getOpenMaintenanceCount, nightsBetween, todayISO } from "@/lib/admin";
-import { isOwnerStay, lastMonths, monthLabel, monthlyMetrics, stayMoney } from "@/lib/metrics";
+import { feeTermsLookup, isOwnerStay, lastMonths, monthLabel, monthlyMetrics, stayFees } from "@/lib/metrics";
 import { requireRole } from "@/lib/auth";
 
 export default async function AdminHome() {
@@ -22,15 +22,13 @@ export default async function AdminHome() {
   const pct = (a: number, b: number) => (b ? Math.round(((a - b) / b) * 100) : 0);
 
   const monthKey = today.slice(0, 7);
-  // Guest stays checking in this month. Management fees come from recorded booking money
-  // (nights subtotal) with the shared fee math; iCal-imported stays carry no money.
-  const ownerFee = (propertyId: string) => {
-    const p = props.find((x) => x.id === propertyId);
-    return owners.find((o) => o.id === p?.ownerId)?.feePercent ?? 0;
-  };
+  // Guest stays checking in this month. Management fees use the shared fee math: the fixed
+  // fee on every guest stay plus the percentage where the nights subtotal is recorded
+  // (iCal-imported stays carry no money). Cleaning passes through and is not counted here.
+  const termsFor = feeTermsLookup(props, owners, feeOverrides);
   const staysThisMonth = bookings.filter((b) => b.checkIn.startsWith(monthKey) && b.status !== "cancelled" && b.status !== "pending" && !isOwnerStay(b));
   const nightsThisMonth = staysThisMonth.reduce((s, b) => s + nightsBetween(b.checkIn, b.checkOut), 0);
-  const feesThisMonth = staysThisMonth.reduce((s, b) => s + (stayMoney(b, feeOverrides[b.propertyId], ownerFee(b.propertyId))?.fee ?? 0), 0);
+  const feesThisMonth = staysThisMonth.reduce((s, b) => s + (stayFees(b, termsFor(b.propertyId))?.managementFeeCents ?? 0), 0) / 100;
   const weekEnd = addDays(today, 7);
 
   const active = bookings.filter((b) => b.status === "confirmed" || b.status === "pending");
@@ -51,7 +49,7 @@ export default async function AdminHome() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatTile label="Revenue this month" value={money(thisMonth.revenue)} delta={{ value: pct(thisMonth.revenue, lastMonth.revenue) }} hint="Nights subtotal, prorated by night" />
         <StatTile label="Occupancy" value={`${Math.round(thisMonth.occupancy * 100)}%`} delta={{ value: Math.round((thisMonth.occupancy - lastMonth.occupancy) * 100), suffix: " pts" }} />
-        <StatTile label="Management fees" value={money(feesThisMonth)} hint="Stays checking in this month, with amounts on file" />
+        <StatTile label="Management fees" value={money(feesThisMonth)} hint="Fixed fee per stay + % where amounts are on file; stays checking in this month" />
         <StatTile label="Stays this month" value={String(staysThisMonth.length)} hint={`${nightsThisMonth} guest night${nightsThisMonth === 1 ? "" : "s"} checking in`} />
       </div>
 

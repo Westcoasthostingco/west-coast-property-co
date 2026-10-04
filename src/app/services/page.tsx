@@ -35,8 +35,8 @@ export default function Services() {
       </div>
       <div className="mt-16 rounded-3xl bg-mist p-10 text-center">
         <p className="caps text-xs text-deep">Fees</p>
-        <p className="display mt-2 text-3xl text-charcoal">A simple percentage of nightly revenue. No setup fees.</p>
-        <p className="mt-3 text-muted">Guests pay cleaning fees and taxes through Airbnb or Vrbo. Let&apos;s talk about your home.</p>
+        <p className="display mt-2 text-3xl text-charcoal">A percentage of nightly revenue plus a flat fee per stay. No setup fees.</p>
+        <p className="mt-3 text-muted">Each stay also carries a set cleaning fee that covers the turnover. Guests pay Airbnb or Vrbo, and your statement shows every fee line by line. Let&apos;s talk about your home.</p>
         <Link href="/contact" className="caps-tight mt-6 inline-block rounded-full bg-deep px-6 py-3 text-[0.7rem] text-white hover:bg-dusk">Get in touch</Link>
       </div>
     </main>

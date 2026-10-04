@@ -25,6 +25,7 @@ create table owners (
   stripe_account_id text unique,      -- Stripe Connect Express account
   payouts_enabled boolean not null default false,
   fee_percent numeric(5,2) not null default 18,
+  fixed_fee_cents integer not null default 0,   -- fixed management fee per guest stay, on top of fee_percent
   created_at timestamptz not null default now()
 );
 
@@ -41,6 +42,7 @@ create table properties (
   cleaning_fee_cents int not null default 0,
   tax_rate_bps int not null default 0,          -- lodging tax (TOT) in basis points, e.g. 1050 = 10.5%
   fee_percent numeric(5,2),                     -- overrides owners.fee_percent when set
+  fixed_fee_cents integer,                      -- overrides owners.fixed_fee_cents per stay when set (null = owner default)
   min_nights int not null default 2,
   check_in_time time not null default '16:00',
   check_out_time time not null default '11:00',

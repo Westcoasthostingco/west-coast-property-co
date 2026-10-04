@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PropertyCard from "@/components/PropertyCard";
 import SearchBar from "@/components/SearchBar";
 import JsonLd from "@/components/seo/JsonLd";
-import { getProperties, getUnavailableDates } from "@/lib/data";
+import { getProperties } from "@/lib/data";
 import { itemListJsonLd } from "@/lib/seo";
 
 const description =
@@ -26,10 +26,12 @@ export default async function Properties({ searchParams }: PageProps<"/propertie
   let list = all;
   if (region) list = list.filter((p) => p.city === region);
   if (guests) list = list.filter((p) => p.guests >= guests);
-  if (checkIn && checkOut && checkOut > checkIn) {
-    const taken = await getUnavailableDates();
-    list = list.filter((p) => !taken.some((t) => t.propertyId === p.id && t.checkIn < checkOut && t.checkOut > checkIn));
-  }
+  // Availability and prices live on Airbnb and Vrbo, so dates aren't used to
+  // filter here: they carry through to each home's page, which opens the
+  // platform listing with them filled in.
+  const hasDates = Boolean(checkIn && checkOut && checkOut > checkIn);
+  const query = new URLSearchParams({ ...(hasDates ? { check_in: checkIn, check_out: checkOut } : {}), ...(guests ? { guests: String(guests) } : {}) }).toString();
+  const fmt = (iso: string) => new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
@@ -38,13 +40,14 @@ export default async function Properties({ searchParams }: PageProps<"/propertie
       <h1 className="display mt-2 text-5xl text-charcoal">Our homes</h1>
       <div className="mt-8"><SearchBar compact defaults={{ region, check_in: checkIn, check_out: checkOut, guests: guests ? String(guests) : "2" }} /></div>
       <p className="ui mt-6 text-sm text-muted">
-        {list.length} {list.length === 1 ? "home" : "homes"}{checkIn && checkOut ? ` available ${checkIn} to ${checkOut}` : ""}
+        {list.length} {list.length === 1 ? "home" : "homes"}{guests ? ` for ${guests} ${guests === 1 ? "guest" : "guests"}` : ""}
+        {hasDates ? <> · {fmt(checkIn)} to {fmt(checkOut)}. Open a home to see the live price for your dates on Airbnb or Vrbo.</> : ". Open a home to check dates and live prices on Airbnb or Vrbo."}
       </p>
       <div className="mt-6 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {list.map((p) => <PropertyCard key={p.id} p={p} />)}
+        {list.map((p) => <PropertyCard key={p.id} p={p} query={query} />)}
       </div>
       {list.length === 0 && (
-        <p className="mt-10 text-muted">Nothing matches those dates. Try different dates, or <a href="/contact" className="text-deep underline">ask us</a>; we sometimes know of a gap.</p>
+        <p className="mt-10 text-muted">No home sleeps that many guests in that area. Try fewer guests or another area, or <a href="/contact" className="text-deep underline">ask us</a>.</p>
       )}
     </main>
   );

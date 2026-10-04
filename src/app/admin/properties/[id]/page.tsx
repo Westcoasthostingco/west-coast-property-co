@@ -7,6 +7,7 @@ import { deletePhotoAction, savePropertyAction, uploadPhotoAction } from "@/app/
 import { getOwners, money } from "@/lib/data";
 import { getCleaners } from "@/lib/cleaning";
 import { getPropertyDetail } from "@/lib/admin";
+import { feeTerms, feeTermsLabel } from "@/lib/metrics";
 import { supabaseConfigured } from "@/lib/supabase";
 import { requireRole } from "@/lib/auth";
 
@@ -60,7 +61,9 @@ export default async function EditProperty({ params, searchParams }: PageProps<"
             <dl className="ui grid grid-cols-2 gap-y-2 text-sm">
               <dt className="text-muted">Slug</dt><dd className="truncate">{p.slug}</dd>
               <dt className="text-muted">Tax</dt><dd>{(p.taxRateBps / 100).toFixed(2)}%</dd>
-              <dt className="text-muted">Fee</dt><dd>{p.feePercentOverride != null ? `${p.feePercentOverride}% (override)` : `${owners.find((o) => o.id === p.ownerId)?.feePercent ?? "—"}% (owner)`}</dd>
+              <dt className="text-muted">Fee</dt><dd>{feeTermsLabel(feeTerms(owners.find((o) => o.id === p.ownerId), { feePercent: p.feePercentOverride, fixedFeeCents: p.fixedFeeCentsOverride }, p))}{" "}
+                <span className="text-muted">({p.feePercentOverride != null || p.fixedFeeCentsOverride != null ? "override" : "owner"})</span></dd>
+              <dt className="text-muted">Cleaning</dt><dd>{money(p.cleaningFee)}/stay</dd>
               <dt className="text-muted">Min nights</dt><dd>{p.minNights}</dd>
               <dt className="text-muted">Door code</dt><dd>{p.doorCode ? "set" : <span className="text-muted">not set</span>}</dd>
               <dt className="text-muted">Default cleaner</dt><dd>{cleaners.find((c) => c.id === p.defaultCleanerId)?.name ?? <span className="text-muted">none</span>}</dd>
