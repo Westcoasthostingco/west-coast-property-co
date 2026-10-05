@@ -107,6 +107,9 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Owner reviews, right after the homes: praise lands while visitors are deciding */}
+      <Testimonials rating={leonoraRating} photo={{ src: "/photos/the-leonora-by-the-sea/31.webp", alt: "Sunset over the water on Hood Canal" }} />
+
       {/* How it works */}
       <section className="bg-mist">
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-24 sm:px-6 lg:grid-cols-[1fr_1.1fr]">
@@ -141,9 +144,6 @@ export default async function Home() {
           ))}
         </div>
       </section>
-
-      {/* Owner reviews, plus the guest rating from the platform listing */}
-      <Testimonials rating={leonoraRating} />
 
       {/* FAQ: what visitors ask before booking */}
       <section className="bg-mist">
