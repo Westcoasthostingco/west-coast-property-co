@@ -5,6 +5,8 @@ import PropertyImage from "@/components/PropertyImage";
 import SearchBar from "@/components/SearchBar";
 import SectionHeading from "@/components/SectionHeading";
 import CoastToCascades from "@/components/art/CoastToCascades";
+import Testimonials from "@/components/Testimonials";
+import { getListingContent } from "@/lib/listing-content";
 import JsonLd from "@/components/seo/JsonLd";
 import { getProperties, type Property } from "@/lib/data";
 import { DEFAULT_DESCRIPTION, SITE_NAME, TAGLINE, faqJsonLd, webSiteJsonLd, type Faq } from "@/lib/seo";
@@ -70,6 +72,11 @@ const regions = [
 export default async function Home() {
   const properties = await getProperties();
   const questions = faqs(properties);
+  const leo = properties.find((p) => p.slug === "the-leonora-by-the-sea");
+  const listing = leo ? getListingContent(leo.slug) : undefined;
+  const leonoraRating = leo && listing?.listingRating && leo.airbnbUrl
+    ? { ...listing.listingRating, home: leo.name, href: leo.airbnbUrl }
+    : undefined;
   return (
     <main>
       <JsonLd data={[webSiteJsonLd(), faqJsonLd(questions)]} />
@@ -134,6 +141,9 @@ export default async function Home() {
           ))}
         </div>
       </section>
+
+      {/* Owner reviews, plus the guest rating from the platform listing */}
+      <Testimonials rating={leonoraRating} />
 
       {/* FAQ: what visitors ask before booking */}
       <section className="bg-mist">
