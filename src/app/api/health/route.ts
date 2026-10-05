@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { clerkConfigured } from "@/lib/clerk-config";
-import { supabaseAdmin, supabaseConfigured } from "@/lib/supabase";
+import { supabaseAdmin, supabaseAdminConfigured, supabaseConfigured } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
@@ -57,8 +57,15 @@ export async function GET() {
       database,
     },
     CRON_SECRET: env("CRON_SECRET"),
+    // Contact form: email goes out through Resend; messages are saved to contact_messages either way.
+    contactEmail: {
+      RESEND_API_KEY: env("RESEND_API_KEY"),
+      EMAIL_FROM: process.env.EMAIL_FROM ? process.env.EMAIL_FROM.replace(/.*</, "<") : "default <hello@westcoasthostingco.com>",
+      CONTACT_TO: process.env.CONTACT_TO ? "set" : "default hello@westcoasthostingco.com",
+      savesToDatabase: supabaseAdminConfigured,
+    },
     // Names (never values) of related variables this deployment can see, to
     // catch typos or a missing Production tick in Vercel.
-    variableNamesSeen: Object.keys(process.env).filter((k) => /SUPABASE|CLERK|CRON/i.test(k)).sort(),
+    variableNamesSeen: Object.keys(process.env).filter((k) => /SUPABASE|CLERK|CRON|RESEND|EMAIL|CONTACT|TURNSTILE/i.test(k)).sort(),
   }, { headers: { "Cache-Control": "no-store" } });
 }

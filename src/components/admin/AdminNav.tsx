@@ -11,6 +11,7 @@ const nav: [string, string][] = [
   ["/admin/owners", "Owners"],
   ["/admin/accounting", "Accounting"],
   ["/admin/reviews", "Reviews"],
+  ["/admin/messages", "Messages"],
   ["/admin/settings/integrations", "Integrations"],
 ];
 

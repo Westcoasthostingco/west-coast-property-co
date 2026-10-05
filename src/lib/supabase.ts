@@ -9,6 +9,7 @@ const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PU
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
 
 export const supabaseConfigured = Boolean(url && anonKey);
+export const supabaseAdminConfigured = Boolean(url && serviceKey);
 
 // Every Supabase call gives up after 10 seconds, so a network problem shows an
 // error page instead of leaving a click hanging with no feedback.
