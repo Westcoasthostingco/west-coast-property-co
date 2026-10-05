@@ -72,7 +72,7 @@ export function propertyLongDescription(p: Property): string {
     p.summary,
     ...(getListingContent(p.slug)?.about.slice(1) ?? []),
     `Amenities include ${list(p.amenities)}.`,
-    `Prices, fees, and Washington lodging taxes are shown and charged by ${bookingPlatformNames(p)} when you book, and the listing sets the house rules and cancellation policy. Minimum stay is usually ${p.minNights ?? 2} nights.`,
+    `Prices, fees, and Washington lodging taxes are shown and charged by ${bookingPlatformNames(p)} when you book, and the listing sets the house rules and cancellation policy. Minimum stay is usually ${p.minNights ?? 2} ${(p.minNights ?? 2) === 1 ? "night" : "nights"}.`,
     p.reviewCount > 0 ? `Guests rate it ${p.rating.toFixed(1)} out of 5 across ${p.reviewCount} reviews.` : "",
     p.tideStationId ? "It is a waterfront home." : "",
     p.skiResort ? `The nearest ski area is ${p.skiResort.name}.` : "",

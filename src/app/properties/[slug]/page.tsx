@@ -121,7 +121,7 @@ export default async function PropertyPage({ params }: PageProps<"/properties/[s
               <div><dt className="caps-tight text-[0.6rem] text-muted">Bedrooms</dt><dd className="mt-1 text-lg text-charcoal">{p.bedrooms}</dd></div>
               <div><dt className="caps-tight text-[0.6rem] text-muted">Baths</dt><dd className="mt-1 text-lg text-charcoal">{p.bathrooms}</dd></div>
               <div><dt className="caps-tight text-[0.6rem] text-muted">Sleeps</dt><dd className="mt-1 text-lg text-charcoal">{p.guests}</dd></div>
-              <div><dt className="caps-tight text-[0.6rem] text-muted">Minimum stay</dt><dd className="mt-1 text-lg text-charcoal">{p.minNights ?? 2} nights</dd></div>
+              <div><dt className="caps-tight text-[0.6rem] text-muted">Minimum stay</dt><dd className="mt-1 text-lg text-charcoal">{nightsLabel(p.minNights ?? 2)}</dd></div>
             </dl>
             <BookOn p={p} className="mt-6" />
           </aside>
@@ -208,7 +208,7 @@ export default async function PropertyPage({ params }: PageProps<"/properties/[s
                 ]
               : [
                   ["Check-in", "Usually after 3:00 pm"], ["Check-out", "Usually by 11:00 am"],
-                  ["Minimum stay", `${p.minNights ?? 2} nights`], ["Sleeps", `${p.guests} guests`],
+                  ["Minimum stay", nightsLabel(p.minNights ?? 2)], ["Sleeps", `${p.guests} guests`],
                   ["Pets", petsWelcome ? "Listed as welcome, see house rules" : "See the listing's house rules"], ["Booking and cancellation", `Through ${where}, under the listing's policy`],
                 ]
             ).map(([k, v], i) => (
@@ -303,3 +303,5 @@ function GalleryPhoto({ ph, name, className = "" }: { ph: ListingPhoto; name: st
     </div>
   );
 }
+
+const nightsLabel = (n: number) => `${n} ${n === 1 ? "night" : "nights"}`;
