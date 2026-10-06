@@ -28,6 +28,7 @@ export type TideReport = {
 export const TIDE_STATIONS: Record<string, string> = {
   "9446484": "Tacoma, Commencement Bay",
   "9445478": "Union, Hood Canal",
+  "9446366": "Vaughn, Case Inlet",
 };
 
 export function stationName(id: string) {
