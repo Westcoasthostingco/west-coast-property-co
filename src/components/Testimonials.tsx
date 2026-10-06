@@ -55,7 +55,7 @@ export default function Testimonials({ rating, photo }: { rating?: Rating; photo
             <h2 id="owners-say" className="sr-only">What owners say</h2>
             <span aria-hidden="true" className="display -mb-10 mt-2 block text-[8rem] leading-none text-wave/35 sm:-mb-16 sm:text-[10rem]">&ldquo;</span>
             <blockquote>
-              <p className="display text-3xl leading-[1.15] text-white sm:text-[2.6rem]">{lead.headline}</p>
+              <p className="display text-3xl leading-[1.15] text-white sm:text-[2.3rem]">{lead.headline}</p>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-cream/85">{lead.body}</p>
             </blockquote>
             <figcaption className="mt-10 max-w-xl border-t border-cream/20 pt-6"><Person t={lead} /></figcaption>
