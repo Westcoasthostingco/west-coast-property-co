@@ -7,7 +7,7 @@ import { getProperties } from "@/lib/data";
 import { itemListJsonLd } from "@/lib/seo";
 
 const description =
-  "Three vacation homes in Washington: The Grand View in Gig Harbor, The Leonora by the Sea on Hood Canal, and The Bedrock near Mount Rainier. Book on Airbnb or Vrbo.";
+  "Four vacation homes in Washington: The Grand View and The Bay House in Gig Harbor, The Leonora by the Sea on Hood Canal, and The Bedrock near Mount Rainier. Book on Airbnb or Vrbo.";
 export const metadata: Metadata = {
   title: "Vacation homes in Gig Harbor, Hood Canal & Mount Rainier",
   description,
@@ -40,7 +40,7 @@ export default async function Properties({ searchParams }: PageProps<"/propertie
         {list.length} {list.length === 1 ? "home" : "homes"}{guests ? ` for ${guests} ${guests === 1 ? "guest" : "guests"}` : ""}
 . Open a home for photos and details; live dates and prices are on its Airbnb or Vrbo listing.
       </p>
-      <div className="mt-6 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-6 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
         {list.map((p) => <PropertyCard key={p.id} p={p} />)}
       </div>
       {list.length === 0 && (

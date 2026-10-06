@@ -21,7 +21,7 @@ export default function PrivacyPage() {
   return (
     <LegalLayout eyebrow="Legal" title="Privacy Notice" sections={sections} intro="We are a two-person company, and we treat your information the way we would want ours treated: we collect only what this site and our portals need, we keep it with reputable providers, and we never sell it.">
       <Section id="who-we-are" title="Who we are">
-        <p>West Coast Hosting Co is based in Gig Harbor, Washington, and run by Christi Young and Melissa Heckman. We publish westcoasthostingco.com, a showcase of vacation homes in Washington, including The Grand View in Gig Harbor, The Leonora by the Sea on Hood Canal, and The Bedrock in Randle near Mount Rainier. This notice covers the website, the invitation-only portals, and the emails we send.</p>
+        <p>West Coast Hosting Co is based in Gig Harbor, Washington, and run by Christi Young and Melissa Heckman. We publish westcoasthostingco.com, a showcase of vacation homes in Washington, including The Grand View and The Bay House in Gig Harbor, The Leonora by the Sea on Hood Canal, and The Bedrock in Randle near Mount Rainier. This notice covers the website, the invitation-only portals, and the emails we send.</p>
         <p>Our website is a showcase only. It does not take reservations or payments, and it does not receive your booking or payment details. When you book one of the homes, Airbnb or Vrbo and the listing’s host handle your information under the platform’s privacy policy.</p>
         <p>For the purposes of privacy law, West Coast Hosting Co is the “controller” of the information described here, meaning we decide why and how it is used.</p>
       </Section>
