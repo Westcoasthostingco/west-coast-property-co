@@ -102,7 +102,7 @@ export default async function Home() {
           <SectionHeading eyebrow="The homes" title="Coast to Cascades" intro="Four homes, four very different views of Washington. Explore them here, then book on Airbnb or Vrbo." />
           <Link href="/properties" className="caps-tight text-[0.7rem] text-deep hover:text-deep">See all homes →</Link>
         </div>
-        <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 grid gap-8 sm:grid-cols-2 2xl:grid-cols-4">
           {properties.map((p) => <PropertyCard key={p.id} p={p} />)}
         </div>
       </section>

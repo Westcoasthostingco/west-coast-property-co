@@ -40,7 +40,7 @@ export default async function Properties({ searchParams }: PageProps<"/propertie
         {list.length} {list.length === 1 ? "home" : "homes"}{guests ? ` for ${guests} ${guests === 1 ? "guest" : "guests"}` : ""}
 . Open a home for photos and details; live dates and prices are on its Airbnb or Vrbo listing.
       </p>
-      <div className="mt-6 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-6 grid gap-8 sm:grid-cols-2 2xl:grid-cols-4">
         {list.map((p) => <PropertyCard key={p.id} p={p} />)}
       </div>
       {list.length === 0 && (
