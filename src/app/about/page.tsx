@@ -23,7 +23,7 @@ export default function About() {
           <h1 className="display mt-2 text-5xl text-deep">Meet West Coast Hosting Co.</h1>
           <div className="mt-8 space-y-5 text-lg leading-relaxed">
             <p>We are Christi and Melissa, longtime friends and business partners from Gig Harbor, with 22 years of combined experience in real estate and sales, all rooted here in the Puget Sound region.</p>
-            <p>We built this site to show off three Washington homes the way a listing page can&apos;t: bigger photos, the neighborhood, the view, and what&apos;s worth doing nearby, from the shores of Hood Canal to the heart of downtown Gig Harbor to the foothills near Mount Rainier.</p>
+            <p>We built this site to show off four Washington homes the way a listing page can&apos;t: bigger photos, the neighborhood, the view, and what&apos;s worth doing nearby, from the shores of Hood Canal to the heart of downtown Gig Harbor to the foothills near Mount Rainier.</p>
             <p>When you find the one you want, each home&apos;s page takes you straight to its Airbnb or Vrbo listing, where you see live prices and book with the host.</p>
           </div>
           <p className="display mt-10 text-3xl text-deep">Coast to Cascades.</p>
@@ -34,7 +34,7 @@ export default function About() {
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
           <p className="caps text-xs text-deep">At a glance</p>
           <ul className="mt-6 grid gap-6 sm:grid-cols-3">
-            {["Three homes, from Hood Canal to Mount Rainier", "Based in Gig Harbor, Washington", "Booked on Airbnb and Vrbo"].map((t) => (
+            {["Four homes, from Hood Canal to Mount Rainier", "Based in Gig Harbor, Washington", "Booked on Airbnb and Vrbo"].map((t) => (
               <li key={t} className="display text-2xl text-charcoal">{t}</li>
             ))}
           </ul>

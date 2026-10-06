@@ -171,7 +171,7 @@ export function itemListJsonLd(properties: Property[]): Thing {
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: `${SITE_NAME} vacation homes`,
-    description: "Vacation homes showcased by West Coast Hosting Co in Gig Harbor, Hood Canal, and Randle near Mount Rainier, Washington.",
+    description: "Vacation homes showcased by West Coast Hosting Co in Gig Harbor, Rocky Bay, Hood Canal, and Randle near Mount Rainier, Washington.",
     url: absUrl("/properties"),
     numberOfItems: properties.length,
     itemListOrder: "https://schema.org/ItemListUnordered",

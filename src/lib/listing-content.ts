@@ -1579,6 +1579,382 @@ export const listingContent: Record<string, ListingContent> = {
     ],
     "source": "https://www.airbnb.com/rooms/1780528394795968142"
   },
+  "the-bay-house": {
+    "about": [
+      "Evenings here are meant to slow down. Soak in the hot tub overlooking the bay and tideflats, gather under the covered patio with the fireplace glowing, and enjoy outdoor living designed for rain or shine.",
+      "Inside, this single-level home is built for gathering: tall ceilings and large windows frame the water, the living area has comfortable seating and a Smart TV, and the kitchen has stainless appliances, a breakfast bar, and dining for six.",
+      "The covered patio is the heart of the home, a furnished outdoor living room with sectional seating, a dining table for six, a gas fireplace, a TV, and a grill. Steps away, the private hot tub overlooks the bay and its changing tides, and a fire pit with seating sits on the large lawn.",
+      "The primary suite has a king bed, patio access to the hot tub, a Smart TV, and an en-suite bath with double sinks. Two more bedrooms have queen beds and share a full bath. Air conditioning in the main living area, ceiling fans, a whole-house generator, a washer and dryer, and driveway parking for three cars round it out.",
+      "The home sits on elevated, high-bank waterfront over a quiet saltwater bay, where the tides shift twice a day and eagles, herons, salmon, and the occasional seal pass through. There is no direct beach access from the yard, but a public shoreline trail is just down the road. The home has a Gig Harbor address and is about 25 minutes from downtown along scenic WA-302, near Allyn and Belfair."
+    ],
+    "highlights": [
+      {
+        "title": "On Rocky Bay, outside Gig Harbor",
+        "body": "A waterfront setting on Rocky Bay with shifting tides, wildlife, and views of the saltwater inlet"
+      },
+      {
+        "title": "Year-round outdoor living room",
+        "body": "A covered patio with a gas fireplace, sectional seating, dining for six, and a grill"
+      }
+    ],
+    "sleeping": [
+      {
+        "room": "Bedroom 1",
+        "beds": "1 king bed"
+      },
+      {
+        "room": "Bedroom 2",
+        "beds": "1 queen bed"
+      },
+      {
+        "room": "Bedroom 3",
+        "beds": "1 queen bed"
+      }
+    ],
+    "amenityGroups": [
+      {
+        "title": "Scenic views",
+        "items": [
+          "Bay view",
+          "Beach view"
+        ]
+      },
+      {
+        "title": "Bathroom",
+        "items": [
+          "Bathtub",
+          "Hair dryer",
+          "Cleaning products",
+          "Shampoo",
+          "Conditioner",
+          "Body soap",
+          "Outdoor shower",
+          "Hot water",
+          "Shower gel"
+        ]
+      },
+      {
+        "title": "Bedroom and laundry",
+        "items": [
+          "Free washer – In unit",
+          "Free dryer – In unit",
+          "Essentials (Towels, bed sheets, soap, and toilet paper)",
+          "Hangers",
+          "Bed linens",
+          "Extra pillows and blankets",
+          "Room-darkening shades",
+          "Iron",
+          "Clothing storage: closet and dresser"
+        ]
+      },
+      {
+        "title": "Entertainment",
+        "items": [
+          "HDTV with DVD player, Roku",
+          "Bluetooth Speaker  Bluetooth sound system",
+          "Books and reading material",
+          "Life size games"
+        ]
+      },
+      {
+        "title": "Family",
+        "items": [
+          "Crib",
+          "Pack ’n play / travel crib - always at the listing",
+          "Board games"
+        ]
+      },
+      {
+        "title": "Heating and cooling",
+        "items": [
+          "AC - split type ductless system",
+          "Ceiling fan",
+          "Central heating",
+          "Heating - split type ductless system"
+        ]
+      },
+      {
+        "title": "Home safety",
+        "items": [
+          "Exterior security cameras on property",
+          "Smoke alarm",
+          "Carbon monoxide alarm",
+          "Fire extinguisher",
+          "First aid kit"
+        ]
+      },
+      {
+        "title": "Internet and office",
+        "items": [
+          "Wifi",
+          "Dedicated workspace (In a common space)"
+        ]
+      },
+      {
+        "title": "Kitchen and dining",
+        "items": [
+          "Kitchen",
+          "GE refrigerator",
+          "Cooking basics (Pots and pans, oil, salt and pepper)",
+          "Dishes and silverware (Plates, bowls, cups, cutlery, and other utensils)",
+          "Freezer",
+          "Dishwasher",
+          "GE Electric flat top range stainless steel electric stove",
+          "GE electric flat top range  stainless steel oven",
+          "Hot water kettle",
+          "Coffee maker: drip coffee maker",
+          "Wine glasses",
+          "Toaster",
+          "Baking sheet",
+          "Blender",
+          "Barbecue utensils (Grill, charcoal, bamboo skewers/iron skewers, etc.)",
+          "Dining table",
+          "Coffee"
+        ]
+      },
+      {
+        "title": "Location features",
+        "items": [
+          "Waterfront",
+          "Private entrance (Separate street or building entrance)"
+        ]
+      },
+      {
+        "title": "Outdoor",
+        "items": [
+          "Private patio or balcony",
+          "Private backyard – Not fully fenced",
+          "Fire pit",
+          "Outdoor furniture",
+          "Outdoor dining area",
+          "BBQ grill: gas"
+        ]
+      },
+      {
+        "title": "Parking and facilities",
+        "items": [
+          "Free driveway parking on premises – 3 spaces",
+          "Private hot tub - available all year, open 24 hours",
+          "Single level home"
+        ]
+      },
+      {
+        "title": "Services",
+        "items": [
+          "Pets allowed (Assistance animals are always allowed)",
+          "Self check-in",
+          "Keypad (Check yourself into the home with a door code)"
+        ]
+      }
+    ],
+    "notIncluded": [],
+    "rules": [
+      {
+        "title": "Check-in after 4:00 PM, until 11:00 PM"
+      },
+      {
+        "title": "Checkout before 11:00 AM"
+      },
+      {
+        "title": "Self check-in with keypad"
+      },
+      {
+        "title": "6 guests maximum"
+      },
+      {
+        "title": "Pets allowed"
+      },
+      {
+        "title": "No parties or events"
+      },
+      {
+        "title": "No smoking"
+      },
+      {
+        "title": "Gather used towels"
+      },
+      {
+        "title": "Throw trash away"
+      },
+      {
+        "title": "Turn things off"
+      },
+      {
+        "title": "Lock up"
+      }
+    ],
+    "safety": [
+      "Pool/hot tub without a gate or lock",
+      "Heights without rails or protection",
+      "Nearby lake, river, other body of water",
+      "Exterior security cameras on property",
+      "Carbon monoxide alarm installed",
+      "Smoke alarm installed",
+      "Potential for noise"
+    ],
+    "locationLabel": "Rocky Bay, outside Gig Harbor, Washington",
+    "locationSummary": "High-bank waterfront on a quiet saltwater bay along WA-302, about 15 miles from downtown Gig Harbor. Cell reception can vary; Wi-Fi calling helps. The home is near a two-lane road, so some traffic noise is possible from the driveway and rear bedrooms.",
+    "nearby": [
+      {
+        "place": "Downtown Gig Harbor",
+        "distance": "about 25 min drive"
+      },
+      {
+        "place": "Allyn and Belfair",
+        "distance": "nearby"
+      },
+      {
+        "place": "Public shoreline trail",
+        "distance": "just down the road"
+      }
+    ],
+    "listingRating": {
+      "value": 4.87,
+      "count": 63,
+      "platform": "Airbnb"
+    },
+    "photos": [
+      {
+        "src": "/photos/the-bay-house/01.webp",
+        "room": "Living room",
+        "width": 1280,
+        "height": 853
+      },
+      {
+        "src": "/photos/the-bay-house/02.webp",
+        "room": "Living room",
+        "width": 1280,
+        "height": 960
+      },
+      {
+        "src": "/photos/the-bay-house/03.webp",
+        "room": "Living room",
+        "width": 1280,
+        "height": 853
+      },
+      {
+        "src": "/photos/the-bay-house/04.webp",
+        "room": "Kitchen",
+        "width": 1280,
+        "height": 960
+      },
+      {
+        "src": "/photos/the-bay-house/05.webp",
+        "room": "Kitchen",
+        "width": 1280,
+        "height": 964
+      },
+      {
+        "src": "/photos/the-bay-house/06.webp",
+        "room": "Dining area",
+        "width": 1280,
+        "height": 853
+      },
+      {
+        "src": "/photos/the-bay-house/07.webp",
+        "room": "Primary suite",
+        "width": 1280,
+        "height": 853
+      },
+      {
+        "src": "/photos/the-bay-house/08.webp",
+        "room": "Primary suite",
+        "width": 1280,
+        "height": 960
+      },
+      {
+        "src": "/photos/the-bay-house/09.webp",
+        "room": "Bedrooms",
+        "width": 1280,
+        "height": 960
+      },
+      {
+        "src": "/photos/the-bay-house/10.webp",
+        "room": "Bedrooms",
+        "width": 1280,
+        "height": 960
+      },
+      {
+        "src": "/photos/the-bay-house/11.webp",
+        "room": "Bathrooms",
+        "width": 1280,
+        "height": 964
+      },
+      {
+        "src": "/photos/the-bay-house/12.webp",
+        "room": "Bathrooms",
+        "width": 1280,
+        "height": 1700
+      },
+      {
+        "src": "/photos/the-bay-house/13.webp",
+        "room": "Rocky Bay",
+        "width": 1280,
+        "height": 853
+      },
+      {
+        "src": "/photos/the-bay-house/14.webp",
+        "room": "Fire pit",
+        "width": 1280,
+        "height": 853
+      },
+      {
+        "src": "/photos/the-bay-house/15.webp",
+        "room": "Rocky Bay",
+        "width": 1280,
+        "height": 960
+      },
+      {
+        "src": "/photos/the-bay-house/16.webp",
+        "room": "Covered patio",
+        "width": 1280,
+        "height": 960
+      },
+      {
+        "src": "/photos/the-bay-house/17.webp",
+        "room": "Covered patio",
+        "width": 1280,
+        "height": 967
+      },
+      {
+        "src": "/photos/the-bay-house/18.webp",
+        "room": "Covered patio",
+        "width": 1280,
+        "height": 853
+      },
+      {
+        "src": "/photos/the-bay-house/19.webp",
+        "room": "Exterior",
+        "width": 1280,
+        "height": 946
+      },
+      {
+        "src": "/photos/the-bay-house/20.webp",
+        "room": "Exterior",
+        "width": 1280,
+        "height": 842
+      },
+      {
+        "src": "/photos/the-bay-house/21.webp",
+        "room": "Hot tub",
+        "width": 1280,
+        "height": 960
+      },
+      {
+        "src": "/photos/the-bay-house/22.webp",
+        "room": "Hot tub",
+        "width": 1280,
+        "height": 853
+      }
+    ],
+    "featured": [
+      21,
+      0,
+      17,
+      7
+    ],
+    "source": "https://www.airbnb.com/rooms/53129855"
+  },
 };
 
 export const getListingContent = (slug: string): ListingContent | undefined => listingContent[slug];

@@ -22,13 +22,13 @@ export async function GET() {
 
   const text = `# ${SITE_NAME}
 
-> ${SITE_NAME} publishes a showcase of vacation homes in Washington, from Hood Canal to Gig Harbor to Mount Rainier: The Grand View in Gig Harbor, The Leonora by the Sea on Hood Canal, and The Bedrock in Randle. ${TAGLINE}.
+> ${SITE_NAME} publishes a showcase of vacation homes in Washington, from Hood Canal to Gig Harbor to Mount Rainier: The Grand View and The Bay House in Gig Harbor, The Leonora by the Sea on Hood Canal, and The Bedrock in Randle. ${TAGLINE}.
 
 This website is a showcase only. It shows photos, details, and local context for each home and links to the home's listing. It does not take bookings or payments, and ${SITE_NAME} is not a party to reservations. Guests book each home with the host on Airbnb, or on Vrbo where it is listed, using the links on each home's page. The site is run by ${FOUNDERS.join(" and ")} in ${CONTACT.locality}, Washington.
 
 ## Key pages
 
-- [Home](${absUrl("/")}): Overview of the three homes, how booking works, a search by area and guest count, and answers to common questions.
+- [Home](${absUrl("/")}): Overview of the four homes, how booking works, a search by area and guest count, and answers to common questions.
 - [The homes](${absUrl("/properties")}): Every home on the site, filterable by area (Gig Harbor, Hood Canal, Randle) and guest count.
 - [About](${absUrl("/about")}): Who Christi and Melissa are and why they built the site.
 - [Contact](${absUrl("/contact")}): Email and phone for questions about the homes or the site. Reservation questions go to the host on Airbnb or Vrbo.

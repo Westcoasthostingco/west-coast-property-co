@@ -64,7 +64,7 @@ const steps = [
 ];
 
 const regions = [
-  { name: "Gig Harbor", slug: "the-grand-view", blurb: "Waterfront shops and restaurants, with Puget Sound and Mount Rainier on the horizon." },
+  { name: "Gig Harbor", slug: "the-grand-view", blurb: "Downtown waterfront shops and restaurants, or a quiet bay 25 minutes out, with Puget Sound and Mount Rainier on the horizon." },
   { name: "Hood Canal", slug: "the-leonora-by-the-sea", blurb: "Oyster beaches, Olympic Mountain views, and trailheads into Olympic National Park." },
   { name: "Randle", slug: "the-bedrock", blurb: "Mountain air and quiet forest near Packwood, Mount Rainier, and White Pass." },
 ];
@@ -87,7 +87,7 @@ export default async function Home() {
         <div className="mx-auto flex min-h-[86vh] max-w-7xl flex-col justify-end px-4 pb-14 pt-32 text-white sm:px-6">
           <p className="caps text-xs text-white/80">Vacation homes in Washington</p>
           <h1 className="display mt-3 max-w-4xl text-5xl leading-[1.05] sm:text-7xl">
-            Three homes. Three views.<br />One unforgettable Washington.
+            Four homes. Four views.<br />One unforgettable Washington.
           </h1>
           <p className="mt-5 max-w-xl text-lg text-white/85">
             From the shores of Hood Canal to downtown Gig Harbor to the foothills near Mount Rainier.
@@ -99,10 +99,10 @@ export default async function Home() {
       {/* Homes */}
       <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6">
         <div className="flex flex-wrap items-end justify-between gap-6">
-          <SectionHeading eyebrow="The homes" title="Coast to Cascades" intro="Three homes, three very different views of Washington. Explore them here, then book on Airbnb or Vrbo." />
+          <SectionHeading eyebrow="The homes" title="Coast to Cascades" intro="Four homes, four very different views of Washington. Explore them here, then book on Airbnb or Vrbo." />
           <Link href="/properties" className="caps-tight text-[0.7rem] text-deep hover:text-deep">See all homes →</Link>
         </div>
-        <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {properties.map((p) => <PropertyCard key={p.id} p={p} />)}
         </div>
       </section>
