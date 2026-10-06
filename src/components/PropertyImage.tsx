@@ -14,6 +14,11 @@ const photos: Record<string, string[]> = {
   hero: ["/photos/the-grand-view-1.webp"],
 };
 
+/** Public path of a home's card/hero photo, or null when only the illustration exists. */
+export function coverPhoto(slug: string): string | null {
+  return photos[slug]?.[0] ?? null;
+}
+
 export default function PropertyImage({ slug, name, className = "", crop = 0, priority = false, sizes = "(min-width: 1024px) 33vw, 100vw" }: { slug: string; name: string; className?: string; crop?: number; priority?: boolean; sizes?: string }) {
   const scene = scenes[slug as keyof typeof scenes] ?? "harbor";
   const src = photos[slug]?.[crop];

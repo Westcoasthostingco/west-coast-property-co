@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import PropertyImage from "@/components/PropertyImage";
+import PropertyImage, { coverPhoto } from "@/components/PropertyImage";
+import PhotoGallery from "@/components/PhotoGallery";
 import Amenities from "@/components/Amenities";
 import BookOn, { hasBookingLink } from "@/components/BookOn";
 import JsonLd from "@/components/seo/JsonLd";
@@ -144,28 +144,19 @@ export default async function PropertyPage({ params }: PageProps<"/properties/[s
         {/* Photos */}
         <section id="gallery" className="scroll-mt-32 pb-14">
           <h2 className="caps text-xs text-deep">Photos</h2>
-          <div className="mt-5 grid gap-2 overflow-hidden rounded-3xl sm:grid-cols-4 sm:grid-rows-2">
-            <PropertyImage slug={p.slug} name={`${p.name}, ${p.city}, Washington`} sizes="(min-width: 640px) 50vw, 100vw" className="aspect-[4/3] sm:col-span-2 sm:row-span-2 sm:aspect-auto" />
-            {c
-              ? c.featured.map((i) => c.photos[i]).filter(Boolean).map((ph) => <GalleryPhoto key={ph.src} ph={ph} name={p.name} className="hidden aspect-[4/3] sm:block" />)
-              : [1, 2, 3, 4].map((i) => <PropertyImage key={i} slug={p.slug} name={`${p.name} ${i}`} crop={i} sizes="(min-width: 640px) 25vw, 100vw" className="hidden aspect-[4/3] sm:block" />)}
-          </div>
-          {c && c.photos.length > 0 && (
-            <details className="group mt-4">
-              <summary className="ui inline-flex cursor-pointer list-none items-center gap-2 rounded-full border border-deep px-5 py-2.5 text-[0.8rem] font-medium text-deep transition hover:bg-deep hover:text-white">
-                <span className="group-open:hidden">Show all {c.photos.length} photos</span><span className="hidden group-open:inline">Hide photos</span>
-              </summary>
-              <div className="mt-6 space-y-10">
-                {groupByRoom(c.photos).map(([room, list]) => (
-                  <div key={room}>
-                    <h3 className="display text-2xl text-charcoal">{room}</h3>
-                    <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-3">
-                      {list.map((ph) => <GalleryPhoto key={ph.src} ph={ph} name={p.name} className="aspect-[4/3] rounded-xl" />)}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </details>
+          {c ? (
+            <PhotoGallery
+              name={p.name}
+              cover={{ src: coverPhoto(p.slug), node: <PropertyImage slug={p.slug} name={`${p.name}, ${p.city}, Washington`} sizes="(min-width: 640px) 50vw, 100vw" className="h-full w-full transition group-hover/ph:scale-[1.02]" /> }}
+              photos={c.photos}
+              featured={c.featured}
+              groups={groupByRoom(c.photos)}
+            />
+          ) : (
+            <div className="mt-5 grid gap-2 overflow-hidden rounded-3xl sm:grid-cols-4 sm:grid-rows-2">
+              <PropertyImage slug={p.slug} name={`${p.name}, ${p.city}, Washington`} sizes="(min-width: 640px) 50vw, 100vw" className="aspect-[4/3] sm:col-span-2 sm:row-span-2 sm:aspect-auto" />
+              {[1, 2, 3, 4].map((i) => <PropertyImage key={i} slug={p.slug} name={`${p.name} ${i}`} crop={i} sizes="(min-width: 640px) 25vw, 100vw" className="hidden aspect-[4/3] sm:block" />)}
+            </div>
           )}
         </section>
 
@@ -296,12 +287,5 @@ function groupByRoom(photos: ListingPhoto[]): [string, ListingPhoto[]][] {
   return [...groups.entries()];
 }
 
-function GalleryPhoto({ ph, name, className = "" }: { ph: ListingPhoto; name: string; className?: string }) {
-  return (
-    <div className={`relative overflow-hidden ${className}`}>
-      <Image src={ph.src} alt={`${name}: ${ph.room.toLowerCase()}`} fill sizes="(min-width: 768px) 33vw, 50vw" className="object-cover" />
-    </div>
-  );
-}
 
 const nightsLabel = (n: number) => `${n} ${n === 1 ? "night" : "nights"}`;
