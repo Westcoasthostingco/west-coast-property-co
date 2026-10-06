@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import PropertyImage, { coverPhoto } from "@/components/PropertyImage";
 import PhotoGallery from "@/components/PhotoGallery";
+import LocationMap from "@/components/LocationMap";
 import Amenities from "@/components/Amenities";
 import BookOn, { hasBookingLink } from "@/components/BookOn";
 import JsonLd from "@/components/seo/JsonLd";
@@ -215,19 +216,21 @@ export default async function PropertyPage({ params }: PageProps<"/properties/[s
         {c && (
           <section id="location" className="scroll-mt-32 pb-14">
             <h2 className="caps text-xs text-deep">Location</h2>
-            <div className="mt-5 grid gap-8 md:grid-cols-[1.2fr_1fr]">
+            <div className="mt-5 grid gap-8 lg:grid-cols-[1fr_1.2fr]">
               <div>
                 <p className="display text-3xl text-charcoal">{c.locationLabel}</p>
                 {c.locationSummary && <p className="mt-3 max-w-xl leading-relaxed text-muted">{c.locationSummary}</p>}
-                <p className="ui mt-4 text-xs text-muted">The host shares the exact address after you book.</p>
+                {c.nearby.length > 0 && (
+                  <dl className="ui mt-6 grid gap-2 text-sm">
+                    {c.nearby.map((n) => (
+                      <div key={n.place} className="flex justify-between gap-4 border-b border-line pb-2"><dt>{n.place}</dt><dd className="text-muted">{n.distance}</dd></div>
+                    ))}
+                  </dl>
+                )}
               </div>
-              {c.nearby.length > 0 && (
-                <dl className="ui grid gap-2 text-sm">
-                  {c.nearby.map((n) => (
-                    <div key={n.place} className="flex justify-between gap-4 border-b border-line pb-2"><dt>{n.place}</dt><dd className="text-muted">{n.distance}</dd></div>
-                  ))}
-                </dl>
-              )}
+              {typeof p.lat === "number" && typeof p.lng === "number"
+                ? <LocationMap lat={p.lat} lng={p.lng} name={p.name} />
+                : <p className="ui text-xs text-muted">The host shares the exact address after you book.</p>}
             </div>
           </section>
         )}

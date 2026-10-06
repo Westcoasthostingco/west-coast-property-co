@@ -103,10 +103,8 @@ function sampleBookings(): Booking[] {
 }
 export const bookings: Booking[] = sampleBookings();
 
-export const reviews: Review[] = [
-  { id: "r1", propertyId: "p1", guest: "A. Rivera", rating: 5, body: "Woke up to Mount Rainier over the harbor. Christi and Melissa thought of everything.", status: "published" },
-  { id: "r2", propertyId: "p3", guest: "S. Patel", rating: 5, body: "Quiet, cozy, and the hot tub after a day at Rainier was perfect.", status: "pending" },
-];
+// No sample reviews: the public site must never show a review that a real guest didn't write.
+export const reviews: Review[] = [];
 
 export const money = (n: number) =>
   n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });

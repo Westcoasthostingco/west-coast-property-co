@@ -15,7 +15,7 @@ const csp = [
   "font-src 'self' data: https://fonts.gstatic.com",
   `img-src 'self' data: blob: https://img.clerk.com https://*.supabase.co${supabaseHost ? ` https://${supabaseHost}` : ""}`,
   "connect-src 'self' https://*.clerk.accounts.dev https://clerk.westcoasthostingco.com https://*.supabase.co https://challenges.cloudflare.com https://va.vercel-scripts.com https://vitals.vercel-insights.com",
-  "frame-src https://challenges.cloudflare.com https://*.clerk.accounts.dev https://clerk.westcoasthostingco.com",
+  "frame-src https://challenges.cloudflare.com https://*.clerk.accounts.dev https://clerk.westcoasthostingco.com https://www.google.com",
   "worker-src 'self' blob:",
   "frame-ancestors 'self'",
   "base-uri 'self'",
