@@ -1,16 +1,17 @@
-// Stylized map: Hood Canal, Gig Harbor and Randle (Mount Rainier) with a dashed
-// route between the three homes. Not to scale; a brand illustration.
+// Stylized map: Hood Canal, Rocky Bay, Gig Harbor and Randle (Mount Rainier) with a
+// dashed route between the homes. Not to scale; a brand illustration.
 const C = { teal: "#6ba8bc", sky: "#8fc0ce", wave: "#a8d0dc", mist: "#eef5f7", charcoal: "#3a4448", pine: "#5a7580" };
 
 const homes = [
   { x: 150, y: 150, name: "The Leonora", place: "Hood Canal", anchor: "end" as const, dx: -16 },
+  { x: 230, y: 265, name: "Rocky Bay Cabin", place: "Rocky Bay", anchor: "end" as const, dx: -16 },
   { x: 300, y: 215, name: "The Grand View", place: "Gig Harbor", anchor: "start" as const, dx: 16 },
   { x: 460, y: 330, name: "The Bedrock", place: "Randle", anchor: "start" as const, dx: 16 },
 ];
 
 export default function CoastToCascades({ className = "" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 600 420" className={className} role="img" aria-label="Map of the three homes from Hood Canal to Mount Rainier">
+    <svg viewBox="0 0 600 420" className={className} role="img" aria-label="Map of the homes from Hood Canal to Mount Rainier">
       <rect width="600" height="420" rx="24" fill={C.mist} />
       {/* water: Puget Sound and Hood Canal, abstracted */}
       <path d="M190,0 c-30,60 10,90 -20,150 c-25,50 10,80 40,110 c25,25 5,70 -10,90 c-10,15 20,40 30,70 L600,420 L600,0 Z" fill={C.wave} opacity="0.55" />
@@ -25,7 +26,7 @@ export default function CoastToCascades({ className = "" }: { className?: string
       <path d="M494,194 l11,-24 l11,24 z" fill="#fbfdfc" />
       <text x="505" y="262" textAnchor="middle" fontSize="11" fontFamily="var(--font-poppins)" letterSpacing="2" fill={C.charcoal} opacity="0.7">MT RAINIER</text>
       {/* route */}
-      <path d={`M${homes[0].x},${homes[0].y} Q220,200 ${homes[1].x},${homes[1].y} Q380,260 ${homes[2].x},${homes[2].y}`} fill="none" stroke={C.teal} strokeWidth="2" strokeDasharray="6 7" strokeLinecap="round" />
+      <path d={`M${homes[0].x},${homes[0].y} Q175,230 ${homes[1].x},${homes[1].y} Q270,265 ${homes[2].x},${homes[2].y} Q380,260 ${homes[3].x},${homes[3].y}`} fill="none" stroke={C.teal} strokeWidth="2" strokeDasharray="6 7" strokeLinecap="round" />
       {homes.map((h) => (
         <g key={h.name}>
           <circle cx={h.x} cy={h.y} r="14" fill={C.teal} opacity="0.25" />
