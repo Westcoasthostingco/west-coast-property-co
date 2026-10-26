@@ -6,6 +6,7 @@ import SearchBar from "@/components/SearchBar";
 import SectionHeading from "@/components/SectionHeading";
 import CoastToCascades from "@/components/art/CoastToCascades";
 import Testimonials from "@/components/Testimonials";
+import GuestReviews from "@/components/GuestReviews";
 import { getListingContent } from "@/lib/listing-content";
 import JsonLd from "@/components/seo/JsonLd";
 import { getProperties, type Property } from "@/lib/data";
@@ -109,6 +110,7 @@ export default async function Home() {
 
       {/* Owner reviews, right after the homes: praise lands while visitors are deciding */}
       <Testimonials rating={leonoraRating} photo={{ src: "/photos/the-leonora-by-the-sea/31.webp", alt: "Sunset over the water on Hood Canal" }} />
+      <GuestReviews />
 
       {/* How it works */}
       <section className="bg-mist">
