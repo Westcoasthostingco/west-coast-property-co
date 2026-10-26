@@ -22,4 +22,14 @@ export const guestReviews: GuestReview[] = [
     platform: "Airbnb",
     date: "October 2026",
   },
+  {
+    headline: "Seriously one of the best air bnbs I've ever stayed in.",
+    body: "BEAUTIFUL! Seriously one of the best air bnbs I've ever stayed in. Everything was so luxurious. Would absolutely book again",
+    name: "Nicole",
+    from: "Puyallup, Washington",
+    home: "The Bedrock",
+    slug: "the-bedrock",
+    platform: "Airbnb",
+    date: "October 2026",
+  },
 ];
