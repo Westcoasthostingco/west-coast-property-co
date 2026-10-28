@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 // Headshots live in public/team/. A founder without one shows her initials.
 const team: { name: string; photo?: string }[] = [
-  { name: "Christi Young" },
+  { name: "Christi Young", photo: "/team/christi-young.webp" },
   { name: "Melissa Heckman", photo: "/team/melissa-heckman.webp" },
 ];
 
