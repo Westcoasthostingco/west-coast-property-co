@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 // Headshots live in public/team/. A founder without one shows her initials.
 // facts and favorite are optional; only add what she has said is true.
 const team: { name: string; photo?: string; facts?: string[]; favorite?: string }[] = [
-  { name: "Christi Young", photo: "/team/christi-young.webp", facts: ["21 years in Gig Harbor", "22 years in real estate"], favorite: "The Devoted Kiss Cafe" },
+  { name: "Christi Young", photo: "/team/christi-young.webp", facts: ["21 years in Gig Harbor", "20 years in real estate"], favorite: "The Devoted Kiss Cafe" },
   { name: "Melissa Heckman", photo: "/team/melissa-heckman.webp" },
 ];
 
