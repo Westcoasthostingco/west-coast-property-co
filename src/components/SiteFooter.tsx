@@ -15,6 +15,7 @@ export default function SiteFooter() {
         <div className="caps-tight text-[0.7rem] leading-7 text-white/85">
           <p className="text-white/60">Explore</p>
           <Link href="/properties" className="block hover:text-white">The homes</Link>
+          <Link href="/services" className="block hover:text-white">Services &amp; pricing</Link>
           <Link href="/about" className="block hover:text-white">About</Link>
           <Link href="/contact" className="block hover:text-white">Contact</Link>
         </div>
