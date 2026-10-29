@@ -16,10 +16,10 @@ export const metadata: Metadata = {
 };
 
 // Headshots live in public/team/. A founder without one shows her initials.
-// facts and favorite are optional; only add what she has said is true.
-const team: { name: string; photo?: string; facts?: string[]; favorite?: string }[] = [
-  { name: "Christi Young", photo: "/team/christi-young.webp", facts: ["21 years in Gig Harbor", "20 years in real estate"], favorite: "The Devoted Kiss Cafe" },
-  { name: "Melissa Heckman", photo: "/team/melissa-heckman.webp" },
+// facts and favorites are optional; only add what she has said is true.
+const team: { name: string; photo?: string; facts?: string[]; favorites?: string[] }[] = [
+  { name: "Christi Young", photo: "/team/christi-young.webp", facts: ["21 years in Gig Harbor", "20 years in real estate"], favorites: ["The Devoted Kiss Cafe"] },
+  { name: "Melissa Heckman", photo: "/team/melissa-heckman.webp", facts: ["17 years in Gig Harbor", "30 years in sales"], favorites: ["Kimball's Coffee", "Zoggs"] },
 ];
 
 // What owners get, kept to what we actually do today.
@@ -38,7 +38,7 @@ export default function About() {
           <p className="caps text-xs text-deep">About us</p>
           <h1 className="display mt-2 text-5xl text-deep">Meet West Coast Hosting Co.</h1>
           <div className="mt-8 space-y-5 text-lg leading-relaxed">
-            <p>We&apos;re Christi Young and Melissa Heckman, the team behind West Coast Hosting Co: longtime friends, Gig Harbor locals, and business partners with more than two decades of real estate and sales experience between us, all here in the Puget Sound region.</p>
+            <p>We&apos;re Christi Young and Melissa Heckman, the team behind West Coast Hosting Co: longtime friends, Gig Harbor locals, and business partners with decades of real estate and sales experience between us, all here in the Puget Sound region.</p>
             <p>We believe a great short-term rental comes down to the people behind it. So we keep things small and hands-on. Owners and guests deal with us directly, never with a call center or a faceless corporation.</p>
             <p>Today we care for a small collection of homes across Western Washington, from the shores of Hood Canal to the foothills of Mount Rainier.</p>
             <p>For guests, that means a home that&apos;s spotless, thoughtfully styled, and ready when you arrive. Each home&apos;s page links straight to its Airbnb or Vrbo listing, where you&apos;ll find live prices and can book your stay.</p>
@@ -65,7 +65,7 @@ export default function About() {
               <p className="display mt-4 text-2xl text-charcoal">{m.name}</p>
               <p className="text-muted">Co-founder, Gig Harbor</p>
               {m.facts && <p className="ui mt-3 text-sm text-charcoal">{m.facts.join(" · ")}</p>}
-              {m.favorite && <p className="ui mt-1 text-sm text-muted">Favorite local spot: <span className="text-deep">{m.favorite}</span></p>}
+              {m.favorites && <p className="ui mt-1 text-sm text-muted">Favorite local {m.favorites.length > 1 ? "spots" : "spot"}: <span className="text-deep">{m.favorites.join(" and ")}</span></p>}
             </li>
           ))}
         </ul>
