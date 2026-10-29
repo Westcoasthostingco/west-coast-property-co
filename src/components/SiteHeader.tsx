@@ -7,6 +7,7 @@ import { clerkConfigured, getRole } from "@/lib/auth";
 
 const publicLinks = [
   { href: "/properties", label: "Homes" },
+  { href: "/services", label: "Services" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];

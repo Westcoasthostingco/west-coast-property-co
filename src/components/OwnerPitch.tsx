@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { pricingTeaser } from "@/lib/pricing";
 
 // What owners get, kept to what we actually do today. Shown on the home and About pages.
 const forOwners = [
@@ -22,6 +23,10 @@ export default function OwnerPitch() {
             </li>
           ))}
         </ul>
+        <div className="mt-12 flex flex-wrap items-center justify-between gap-6 rounded-3xl bg-white/10 px-7 py-6 ring-1 ring-white/15">
+          <p className="display text-2xl sm:text-3xl">Co-hosting from {pricingTeaser.cohostFrom}. Launch packages from {pricingTeaser.launchFrom}.</p>
+          <Link href="/services" className="ui rounded-full border border-white px-6 py-3 text-sm font-medium transition hover:bg-white hover:text-deep">See pricing</Link>
+        </div>
         <p className="mt-12 max-w-2xl text-lg leading-relaxed text-white/85">We see every home as a partnership. When your rental does well and your guests leave happy, we&apos;ve done our job.</p>
         <div className="ui mt-8 flex flex-wrap items-center gap-x-8 gap-y-4">
           <Link href="/contact" className="rounded-full bg-white px-6 py-3 text-sm font-medium text-deep transition hover:bg-mist">Tell us about your home</Link>
