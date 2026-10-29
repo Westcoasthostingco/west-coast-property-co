@@ -91,10 +91,11 @@ export default async function Home() {
         <div className="mx-auto flex min-h-[86vh] max-w-7xl flex-col justify-end px-4 pb-14 pt-32 text-white sm:px-6">
           <p className="caps text-xs text-white/80">Short-term rental management · Gig Harbor, Washington</p>
           <h1 className="display mt-3 max-w-4xl text-5xl leading-[1.05] sm:text-7xl">
-            Make your home somewhere worth remembering.
+            Make your home a stay worth remembering.
+            <span className="mt-3 block text-3xl text-white/85 sm:text-5xl">Hosted by locals who care.</span>
           </h1>
           <p className="mt-5 max-w-xl text-lg text-white/85">
-            Hands-on hosting and co-hosting from two Gig Harbor locals, for homes from the shores of Hood Canal to the foothills of Mount Rainier.
+            Hands-on hosting and co-hosting from Gig Harbor, for homes from the shores of Hood Canal to the foothills of Mount Rainier.
           </p>
           <div className="ui mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
             <Link href="/contact" className="rounded-full bg-white px-7 py-3.5 text-sm font-medium text-deep shadow-lg shadow-ink/20 transition hover:bg-mist">Tell us about your home</Link>
