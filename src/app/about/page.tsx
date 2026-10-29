@@ -40,7 +40,7 @@ export default function About() {
           <div className="mt-8 space-y-5 text-lg leading-relaxed">
             <p>We&apos;re Christi Young and Melissa Heckman, the team behind West Coast Hosting Co: longtime friends, Gig Harbor locals, and business partners with more than two decades of real estate and sales experience between us, all here in the Puget Sound region.</p>
             <p>We believe a great short-term rental comes down to the people behind it. So we keep things small and hands-on. Owners and guests deal with us directly, never a call center or a faceless corporation.</p>
-            <p>Today we care for a small collection of Washington homes, from a beachfront cottage on Hood Canal and a waterfront home on Rocky Bay to the harbor in downtown Gig Harbor and the forest near Mount Rainier.</p>
+            <p>Today we care for a small collection of homes across Western Washington, from the shores of Hood Canal to the foothills of Mount Rainier.</p>
             <p>For guests, that means a home that&apos;s spotless, thoughtfully styled, and ready when you arrive. Each home&apos;s page links straight to its Airbnb or Vrbo listing, where you see live prices and book.</p>
           </div>
           <p className="display mt-10 text-3xl text-deep">Coast to Cascades.</p>
