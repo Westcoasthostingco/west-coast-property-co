@@ -24,9 +24,10 @@ const team: { name: string; photo?: string; facts?: string[]; favorite?: string 
 
 // What owners get, kept to what we actually do today.
 const forOwners = [
-  ["Turnovers you don't chase", "We schedule every cleaning around your bookings. Our cleaners work from a checklist, send photos, and flag anything that needs fixing."],
-  ["A clear view of your home", "Your owner portal shows every stay, your statements, and how the home is performing over time."],
-  ["Local, and easy to reach", "We live here. Call or text either of us directly, and you'll hear back from Christi or Melissa, not a call center."],
+  ["Small by design", "We take on a handful of homes so each one gets our full attention. We know every home, every cleaner, and every owner by name."],
+  ["A direct line to us", "Call or text Christi or Melissa. You'll hear back from one of us, not a call center or a ticket queue."],
+  ["Turnovers handled", "We schedule every cleaning around your bookings. Our cleaners work from a checklist, send photos, and flag anything that needs fixing."],
+  ["Clear numbers", "Your owner portal shows every stay, your statements, and how your home is performing over time."],
 ];
 
 export default function About() {
@@ -38,9 +39,10 @@ export default function About() {
           <p className="caps text-xs text-deep">About us</p>
           <h1 className="display mt-2 text-5xl text-deep">Meet West Coast Hosting Co.</h1>
           <div className="mt-8 space-y-5 text-lg leading-relaxed">
-            <p>We&apos;re Christi Young and Melissa Heckman, longtime friends and business partners from Gig Harbor, with more than two decades of real estate and sales experience between us, all here in the Puget Sound region.</p>
-            <p>We care for four Washington homes, from a beachfront cottage on Hood Canal and a waterfront home on Rocky Bay to the harbor in downtown Gig Harbor and the forest near Mount Rainier. We keep it small on purpose: we know every home, every cleaner, and every owner by name.</p>
-            <p>For guests, that means a home that&apos;s spotless, thoughtfully styled, and ready when you arrive. When you find the one you want, its page takes you straight to its Airbnb or Vrbo listing, where you see live prices and book.</p>
+            <p>We&apos;re Christi Young and Melissa Heckman, the team behind West Coast Hosting Co: longtime friends, Gig Harbor locals, and business partners with more than two decades of real estate and sales experience between us, all here in the Puget Sound region.</p>
+            <p>We believe a great short-term rental comes down to the people behind it. So we keep things small and hands-on. Owners and guests deal with us directly, never a call center or a faceless corporation.</p>
+            <p>Today we care for four Washington homes, from a beachfront cottage on Hood Canal and a waterfront home on Rocky Bay to the harbor in downtown Gig Harbor and the forest near Mount Rainier.</p>
+            <p>For guests, that means a home that&apos;s spotless, thoughtfully styled, and ready when you arrive. Each home&apos;s page links straight to its Airbnb or Vrbo listing, where you see live prices and book.</p>
           </div>
           <p className="display mt-10 text-3xl text-deep">Coast to Cascades.</p>
         </div>
@@ -72,9 +74,9 @@ export default function About() {
       <section className="bg-deep text-white">
         <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
           <p className="caps text-xs text-wave">For homeowners</p>
-          <h2 className="display mt-2 text-4xl sm:text-5xl">We care for your home like it&apos;s our own</h2>
-          <p className="mt-4 max-w-2xl text-lg leading-relaxed text-white/85">Own a home in the Puget Sound region and thinking about renting it? We take on a small number of homes so each one gets our full attention.</p>
-          <ul className="mt-12 grid gap-8 md:grid-cols-3">
+          <h2 className="display mt-2 text-4xl sm:text-5xl">Why owners choose us</h2>
+          <p className="mt-4 max-w-2xl text-lg leading-relaxed text-white/85">Own a home in the Puget Sound region and thinking about renting it? Big management firms spread their attention across hundreds of homes. We&apos;d rather be your local partner.</p>
+          <ul className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {forOwners.map(([t, d]) => (
               <li key={t}>
                 <h3 className="display text-2xl">{t}</h3>
@@ -82,7 +84,8 @@ export default function About() {
               </li>
             ))}
           </ul>
-          <div className="ui mt-12 flex flex-wrap items-center gap-x-8 gap-y-4">
+          <p className="mt-12 max-w-2xl text-lg leading-relaxed text-white/85">We see every home as a partnership. When your rental does well and your guests leave happy, we&apos;ve done our job.</p>
+          <div className="ui mt-8 flex flex-wrap items-center gap-x-8 gap-y-4">
             <Link href="/contact" className="rounded-full bg-white px-6 py-3 text-sm font-medium text-deep transition hover:bg-mist">Tell us about your home</Link>
             <a href="tel:+12532786818" className="text-sm text-white/85 hover:text-white">or call 253.278.6818</a>
           </div>
