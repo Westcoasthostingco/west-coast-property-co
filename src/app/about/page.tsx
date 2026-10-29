@@ -15,8 +15,9 @@ export const metadata: Metadata = {
 };
 
 // Headshots live in public/team/. A founder without one shows her initials.
-const team: { name: string; photo?: string }[] = [
-  { name: "Christi Young", photo: "/team/christi-young.webp" },
+// facts and favorite are optional; only add what she has said is true.
+const team: { name: string; photo?: string; facts?: string[]; favorite?: string }[] = [
+  { name: "Christi Young", photo: "/team/christi-young.webp", facts: ["21 years in Gig Harbor", "22 years in real estate"], favorite: "The Devoted Kiss Cafe" },
   { name: "Melissa Heckman", photo: "/team/melissa-heckman.webp" },
 ];
 
@@ -54,6 +55,8 @@ export default function About() {
               </div>
               <p className="display mt-4 text-2xl text-charcoal">{m.name}</p>
               <p className="text-muted">Co-founder, Gig Harbor</p>
+              {m.facts && <p className="ui mt-3 text-sm text-charcoal">{m.facts.join(" · ")}</p>}
+              {m.favorite && <p className="ui mt-1 text-sm text-muted">Favorite local spot: <span className="text-deep">{m.favorite}</span></p>}
             </li>
           ))}
         </ul>
