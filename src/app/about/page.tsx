@@ -3,7 +3,7 @@ import Image from "next/image";
 import CoastToCascades from "@/components/art/CoastToCascades";
 import OwnerPitch from "@/components/OwnerPitch";
 import JsonLd from "@/components/seo/JsonLd";
-import { FOUNDERS, personJsonLd } from "@/lib/seo";
+import { CONTACT, FOUNDERS, personJsonLd } from "@/lib/seo";
 
 const description =
   "Meet Christi Young and Melissa Heckman, the Gig Harbor friends behind West Coast Hosting Co, caring for vacation homes from Hood Canal to Mount Rainier and welcoming new homeowners.";
@@ -17,9 +17,9 @@ export const metadata: Metadata = {
 
 // Headshots live in public/team/. A founder without one shows her initials.
 // facts and favorites are optional; only add what she has said is true.
-const team: { name: string; photo?: string; facts?: string[]; favorites?: string[] }[] = [
-  { name: "Christi Young", photo: "/team/christi-young.webp", facts: ["21 years in Gig Harbor", "20 years in real estate"], favorites: ["The Devoted Kiss Cafe"] },
-  { name: "Melissa Heckman", photo: "/team/melissa-heckman.webp", facts: ["17 years in Gig Harbor", "30 years in sales"], favorites: ["Kimball's Coffee", "Zoggs"] },
+const team: { name: string; photo?: string; facts?: string[]; favorites?: string[]; phone: string }[] = [
+  { name: "Christi Young", photo: "/team/christi-young.webp", facts: ["21 years in Gig Harbor", "20 years in real estate"], favorites: ["The Devoted Kiss Cafe"], phone: "253.278.6818" },
+  { name: "Melissa Heckman", photo: "/team/melissa-heckman.webp", facts: ["17 years in Gig Harbor", "30 years in sales"], favorites: ["Kimball's Coffee", "Zoggs"], phone: "503.860.8115" },
 ];
 
 export default function About() {
@@ -74,6 +74,22 @@ export default function About() {
             ))}
           </ul>
         </div>
+      </section>
+      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+        <p className="caps text-xs text-deep">Get in touch</p>
+        <h2 className="display mt-2 text-4xl text-deep">Call or text us directly</h2>
+        <ul className="ui mt-8 grid gap-6 sm:grid-cols-3">
+          {team.map((m) => (
+            <li key={m.name}>
+              <p className="text-sm text-muted">{m.name}</p>
+              <a href={`tel:+1${m.phone.replace(/\D/g, "")}`} className="text-xl font-medium text-charcoal hover:text-deep">{m.phone}</a>
+            </li>
+          ))}
+          <li>
+            <p className="text-sm text-muted">Email</p>
+            <a href={`mailto:${CONTACT.email}`} className="break-all text-xl font-medium text-charcoal hover:text-deep">{CONTACT.email}</a>
+          </li>
+        </ul>
       </section>
     </main>
   );
