@@ -15,15 +15,18 @@ export default function ContactForm({ turnstileSiteKey }: { turnstileSiteKey?: s
       <div className="grid gap-4 sm:grid-cols-2">
         <label className={label}>Name<input required name="name" className={field} /></label>
         <label className={label}>Email<input required name="email" type="email" className={field} /></label>
+        <label className={label}>Phone (optional)<input name="phone" type="tel" autoComplete="tel" className={field} /></label>
+        <label className={label}>Where is your home?<input name="location" placeholder="e.g. Gig Harbor" className={field} /></label>
       </div>
-      <label className={`${label} mt-4`}>About
+      <label className={`${label} mt-4`}>I&apos;m looking for
         <select name="kind" className={field}>
-          <option>question about a home</option>
-          <option>question about this website</option>
+          <option>help listing my home</option>
+          <option>a co-host for my rental</option>
+          <option>not sure yet</option>
           <option>something else</option>
         </select>
       </label>
-      <label className={`${label} mt-4`}>Message<textarea required name="message" rows={6} className={field} /></label>
+      <label className={`${label} mt-4`}>Tell us about your home<textarea required name="message" rows={6} placeholder="Bedrooms, whether it's rented now, and anything else we should know." className={field} /></label>
       <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
       {turnstileSiteKey && <div className="cf-turnstile mt-4" data-sitekey={turnstileSiteKey} />}
       {state.error && <p className="ui mt-4 text-sm text-charcoal">{state.error}</p>}
