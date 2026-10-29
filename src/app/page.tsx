@@ -95,7 +95,7 @@ export default async function Home() {
             <span className="mt-3 block text-3xl text-white/85 sm:text-5xl">Hosted by locals who care.</span>
           </h1>
           <p className="mt-5 max-w-xl text-lg text-white/85">
-            Hands-on hosting and co-hosting from Gig Harbor, for homes from the shores of Hood Canal to the foothills of Mount Rainier.
+            From listing to checkout, we handle the details so you don&apos;t have to.
           </p>
           <div className="ui mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
             <Link href="/contact" className="rounded-full bg-white px-7 py-3.5 text-sm font-medium text-deep shadow-lg shadow-ink/20 transition hover:bg-mist">Tell us about your home</Link>
