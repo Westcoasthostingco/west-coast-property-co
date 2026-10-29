@@ -27,7 +27,6 @@ const forOwners = [
   ["Small by design", "We take on a handful of homes so each one gets our full attention. We know every home, every cleaner, and every owner by name."],
   ["A direct line to us", "Call or text Christi or Melissa. You'll hear back from one of us, not a call center or a ticket queue."],
   ["Turnovers handled", "We schedule every cleaning around your bookings. Our cleaners work from a checklist, send photos, and flag anything that needs fixing."],
-  ["Clear numbers", "Your owner portal shows every stay, your statements, and how your home is performing over time."],
 ];
 
 export default function About() {
@@ -76,7 +75,7 @@ export default function About() {
           <p className="caps text-xs text-wave">For homeowners</p>
           <h2 className="display mt-2 text-4xl sm:text-5xl">Why owners choose us</h2>
           <p className="mt-4 max-w-2xl text-lg leading-relaxed text-white/85">Own a home in the Puget Sound region and thinking about renting it? Big management firms spread their attention across hundreds of homes. We&apos;d rather be your local partner.</p>
-          <ul className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="mt-12 grid gap-8 md:grid-cols-3">
             {forOwners.map(([t, d]) => (
               <li key={t}>
                 <h3 className="display text-2xl">{t}</h3>
