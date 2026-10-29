@@ -4,7 +4,7 @@ const C = { teal: "#6ba8bc", sky: "#8fc0ce", wave: "#a8d0dc", mist: "#eef5f7", c
 
 const homes = [
   { x: 150, y: 150, name: "The Leonora", place: "Hood Canal", anchor: "end" as const, dx: -16 },
-  { x: 230, y: 265, name: "Rocky Bay Cabin", place: "Rocky Bay", anchor: "end" as const, dx: -16 },
+  { x: 230, y: 265, name: "The Bay House", place: "Rocky Bay", anchor: "end" as const, dx: -16 },
   { x: 300, y: 215, name: "The Grand View", place: "Gig Harbor", anchor: "start" as const, dx: 16 },
   { x: 460, y: 330, name: "The Bedrock", place: "Randle", anchor: "start" as const, dx: 16 },
 ];
