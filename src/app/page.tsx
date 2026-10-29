@@ -7,18 +7,21 @@ import SectionHeading from "@/components/SectionHeading";
 import CoastToCascades from "@/components/art/CoastToCascades";
 import Testimonials from "@/components/Testimonials";
 import GuestReviews from "@/components/GuestReviews";
+import OwnerPitch from "@/components/OwnerPitch";
 import { getListingContent } from "@/lib/listing-content";
 import JsonLd from "@/components/seo/JsonLd";
 import { getProperties, type Property } from "@/lib/data";
-import { DEFAULT_DESCRIPTION, SITE_NAME, TAGLINE, faqJsonLd, webSiteJsonLd, type Faq } from "@/lib/seo";
+import { SITE_NAME, faqJsonLd, webSiteJsonLd, type Faq } from "@/lib/seo";
 
-const homeTitle = `${SITE_NAME} | ${TAGLINE} Vacation Rentals`;
+const homeTitle = `${SITE_NAME} | Short-Term Rental Management in Gig Harbor, WA`;
+const homeDescription =
+  "Hands-on short-term rental management and co-hosting from two Gig Harbor locals, for homes from Hood Canal to Mount Rainier. Planning a stay? Explore our homes, then book on Airbnb or Vrbo.";
 export const metadata: Metadata = {
   title: { absolute: homeTitle },
-  description: DEFAULT_DESCRIPTION,
+  description: homeDescription,
   alternates: { canonical: "/" },
-  openGraph: { type: "website", url: "/", title: homeTitle, description: DEFAULT_DESCRIPTION },
-  twitter: { card: "summary_large_image", title: homeTitle, description: DEFAULT_DESCRIPTION },
+  openGraph: { type: "website", url: "/", title: homeTitle, description: homeDescription },
+  twitter: { card: "summary_large_image", title: homeTitle, description: homeDescription },
 };
 
 // Answers are built from live property data so they stay true as homes change.
@@ -81,35 +84,44 @@ export default async function Home() {
   return (
     <main>
       <JsonLd data={[webSiteJsonLd(), faqJsonLd(questions)]} />
-      {/* Hero: full-bleed, short headline, search strip (Wander layout) */}
+      {/* Hero: full-bleed photo, owner-first headline, a quieter link for guests */}
       <section className="relative isolate">
         <PropertyImage slug="hero" name="The deck at The Grand View over Puget Sound" priority sizes="100vw" className="absolute inset-0 -z-10" />
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-ink/45 via-ink/15 to-ink/70" />
         <div className="mx-auto flex min-h-[86vh] max-w-7xl flex-col justify-end px-4 pb-14 pt-32 text-white sm:px-6">
-          <p className="caps text-xs text-white/80">Vacation homes in Washington</p>
+          <p className="caps text-xs text-white/80">Short-term rental management · Gig Harbor, Washington</p>
           <h1 className="display mt-3 max-w-4xl text-5xl leading-[1.05] sm:text-7xl">
-            Four homes. Four views.<br />One unforgettable Washington.
+            Make your home somewhere worth remembering.
           </h1>
           <p className="mt-5 max-w-xl text-lg text-white/85">
-            From the shores of Hood Canal to downtown Gig Harbor to the foothills near Mount Rainier.
+            Hands-on hosting and co-hosting from two Gig Harbor locals, for homes from the shores of Hood Canal to the foothills of Mount Rainier.
           </p>
-          <div className="mt-10"><SearchBar /></div>
+          <div className="ui mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
+            <Link href="/contact" className="rounded-full bg-white px-7 py-3.5 text-sm font-medium text-deep shadow-lg shadow-ink/20 transition hover:bg-mist">Tell us about your home</Link>
+            <Link href="/properties" className="text-sm text-white/90 hover:text-white">Planning a stay? Browse our homes →</Link>
+          </div>
         </div>
       </section>
+
+      {/* For homeowners: the main audience */}
+      <OwnerPitch />
+
+      {/* Owner review, right after the pitch: proof from an owner we work with */}
+      <Testimonials rating={leonoraRating} photo={{ src: "/photos/the-leonora-by-the-sea/31.webp", alt: "Sunset over the water on Hood Canal" }} />
 
       {/* Homes */}
       <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6">
         <div className="flex flex-wrap items-end justify-between gap-6">
-          <SectionHeading eyebrow="The homes" title="Coast to Cascades" intro="Four homes, four very different views of Washington. Explore them here, then book on Airbnb or Vrbo." />
+          <SectionHeading eyebrow="Our homes" title="Coast to Cascades" intro="Planning a stay? These are the homes we care for across Western Washington. Explore them here, then book on Airbnb or Vrbo." />
           <Link href="/properties" className="caps-tight text-[0.7rem] text-deep hover:text-deep">See all homes →</Link>
         </div>
+        <div className="mt-8"><SearchBar /></div>
         <div className="mt-12 grid gap-8 sm:grid-cols-2 2xl:grid-cols-4">
           {properties.map((p) => <PropertyCard key={p.id} p={p} />)}
         </div>
       </section>
 
-      {/* Owner reviews, right after the homes: praise lands while visitors are deciding */}
-      <Testimonials rating={leonoraRating} photo={{ src: "/photos/the-leonora-by-the-sea/31.webp", alt: "Sunset over the water on Hood Canal" }} />
+      {/* Guest reviews, after the homes */}
       <GuestReviews />
 
       {/* How it works */}
