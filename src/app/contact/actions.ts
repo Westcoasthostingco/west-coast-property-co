@@ -18,9 +18,13 @@ export async function sendContact(_prev: ContactState, form: FormData): Promise<
   const name = String(form.get("name") ?? "").trim();
   const email = String(form.get("email") ?? "").trim();
   const kind = String(form.get("kind") ?? "");
-  const message = String(form.get("message") ?? "").trim();
+  const note = String(form.get("message") ?? "").trim();
+  const phone = String(form.get("phone") ?? "").trim();
+  const location = String(form.get("location") ?? "").trim();
   if (String(form.get("website") ?? "")) return { ok: true }; // honeypot
-  if (!name || !email.includes("@") || message.length < 5) return { error: "Add your name, a real email, and a message." };
+  if (!name || !email.includes("@") || note.length < 5) return { error: "Add your name, a real email, and a message." };
+  // contact_messages has no phone or location columns, so they lead the message.
+  const message = [phone && `Phone: ${phone}`, location && `Home: ${location}`, note].filter(Boolean).join("\n");
   if (!(await verifyTurnstile(form.get("cf-turnstile-response") as string | null))) return { error: "Spam check failed. Try again." };
   // Save first so no message is ever lost, then try to email it to the team.
   let savedId: string | null = null;
