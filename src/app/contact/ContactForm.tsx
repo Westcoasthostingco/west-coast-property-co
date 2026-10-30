@@ -22,6 +22,7 @@ export default function ContactForm({ turnstileSiteKey }: { turnstileSiteKey?: s
         <select name="kind" className={field}>
           <option>help listing my home</option>
           <option>a co-host for my rental</option>
+          <option>help with a mid-term rental (30+ nights)</option>
           <option>not sure yet</option>
           <option>something else</option>
         </select>

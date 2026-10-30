@@ -13,9 +13,9 @@ import JsonLd from "@/components/seo/JsonLd";
 import { getProperties, type Property } from "@/lib/data";
 import { SITE_NAME, faqJsonLd, webSiteJsonLd, type Faq } from "@/lib/seo";
 
-const homeTitle = `${SITE_NAME} | Short-Term Rental Management in Gig Harbor, WA`;
+const homeTitle = `${SITE_NAME} | Short-Term & Mid-Term Rental Management in Gig Harbor, WA`;
 const homeDescription =
-  "Hands-on short-term rental management and co-hosting from two Gig Harbor locals, for homes from Hood Canal to Mount Rainier. Planning a stay? Explore our homes, then book on Airbnb or Vrbo.";
+  "Hands-on short-term and mid-term rental management and co-hosting from two Gig Harbor locals, for homes from Hood Canal to Mount Rainier. Planning a stay? Explore our homes, then book on Airbnb or Vrbo.";
 export const metadata: Metadata = {
   title: { absolute: homeTitle },
   description: homeDescription,
@@ -89,7 +89,7 @@ export default async function Home() {
         <PropertyImage slug="hero" name="The deck at The Grand View over Puget Sound" priority sizes="100vw" className="absolute inset-0 -z-10" />
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-ink/45 via-ink/15 to-ink/70" />
         <div className="mx-auto flex min-h-[86vh] max-w-7xl flex-col justify-end px-4 pb-14 pt-32 text-white sm:px-6">
-          <p className="caps text-xs text-white/80">Short-term rental management · Gig Harbor, Washington</p>
+          <p className="caps text-xs text-white/80">Short- &amp; mid-term rental management · Gig Harbor, WA</p>
           <h1 className="display mt-3 max-w-4xl text-5xl leading-[1.05] sm:text-7xl">
             Make your home a stay worth remembering.
             <span className="mt-3 block text-3xl text-white/85 sm:text-5xl">Hosted by locals who care.</span>

@@ -4,7 +4,7 @@ import SectionHeading from "@/components/SectionHeading";
 import { billing, cohostPlans, goodToKnow, launchPlans, setupFeeWaiver, whichFits, type Plan } from "@/lib/pricing";
 
 const description =
-  "Short-term rental launch packages from $495 and co-hosting from 10% of booking revenue, from West Coast Hosting Co in Gig Harbor, Washington.";
+  "Short-term and mid-term rental launch packages from $495 and co-hosting from 10% of booking revenue, from West Coast Hosting Co in Gig Harbor, Washington.";
 export const metadata: Metadata = {
   title: "Services & Pricing",
   description,
@@ -53,7 +53,7 @@ export default function Services() {
       <section className="mx-auto max-w-7xl px-4 pb-8 pt-20 sm:px-6">
         <p className="caps text-xs text-deep">For homeowners</p>
         <h1 className="display mt-2 text-5xl text-deep sm:text-6xl">Services &amp; Pricing</h1>
-        <p className="mt-6 max-w-2xl text-lg leading-relaxed">Whether you want a little guidance getting started or a home that is fully managed, we have a clear option for you. You always keep ownership of your listing, your reviews, and your payouts.</p>
+        <p className="mt-6 max-w-2xl text-lg leading-relaxed">Whether you rent to vacation guests or to mid-term guests staying a month or more, and whether you want a little guidance getting started or a home that is fully managed, we have a clear option for you. You always keep ownership of your listing, your reviews, and your payouts.</p>
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
