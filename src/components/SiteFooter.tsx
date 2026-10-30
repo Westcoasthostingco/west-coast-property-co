@@ -9,7 +9,7 @@ export default function SiteFooter() {
           <Wordmark reversed href={null} />
           <p className="display mt-4 text-xl text-white/90">Coast to Cascades</p>
           <p className="mt-2 max-w-sm text-sm text-white/75">
-            Hands-on short-term rental management and co-hosting, based in Gig Harbor, Washington. Planning a stay? Explore our homes, then book on Airbnb or Vrbo.
+            Hands-on short-term and mid-term rental management and co-hosting, based in Gig Harbor, Washington. Planning a stay? Explore our homes, then book on Airbnb or Vrbo.
           </p>
         </div>
         <div className="caps-tight text-[0.7rem] leading-7 text-white/85">

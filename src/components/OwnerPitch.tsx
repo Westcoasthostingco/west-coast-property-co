@@ -14,7 +14,7 @@ export default function OwnerPitch() {
       <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
         <p className="caps text-xs text-wave">For homeowners</p>
         <h2 className="display mt-2 text-4xl sm:text-5xl">Why owners choose us</h2>
-        <p className="mt-4 max-w-2xl text-lg leading-relaxed text-white/85">Own a home in the Puget Sound region and thinking about renting it? Big management firms spread their attention across hundreds of homes. We&apos;d rather be your local partner.</p>
+        <p className="mt-4 max-w-2xl text-lg leading-relaxed text-white/85">Own a home in the Puget Sound region and thinking about renting it, by the night or by the month? Big management firms spread their attention across hundreds of homes. We&apos;d rather be your local partner.</p>
         <ul className="mt-12 grid gap-8 md:grid-cols-3">
           {forOwners.map(([t, d]) => (
             <li key={t}>

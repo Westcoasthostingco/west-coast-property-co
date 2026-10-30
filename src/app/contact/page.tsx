@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import ContactForm from "./ContactForm";
 
-export const metadata: Metadata = { title: "Contact", description: "Own a home in the Puget Sound region? Contact West Coast Hosting Co in Gig Harbor about listing it as a short-term rental or hiring a co-host.", alternates: { canonical: "/contact" } };
+export const metadata: Metadata = { title: "Contact", description: "Own a home in the Puget Sound region? Contact West Coast Hosting Co in Gig Harbor about listing it as a short-term or mid-term rental or hiring a co-host.", alternates: { canonical: "/contact" } };
 
 export default function Contact() {
   return (
@@ -12,7 +12,7 @@ export default function Contact() {
       <div>
         <p className="caps text-xs text-deep">Contact</p>
         <h1 className="display mt-2 text-5xl text-deep">Let&apos;s talk about your home.</h1>
-        <p className="mt-6 text-lg leading-relaxed">Thinking about listing your home as a short-term rental, or looking for a co-host for one you already rent? Tell us a little about it, and Christi or Melissa will get back to you.</p>
+        <p className="mt-6 text-lg leading-relaxed">Thinking about listing your home as a short-term or mid-term rental, or looking for a co-host for one you already rent? Tell us a little about it, and Christi or Melissa will get back to you.</p>
         <div className="mt-8 space-y-2 text-lg">
           <a href="mailto:hello@westcoasthostingco.com" className="block text-deep hover:underline">hello@westcoasthostingco.com</a>
           <a href="tel:+12532786818" className="block">253.278.6818</a>
