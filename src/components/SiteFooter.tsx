@@ -9,7 +9,7 @@ export default function SiteFooter() {
           <Wordmark reversed href={null} />
           <p className="display mt-4 text-xl text-white/90">Coast to Cascades</p>
           <p className="mt-2 max-w-sm text-sm text-white/75">
-            A showcase of vacation homes from Hood Canal to Mount Rainier. Explore them here, then book on Airbnb or Vrbo.
+            Hands-on short-term rental management and co-hosting, based in Gig Harbor, Washington. Planning a stay? Explore our homes, then book on Airbnb or Vrbo.
           </p>
         </div>
         <div className="caps-tight text-[0.7rem] leading-7 text-white/85">
@@ -20,10 +20,10 @@ export default function SiteFooter() {
           <Link href="/contact" className="block hover:text-white">Contact</Link>
         </div>
         <div className="text-sm leading-7 text-white/85">
-          <p className="caps-tight text-[0.7rem] text-white/60">Questions about the site</p>
+          <p className="caps-tight text-[0.7rem] text-white/60">Get in touch</p>
           <a href="mailto:hello@westcoasthostingco.com" className="block hover:text-white">hello@westcoasthostingco.com</a>
-          <a href="tel:+12532786818" className="block hover:text-white">253.278.6818</a>
-          <a href="tel:+15038608115" className="block hover:text-white">503.860.8115</a>
+          <a href="tel:+12532786818" className="block hover:text-white">Christi · 253.278.6818</a>
+          <a href="tel:+15038608115" className="block hover:text-white">Melissa · 503.860.8115</a>
           <p className="text-white/60">Gig Harbor, Washington</p>
         </div>
       </div>
