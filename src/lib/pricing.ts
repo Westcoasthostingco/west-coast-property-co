@@ -1,73 +1,5 @@
 // Services and pricing for homeowners, from the West Coast Hosting Co pricing sheet.
 // The home page teaser reads its "from" numbers from here, so edit prices in one place.
-export type Plan = {
-  name: string;
-  price: string; // shown large on the card
-  from?: boolean; // "from $2,500"
-  unit: string;
-  fee?: string; // one-time onboarding or setup fee
-  fit: string;
-  features: string[];
-  onboarding?: string[]; // what the one-time onboarding or setup fee covers
-  billedSeparately?: string[];
-  feature?: boolean; // highlighted card
-  ribbon?: string;
-};
-
-export const launchPlans: Plan[] = [
-  {
-    name: "Design & Readiness Plan",
-    price: "$495",
-    unit: "one-time",
-    fit: "For homes that are not guest-ready yet.",
-    features: [
-      "Two-hour in-person walkthrough of your home",
-      "Room-by-room design and staging recommendations",
-      "Complete furnishing and supply shopping list, with quantities for linens, towels, and kitchen",
-      "Guest safety checklist: smoke and CO detectors, fire extinguisher, first aid kit, exterior lighting",
-      "Smart lock and Wi-Fi recommendations",
-      "Local permit and registration resources for your county",
-      "Written plan delivered within five business days",
-    ],
-  },
-  {
-    name: "Listing Launch",
-    price: "$750",
-    unit: "one-time",
-    fit: "For guest-ready homes whose owners plan to host themselves.",
-    features: [
-      "In-person walkthrough of your home",
-      "Listing built on your own Airbnb and Vrbo accounts",
-      "Title, description, amenities, and house rules written for you",
-      "Nightly rates, minimum stays, cancellation policy, and calendar settings",
-      "Check-in and check-out instructions plus saved guest message templates",
-      "Photographer recommendation and room-by-room shot list",
-      "A follow-up call after your first guest checks out",
-    ],
-  },
-  {
-    name: "Turnkey Launch",
-    price: "$2,500",
-    from: true,
-    unit: "one-time",
-    fit: "For owners who want us to handle the entire process.",
-    feature: true,
-    ribbon: "Start to finish",
-    features: [
-      "Everything in the Design & Readiness Plan and Listing Launch",
-      "Furniture and supply ordering coordinated for you",
-      "Staging and setup day at the home",
-      "Professional photography scheduled and managed",
-      "Custom printed welcome guide for your home",
-      "Smart lock and Wi-Fi set up",
-      "Cleaner introductions and a turnover checklist",
-      "Listing live on Airbnb and Vrbo",
-      "Guest messaging for your first 30 days",
-    ],
-    billedSeparately: ["Furniture, supplies, and photography are billed at cost to the owner, approved in advance"],
-  },
-];
-
 // One management plan; how the home starts only changes the one-time fee.
 export type StartOption = { label: string; fee: string; feeUnit: string; fit: string; includes: string[]; note?: string; from?: boolean };
 export const cohostPlan = {
@@ -120,18 +52,10 @@ export const cohostPlan = {
   ] as StartOption[],
 };
 
-export const whichFits: [string, string][] = [
-  ["Aren't listed yet and want a listing built and managed for you", "Full-Service Co-Hosting, from scratch"],
-  ["Are already on Airbnb or Vrbo and want us to manage it", "Full-Service Co-Hosting, already listed"],
-  ["Have a home that needs furniture, supplies, or a safety check before guests arrive", "Design & Readiness Plan"],
-  ["Have a guest-ready home and plan to host it yourself", "Listing Launch"],
-  ["Want the whole process handled from empty home to first booking", "Turnkey Launch"],
-];
-
 export const billing = [
   "Guest payouts go directly from the platform to the owner. We never hold owner funds or security deposits.",
   "Co-hosting fees are billed monthly on completed stays, with no monthly minimums.",
-  "Launch packages are paid at the start of the project.",
+  "Onboarding and setup fees are paid at the start.",
 ];
 
 export const goodToKnow = [
@@ -143,5 +67,5 @@ export const goodToKnow = [
 /** "from" numbers for the home page teaser. */
 export const pricingTeaser = {
   cohostFrom: cohostPlan.price,
-  launchFrom: launchPlans.map((p) => p.price).sort((a, b) => parseFloat(a.replace(/\D/g, "")) - parseFloat(b.replace(/\D/g, "")))[0],
+  setupFrom: cohostPlan.starts.map((o) => o.fee).sort((a, b) => parseFloat(a.replace(/\D/g, "")) - parseFloat(b.replace(/\D/g, "")))[0],
 };
