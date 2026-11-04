@@ -106,11 +106,11 @@ export const setupFeeWaiver =
   "Sign up for Full-Service Co-Hosting within 30 days of any launch package, and we waive the $1,200 setup fee.";
 
 export const whichFits: [string, string][] = [
+  ["Want the home managed for you every month", "Full-Service Co-Hosting"],
+  ["Already host and want help with guest communication", "Essential Co-Hosting"],
   ["Have a home that needs furniture, supplies, or a safety check before guests arrive", "Design & Readiness Plan"],
   ["Have a guest-ready home and plan to host it yourself", "Listing Launch"],
   ["Want the whole process handled from empty home to first booking", "Turnkey Launch"],
-  ["Already host and want help with guest communication", "Essential Co-Hosting"],
-  ["Want the home managed for you every month", "Full-Service Co-Hosting"],
 ];
 
 export const billing = [
