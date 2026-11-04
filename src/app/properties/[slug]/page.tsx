@@ -6,6 +6,7 @@ import PhotoGallery from "@/components/PhotoGallery";
 import LocationMap from "@/components/LocationMap";
 import Amenities from "@/components/Amenities";
 import BookOn, { hasBookingLink } from "@/components/BookOn";
+import { directBookingName, directBookingUrl } from "@/lib/direct-booking";
 import JsonLd from "@/components/seo/JsonLd";
 import { getProperty, getProperties, getPublishedReviews } from "@/lib/data";
 import { propertyDescription, propertyPhoto, vacationRentalJsonLd } from "@/lib/seo";
@@ -43,8 +44,8 @@ export async function generateMetadata({ params }: PageProps<"/properties/[slug]
   };
 }
 
-function platformNames(p: { airbnbUrl?: string | null; vrboUrl?: string | null }) {
-  const names = [p.airbnbUrl && "Airbnb", p.vrboUrl && "Vrbo"].filter(Boolean) as string[];
+function platformNames(p: { slug: string; airbnbUrl?: string | null; vrboUrl?: string | null }) {
+  const names = [directBookingName(p.slug), p.airbnbUrl && "Airbnb", p.vrboUrl && "Vrbo"].filter(Boolean) as string[];
   return names.length ? names.join(" or ") : "us";
 }
 
@@ -94,9 +95,9 @@ export default async function PropertyPage({ params }: PageProps<"/properties/[s
           <ul className="caps-tight flex shrink-0 gap-5 py-3.5 text-[0.65rem] text-charcoal/80">
             {sections.map(([id, label]) => <li key={id}><a href={`#${id}`} className="whitespace-nowrap hover:text-deep">{label}</a></li>)}
           </ul>
-          {p.airbnbUrl && (
-            <a href={p.airbnbUrl} target="_blank" rel="noopener noreferrer" className="ui ml-auto hidden shrink-0 rounded-full bg-deep px-4 py-1.5 text-xs font-medium text-white hover:bg-dusk md:inline-flex">
-              Book on Airbnb ↗
+          {(directBookingUrl(p.slug) || p.airbnbUrl) && (
+            <a href={directBookingUrl(p.slug) || p.airbnbUrl || undefined} target="_blank" rel="noopener noreferrer" className="ui ml-auto hidden shrink-0 rounded-full bg-deep px-4 py-1.5 text-xs font-medium text-white hover:bg-dusk md:inline-flex">
+              {directBookingUrl(p.slug) ? "Book direct ↗" : "Book on Airbnb ↗"}
             </a>
           )}
         </div>

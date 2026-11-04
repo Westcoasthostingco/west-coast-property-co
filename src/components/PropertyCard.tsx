@@ -4,6 +4,7 @@ import CardReel from "./CardReel";
 import type { Property } from "@/lib/data";
 import { getListingContent } from "@/lib/listing-content";
 import ConditionsCard from "./widgets/ConditionsCard";
+import { directBookingUrl } from "@/lib/direct-booking";
 
 export default function PropertyCard({ p, wide = false }: { p: Property; wide?: boolean }) {
   const content = getListingContent(p.slug);
@@ -31,7 +32,7 @@ export default function PropertyCard({ p, wide = false }: { p: Property; wide?: 
           {listing ? (
             <p className="ui text-sm font-medium">★ {listing.value.toFixed(2)}<span className="text-xs font-normal text-muted"> · {listing.count} on {listing.platform}</span></p>
           ) : p.reviewCount > 0 && <p className="ui text-sm font-medium">★ {p.rating.toFixed(1)}<span className="text-xs font-normal text-muted"> · {p.reviewCount}</span></p>}
-          <p className="ui mt-0.5 text-xs text-muted">{p.airbnbUrl || p.vrboUrl ? `Book on ${[p.airbnbUrl && "Airbnb", p.vrboUrl && "Vrbo"].filter(Boolean).join(" · ")}` : "Listing coming soon"}</p>
+          <p className="ui mt-0.5 text-xs text-muted">{directBookingUrl(p.slug) || p.airbnbUrl || p.vrboUrl ? `Book ${[directBookingUrl(p.slug) && "direct", p.airbnbUrl && "on Airbnb", p.vrboUrl && "on Vrbo"].filter(Boolean).join(" · ")}` : "Listing coming soon"}</p>
         </div>
       </Link>
       {/* Live tide or snow conditions, pinned to the bottom so the strips line up across cards */}
