@@ -93,6 +93,7 @@ export default function Services() {
                     <ul className="mt-4 space-y-2 text-[0.95rem] leading-snug text-charcoal">
                       {o.includes.map((f) => <li key={f} className="flex gap-3"><span aria-hidden className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full bg-wave" />{f}</li>)}
                     </ul>
+                    {o.note && <p className="mt-4 text-sm leading-snug text-muted">{o.note}</p>}
                   </div>
                 ))}
               </div>

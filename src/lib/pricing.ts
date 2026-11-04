@@ -69,7 +69,7 @@ export const launchPlans: Plan[] = [
 ];
 
 // One management plan; how the home starts only changes the one-time fee.
-export type StartOption = { label: string; fee: string; feeUnit: string; fit: string; includes: string[] };
+export type StartOption = { label: string; fee: string; feeUnit: string; fit: string; includes: string[]; note?: string };
 export const cohostPlan = {
   name: "Full-Service Co-Hosting",
   price: "20%",
@@ -103,7 +103,7 @@ export const cohostPlan = {
     },
     {
       label: "Starting from scratch",
-      fee: "$1,200",
+      fee: "$750",
       feeUnit: "one-time setup",
       fit: "Not listed yet? We build your listing from the ground up, then manage it for you.",
       includes: [
@@ -113,6 +113,7 @@ export const cohostPlan = {
         "Saved guest message templates and guidebook",
         "Lock access set up for co-hosts",
       ],
+      note: "Professional photography is not included and is paid by the owner separately.",
     },
   ] as StartOption[],
 };
