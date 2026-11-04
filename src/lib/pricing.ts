@@ -68,52 +68,61 @@ export const launchPlans: Plan[] = [
   },
 ];
 
-export const cohostPlans: Plan[] = [
-  {
-    name: "Essential Co-Hosting",
-    price: "15%",
-    unit: "of booking revenue",
-    fee: "+ $250 one-time onboarding",
-    fit: "For established listings that need a reliable voice for guests.",
-    features: [
-      "Guest messaging from first inquiry through checkout",
-      "Booking requests and guest screening",
-      "Check-in and check-out instructions sent to every guest",
-      "Guest reviews and responses",
-      "Cleaning and turnover scheduling",
-      "Prompt notice to the owner when something at the home needs attention",
-    ],
-    onboarding: [
-      "In-person walkthrough of your home",
-      "Co-host access set up on your existing listing",
-      "Review of your listing, rates, and guidebook",
-      "Saved guest message templates",
-      "Lock access set up for co-hosts",
-    ],
-  },
-  {
-    name: "Full-Service Co-Hosting",
-    price: "20%",
-    unit: "of booking revenue",
-    fee: "+ $1,200 one-time setup",
-    fit: "For owners who want the home fully managed.",
-    feature: true,
-    features: [
-      "Everything in Essential Co-Hosting",
-      "Listings created and managed on Airbnb and Vrbo, plus private bookings",
-      "Dynamic pricing",
-      "Maintenance coordination and vendor scheduling",
-      "Quarterly in-person property check",
-    ],
-  },
-];
-
-export const setupFeeWaiver =
-  "Sign up for Full-Service Co-Hosting within 30 days of any launch package, and we waive the $1,200 setup fee.";
+// One management plan; how the home starts only changes the one-time fee.
+export type StartOption = { label: string; fee: string; feeUnit: string; fit: string; includes: string[]; note?: string; from?: boolean };
+export const cohostPlan = {
+  name: "Full-Service Co-Hosting",
+  price: "20%",
+  unit: "of booking revenue",
+  fit: "Full management for your home, whether it's already listed or starting from scratch.",
+  features: [
+    "Guest messaging from first inquiry through checkout",
+    "Booking requests and guest screening",
+    "Check-in and check-out instructions sent to every guest",
+    "Guest reviews and responses",
+    "Cleaning and turnover scheduling",
+    "Listings managed on Airbnb and Vrbo, plus private bookings",
+    "Dynamic pricing",
+    "Maintenance coordination and vendor scheduling",
+    "Quarterly in-person property check",
+    "Prompt notice to the owner when something at the home needs attention",
+  ],
+  starts: [
+    {
+      label: "Already listed",
+      fee: "$250",
+      feeUnit: "one-time onboarding",
+      fit: "Already on Airbnb or Vrbo? We step in as your co-host and take it from here.",
+      includes: [
+        "In-person walkthrough of your home",
+        "Co-host access set up on your existing listing",
+        "Review of your listing, rates, and guidebook",
+        "Saved guest message templates",
+        "Lock access set up for co-hosts",
+      ],
+    },
+    {
+      label: "Starting from scratch",
+      fee: "$750",
+      from: true,
+      feeUnit: "one-time setup",
+      fit: "Not listed yet? We build your listing from the ground up, then manage it for you.",
+      includes: [
+        "In-person walkthrough of your home",
+        "Your Airbnb and Vrbo listings created for you",
+        "Title, description, amenities, house rules, and rates set up",
+        "Saved guest message templates",
+        "Welcome guide for your home",
+        "Smart lock set up, including co-host access",
+      ],
+      note: "Professional photography is not included and is paid by the owner separately.",
+    },
+  ] as StartOption[],
+};
 
 export const whichFits: [string, string][] = [
-  ["Want the home managed for you every month", "Full-Service Co-Hosting"],
-  ["Already host and want help with guest communication", "Essential Co-Hosting"],
+  ["Aren't listed yet and want a listing built and managed for you", "Full-Service Co-Hosting, from scratch"],
+  ["Are already on Airbnb or Vrbo and want us to manage it", "Full-Service Co-Hosting, already listed"],
   ["Have a home that needs furniture, supplies, or a safety check before guests arrive", "Design & Readiness Plan"],
   ["Have a guest-ready home and plan to host it yourself", "Listing Launch"],
   ["Want the whole process handled from empty home to first booking", "Turnkey Launch"],
@@ -133,6 +142,6 @@ export const goodToKnow = [
 
 /** "from" numbers for the home page teaser. */
 export const pricingTeaser = {
-  cohostFrom: cohostPlans.map((p) => p.price).sort((a, b) => parseFloat(a) - parseFloat(b))[0],
+  cohostFrom: cohostPlan.price,
   launchFrom: launchPlans.map((p) => p.price).sort((a, b) => parseFloat(a.replace(/\D/g, "")) - parseFloat(b.replace(/\D/g, "")))[0],
 };

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import SectionHeading from "@/components/SectionHeading";
-import { billing, cohostPlans, goodToKnow, launchPlans, setupFeeWaiver, whichFits, type Plan } from "@/lib/pricing";
+import { billing, cohostPlan, goodToKnow, launchPlans, whichFits, type Plan } from "@/lib/pricing";
 
 const description =
   "Short-term and mid-term rental launch packages from $495 and co-hosting from 15% of booking revenue, from West Coast Hosting Co in Gig Harbor, Washington.";
@@ -68,10 +68,37 @@ export default function Services() {
 
       <section className="bg-mist">
         <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
-          <SectionHeading eyebrow="Monthly, on completed stays" title="Property management plans" intro="Two local, five-star rated co-hosts with decades of sales and real estate experience, managing your home month to month." />
-          <div className="mt-12 grid items-start gap-6 md:grid-cols-2 lg:max-w-5xl">
-            {cohostPlans.map((p) => <PlanCard key={p.name} p={p} />)}
-          </div>
+          <SectionHeading eyebrow="Monthly, on completed stays" title="Property management" intro="Two local, five-star rated co-hosts with decades of sales and real estate experience, managing your home month to month." />
+          <article className="mt-12 overflow-hidden rounded-3xl border border-deep bg-white shadow-lg shadow-teal/10">
+            <div className="grid gap-8 bg-deep px-7 py-9 text-white md:grid-cols-[1fr_1.2fr] md:items-center sm:px-10">
+              <div>
+                <p className="caps text-xs text-wave">{cohostPlan.name}</p>
+                <p className="display mt-2 text-6xl">{cohostPlan.price}</p>
+                <p className="mt-1 text-white/85">{cohostPlan.unit}</p>
+              </div>
+              <p className="display text-2xl leading-snug">{cohostPlan.fit}</p>
+            </div>
+            <div className="px-7 py-9 sm:px-10">
+              <p className="caps-tight text-[0.65rem] text-deep">Management includes</p>
+              <ul className="mt-4 grid gap-x-10 gap-y-2 text-[0.95rem] leading-snug text-charcoal md:grid-cols-2">
+                {cohostPlan.features.map((f) => <li key={f} className="flex gap-3"><span aria-hidden className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full bg-wave" />{f}</li>)}
+              </ul>
+              <p className="caps-tight mt-10 text-[0.65rem] text-deep">Pick your starting point</p>
+              <div className="mt-4 grid gap-6 md:grid-cols-2">
+                {cohostPlan.starts.map((o) => (
+                  <div key={o.label} className="rounded-2xl border border-line bg-mist p-6">
+                    <p className="caps text-xs text-deep">{o.label}</p>
+                    <p className="display mt-2 text-4xl text-charcoal">{o.from && <span className="ui mr-1 align-middle text-xs uppercase tracking-wider text-muted">from</span>}{o.fee} <span className="ui align-middle text-xs uppercase tracking-wider text-muted">{o.feeUnit}</span></p>
+                    <p className="display mt-3 text-lg text-deep">{o.fit}</p>
+                    <ul className="mt-4 space-y-2 text-[0.95rem] leading-snug text-charcoal">
+                      {o.includes.map((f) => <li key={f} className="flex gap-3"><span aria-hidden className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full bg-wave" />{f}</li>)}
+                    </ul>
+                    {o.note && <p className="mt-4 text-sm leading-snug text-muted">{o.note}</p>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </article>
         </div>
       </section>
 
@@ -80,7 +107,6 @@ export default function Services() {
         <div className="mt-12 grid items-start gap-6 lg:grid-cols-3">
           {launchPlans.map((p) => <PlanCard key={p.name} p={p} />)}
         </div>
-        <p className="mt-8 rounded-2xl border border-dashed border-wave bg-mist px-6 py-5 leading-relaxed"><strong className="text-deep">Ready for ongoing help?</strong> {setupFeeWaiver}</p>
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
