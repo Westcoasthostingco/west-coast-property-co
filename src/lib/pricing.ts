@@ -8,6 +8,7 @@ export type Plan = {
   fee?: string; // one-time onboarding or setup fee
   fit: string;
   features: string[];
+  onboarding?: string[]; // what the one-time onboarding or setup fee covers
   billedSeparately?: string[];
   feature?: boolean; // highlighted card
   ribbon?: string;
@@ -70,7 +71,7 @@ export const launchPlans: Plan[] = [
 export const cohostPlans: Plan[] = [
   {
     name: "Essential Co-Hosting",
-    price: "10%",
+    price: "15%",
     unit: "of booking revenue",
     fee: "+ $250 one-time onboarding",
     fit: "For established listings that need a reliable voice for guests.",
@@ -79,7 +80,15 @@ export const cohostPlans: Plan[] = [
       "Booking requests and guest screening",
       "Check-in and check-out instructions sent to every guest",
       "Guest reviews and responses",
+      "Cleaning and turnover scheduling",
       "Prompt notice to the owner when something at the home needs attention",
+    ],
+    onboarding: [
+      "In-person walkthrough of your home",
+      "Co-host access set up on your existing listing",
+      "Review of your listing, rates, and guidebook",
+      "Saved guest message templates",
+      "Lock access set up for co-hosts",
     ],
   },
   {
@@ -91,13 +100,10 @@ export const cohostPlans: Plan[] = [
     feature: true,
     features: [
       "Everything in Essential Co-Hosting",
-      "Listings managed on Airbnb and Vrbo, plus private bookings",
-      "Dynamic pricing and multi-platform calendar sync",
-      "Cleaning and turnover scheduling",
+      "Listings created and managed on Airbnb and Vrbo, plus private bookings",
+      "Dynamic pricing",
       "Maintenance coordination and vendor scheduling",
-      "Restocking of guest consumables",
       "Quarterly in-person property check",
-      "24/7 guest support and issue resolution",
     ],
   },
 ];
@@ -106,11 +112,11 @@ export const setupFeeWaiver =
   "Sign up for Full-Service Co-Hosting within 30 days of any launch package, and we waive the $1,200 setup fee.";
 
 export const whichFits: [string, string][] = [
+  ["Want the home managed for you every month", "Full-Service Co-Hosting"],
+  ["Already host and want help with guest communication", "Essential Co-Hosting"],
   ["Have a home that needs furniture, supplies, or a safety check before guests arrive", "Design & Readiness Plan"],
   ["Have a guest-ready home and plan to host it yourself", "Listing Launch"],
   ["Want the whole process handled from empty home to first booking", "Turnkey Launch"],
-  ["Already host and want help with guest communication", "Essential Co-Hosting"],
-  ["Want the home managed for you every month", "Full-Service Co-Hosting"],
 ];
 
 export const billing = [

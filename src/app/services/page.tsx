@@ -4,7 +4,7 @@ import SectionHeading from "@/components/SectionHeading";
 import { billing, cohostPlans, goodToKnow, launchPlans, setupFeeWaiver, whichFits, type Plan } from "@/lib/pricing";
 
 const description =
-  "Short-term and mid-term rental launch packages from $495 and co-hosting from 10% of booking revenue, from West Coast Hosting Co in Gig Harbor, Washington.";
+  "Short-term and mid-term rental launch packages from $495 and co-hosting from 15% of booking revenue, from West Coast Hosting Co in Gig Harbor, Washington.";
 export const metadata: Metadata = {
   title: "Services & Pricing",
   description,
@@ -34,6 +34,16 @@ function PlanCard({ p }: { p: Plan }) {
             <li key={f} className="flex gap-3"><span aria-hidden className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full bg-wave" />{f}</li>
           ))}
         </ul>
+        {p.onboarding && (
+          <div>
+            <p className="caps-tight text-[0.6rem] text-deep">Onboarding includes</p>
+            <ul className="mt-2 space-y-2 text-[0.95rem] leading-snug text-charcoal">
+              {p.onboarding.map((f) => (
+                <li key={f} className="flex gap-3"><span aria-hidden className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full bg-wave" />{f}</li>
+              ))}
+            </ul>
+          </div>
+        )}
         {p.billedSeparately && (
           <div>
             <p className="caps-tight text-[0.6rem] text-deep">Billed separately</p>
@@ -56,21 +66,21 @@ export default function Services() {
         <p className="mt-6 max-w-2xl text-lg leading-relaxed">Whether you rent to vacation guests or to mid-term guests staying a month or more, and whether you want a little guidance getting started or a home that is fully managed, we have a clear option for you. You always keep ownership of your listing, your reviews, and your payouts.</p>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-        <SectionHeading eyebrow="One-time fee" title="Launch your rental" intro="For homeowners who want help getting their home on Airbnb and Vrbo. Pay once, with no ongoing commitment." />
-        <div className="mt-12 grid items-start gap-6 lg:grid-cols-3">
-          {launchPlans.map((p) => <PlanCard key={p.name} p={p} />)}
-        </div>
-        <p className="mt-8 rounded-2xl border border-dashed border-wave bg-mist px-6 py-5 leading-relaxed"><strong className="text-deep">Ready for ongoing help?</strong> {setupFeeWaiver}</p>
-      </section>
-
       <section className="bg-mist">
         <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
-          <SectionHeading eyebrow="Monthly, on completed stays" title="Ongoing co-hosting" intro="Two local, five-star rated co-hosts with decades of sales and real estate experience, managing your home month to month." />
+          <SectionHeading eyebrow="Monthly, on completed stays" title="Property management plans" intro="Two local, five-star rated co-hosts with decades of sales and real estate experience, managing your home month to month." />
           <div className="mt-12 grid items-start gap-6 md:grid-cols-2 lg:max-w-5xl">
             {cohostPlans.map((p) => <PlanCard key={p.name} p={p} />)}
           </div>
         </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+        <SectionHeading eyebrow="Getting started · one-time fee" title="Launch your rental" intro="For homeowners who want help getting their home on Airbnb and Vrbo. Pay once, with no ongoing commitment." />
+        <div className="mt-12 grid items-start gap-6 lg:grid-cols-3">
+          {launchPlans.map((p) => <PlanCard key={p.name} p={p} />)}
+        </div>
+        <p className="mt-8 rounded-2xl border border-dashed border-wave bg-mist px-6 py-5 leading-relaxed"><strong className="text-deep">Ready for ongoing help?</strong> {setupFeeWaiver}</p>
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
