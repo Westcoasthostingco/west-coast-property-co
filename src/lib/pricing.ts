@@ -97,7 +97,6 @@ export const cohostPlans: Plan[] = [
       "Maintenance coordination and vendor scheduling",
       "Restocking of guest consumables",
       "Quarterly in-person property check",
-      "24/7 guest support and issue resolution",
     ],
   },
 ];
