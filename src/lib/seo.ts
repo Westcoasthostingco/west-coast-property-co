@@ -7,6 +7,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import type { Property } from "./mock";
 import { getListingContent } from "./listing-content";
+import { directBookingName, directBookingUrl } from "./direct-booking";
 
 export const SITE_URL = "https://www.westcoasthostingco.com";
 export const SITE_NAME = "West Coast Hosting Co";
@@ -41,16 +42,18 @@ export function propertyPhoto(slug: string): string | null {
 const list = (items: string[]) =>
   items.length <= 1 ? items.join("") : `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
 
-/** Booking platform listings for a home, in display order. Every home has an Airbnb listing; Vrbo only where a link exists. */
-export function bookingPlatforms(p: Pick<Property, "airbnbUrl" | "vrboUrl">): { name: "Airbnb" | "Vrbo"; url: string }[] {
-  const out: { name: "Airbnb" | "Vrbo"; url: string }[] = [];
+/** Where a home can be booked, in display order: its own website when it has one, then Airbnb and Vrbo. */
+export function bookingPlatforms(p: Pick<Property, "slug" | "airbnbUrl" | "vrboUrl">): { name: string; url: string }[] {
+  const out: { name: string; url: string }[] = [];
+  const direct = directBookingUrl(p.slug);
+  if (direct) out.push({ name: directBookingName(p.slug)!, url: direct });
   if (p.airbnbUrl) out.push({ name: "Airbnb", url: p.airbnbUrl });
   if (p.vrboUrl) out.push({ name: "Vrbo", url: p.vrboUrl });
   return out;
 }
 
 /** "Airbnb" or "Airbnb or Vrbo", for copy. Falls back to Airbnb, where every home is listed. */
-export const bookingPlatformNames = (p: Pick<Property, "airbnbUrl" | "vrboUrl">) =>
+export const bookingPlatformNames = (p: Pick<Property, "slug" | "airbnbUrl" | "vrboUrl">) =>
   bookingPlatforms(p).map((x) => x.name).join(" or ") || "Airbnb";
 
 /** A 140 to 160 character description for a property page, written for people. */

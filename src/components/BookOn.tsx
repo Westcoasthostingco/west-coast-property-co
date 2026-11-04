@@ -1,9 +1,10 @@
 import Link from "next/link";
 import type { Property } from "@/lib/data";
+import { directBookingUrl } from "@/lib/direct-booking";
 
-// "Book on Airbnb / Vrbo" buttons. The site takes no bookings or payments:
-// every reservation is made on the platform listing. Opens in a new tab.
-type Props = { p: Pick<Property, "name" | "airbnbUrl" | "vrboUrl">; size?: "md" | "lg"; tone?: "light" | "dark"; className?: string };
+// "Book direct / on Airbnb / on Vrbo" buttons. The site takes no bookings or payments:
+// every reservation is made on the home's own booking site or platform listing. Opens in a new tab.
+type Props = { p: Pick<Property, "name" | "slug" | "airbnbUrl" | "vrboUrl">; size?: "md" | "lg"; tone?: "light" | "dark"; className?: string };
 
 function Arrow() {
   return (
@@ -13,8 +14,8 @@ function Arrow() {
   );
 }
 
-export function hasBookingLink(p: Pick<Property, "airbnbUrl" | "vrboUrl">) {
-  return Boolean(p.airbnbUrl || p.vrboUrl);
+export function hasBookingLink(p: Pick<Property, "slug" | "airbnbUrl" | "vrboUrl">) {
+  return Boolean(directBookingUrl(p.slug) || p.airbnbUrl || p.vrboUrl);
 }
 
 export default function BookOn({ p, size = "md", tone = "light", className = "" }: Props) {
@@ -30,15 +31,21 @@ export default function BookOn({ p, size = "md", tone = "light", className = "" 
       </div>
     );
   }
+  const direct = directBookingUrl(p.slug);
   return (
     <div className={`flex flex-wrap gap-3 ${className}`}>
+      {direct && (
+        <a href={direct} target="_blank" rel="noopener noreferrer" className={`${base} ${primary}`} aria-label={`Book ${p.name} direct on its own website (opens in a new tab)`}>
+          Book direct <Arrow />
+        </a>
+      )}
       {p.airbnbUrl && (
-        <a href={p.airbnbUrl} target="_blank" rel="noopener noreferrer" className={`${base} ${primary}`} aria-label={`Book ${p.name} on Airbnb (opens in a new tab)`}>
+        <a href={p.airbnbUrl} target="_blank" rel="noopener noreferrer" className={`${base} ${direct ? secondary : primary}`} aria-label={`Book ${p.name} on Airbnb (opens in a new tab)`}>
           Book on Airbnb <Arrow />
         </a>
       )}
       {p.vrboUrl && (
-        <a href={p.vrboUrl} target="_blank" rel="noopener noreferrer" className={`${base} ${p.airbnbUrl ? secondary : primary}`} aria-label={`Book ${p.name} on Vrbo (opens in a new tab)`}>
+        <a href={p.vrboUrl} target="_blank" rel="noopener noreferrer" className={`${base} ${direct || p.airbnbUrl ? secondary : primary}`} aria-label={`Book ${p.name} on Vrbo (opens in a new tab)`}>
           Book on Vrbo <Arrow />
         </a>
       )}
