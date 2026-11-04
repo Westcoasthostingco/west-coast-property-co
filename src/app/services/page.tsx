@@ -34,6 +34,16 @@ function PlanCard({ p }: { p: Plan }) {
             <li key={f} className="flex gap-3"><span aria-hidden className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full bg-wave" />{f}</li>
           ))}
         </ul>
+        {p.onboarding && (
+          <div>
+            <p className="caps-tight text-[0.6rem] text-deep">Onboarding includes</p>
+            <ul className="mt-2 space-y-2 text-[0.95rem] leading-snug text-charcoal">
+              {p.onboarding.map((f) => (
+                <li key={f} className="flex gap-3"><span aria-hidden className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full bg-wave" />{f}</li>
+              ))}
+            </ul>
+          </div>
+        )}
         {p.billedSeparately && (
           <div>
             <p className="caps-tight text-[0.6rem] text-deep">Billed separately</p>

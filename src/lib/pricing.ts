@@ -8,6 +8,7 @@ export type Plan = {
   fee?: string; // one-time onboarding or setup fee
   fit: string;
   features: string[];
+  onboarding?: string[]; // what the one-time onboarding or setup fee covers
   billedSeparately?: string[];
   feature?: boolean; // highlighted card
   ribbon?: string;
@@ -81,6 +82,13 @@ export const cohostPlans: Plan[] = [
       "Guest reviews and responses",
       "Cleaning and turnover scheduling",
       "Prompt notice to the owner when something at the home needs attention",
+    ],
+    onboarding: [
+      "In-person walkthrough of your home",
+      "Co-host access set up on your existing listing",
+      "Review of your listing, rates, and guidebook",
+      "Saved guest message templates",
+      "Lock access set up for co-hosts",
     ],
   },
   {
