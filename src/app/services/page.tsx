@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import SectionHeading from "@/components/SectionHeading";
-import { billing, cohostPlan, goodToKnow, launchPlans, setupFeeWaiver, whichFits, type Plan } from "@/lib/pricing";
+import { billing, cohostPlan, goodToKnow, launchPlans, whichFits, type Plan } from "@/lib/pricing";
 
 const description =
   "Short-term and mid-term rental launch packages from $495 and co-hosting from 15% of booking revenue, from West Coast Hosting Co in Gig Harbor, Washington.";
@@ -107,7 +107,6 @@ export default function Services() {
         <div className="mt-12 grid items-start gap-6 lg:grid-cols-3">
           {launchPlans.map((p) => <PlanCard key={p.name} p={p} />)}
         </div>
-        <p className="mt-8 rounded-2xl border border-dashed border-wave bg-mist px-6 py-5 leading-relaxed"><strong className="text-deep">Ready for ongoing help?</strong> {setupFeeWaiver}</p>
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">

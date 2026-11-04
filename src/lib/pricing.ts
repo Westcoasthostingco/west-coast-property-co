@@ -120,9 +120,6 @@ export const cohostPlan = {
   ] as StartOption[],
 };
 
-export const setupFeeWaiver =
-  "Sign up for Full-Service Co-Hosting within 30 days of any launch package, and we waive the onboarding fee.";
-
 export const whichFits: [string, string][] = [
   ["Aren't listed yet and want a listing built and managed for you", "Full-Service Co-Hosting, from scratch"],
   ["Are already on Airbnb or Vrbo and want us to manage it", "Full-Service Co-Hosting, already listed"],
