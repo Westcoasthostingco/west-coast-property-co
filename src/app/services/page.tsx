@@ -4,7 +4,7 @@ import SectionHeading from "@/components/SectionHeading";
 import { billing, cohostPlans, goodToKnow, launchPlans, setupFeeWaiver, whichFits, type Plan } from "@/lib/pricing";
 
 const description =
-  "Short-term and mid-term rental launch packages from $495 and co-hosting from 10% of booking revenue, from West Coast Hosting Co in Gig Harbor, Washington.";
+  "Short-term and mid-term rental launch packages from $495 and co-hosting from 15% of booking revenue, from West Coast Hosting Co in Gig Harbor, Washington.";
 export const metadata: Metadata = {
   title: "Services & Pricing",
   description,

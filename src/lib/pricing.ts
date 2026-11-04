@@ -70,7 +70,7 @@ export const launchPlans: Plan[] = [
 export const cohostPlans: Plan[] = [
   {
     name: "Essential Co-Hosting",
-    price: "10%",
+    price: "15%",
     unit: "of booking revenue",
     fee: "+ $250 one-time onboarding",
     fit: "For established listings that need a reliable voice for guests.",
