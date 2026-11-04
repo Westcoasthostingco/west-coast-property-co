@@ -88,7 +88,7 @@ export default function Services() {
                 {cohostPlan.starts.map((o) => (
                   <div key={o.label} className="rounded-2xl border border-line bg-mist p-6">
                     <p className="caps text-xs text-deep">{o.label}</p>
-                    <p className="display mt-2 text-4xl text-charcoal">{o.fee} <span className="ui align-middle text-xs uppercase tracking-wider text-muted">{o.feeUnit}</span></p>
+                    <p className="display mt-2 text-4xl text-charcoal">{o.from && <span className="ui mr-1 align-middle text-xs uppercase tracking-wider text-muted">from</span>}{o.fee} <span className="ui align-middle text-xs uppercase tracking-wider text-muted">{o.feeUnit}</span></p>
                     <p className="display mt-3 text-lg text-deep">{o.fit}</p>
                     <ul className="mt-4 space-y-2 text-[0.95rem] leading-snug text-charcoal">
                       {o.includes.map((f) => <li key={f} className="flex gap-3"><span aria-hidden className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full bg-wave" />{f}</li>)}
