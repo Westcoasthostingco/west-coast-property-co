@@ -101,7 +101,7 @@ export const cohostPlans: Plan[] = [
     features: [
       "Everything in Essential Co-Hosting",
       "Listings created and managed on Airbnb and Vrbo, plus private bookings",
-      "Dynamic pricing and multi-platform calendar sync",
+      "Dynamic pricing",
       "Maintenance coordination and vendor scheduling",
       "Quarterly in-person property check",
     ],
