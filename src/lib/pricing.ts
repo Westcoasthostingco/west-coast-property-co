@@ -70,11 +70,11 @@ export const launchPlans: Plan[] = [
 
 export const cohostPlans: Plan[] = [
   {
-    name: "Essential Co-Hosting",
+    name: "Co-Hosting: Existing Listing",
     price: "15%",
     unit: "of booking revenue",
     fee: "+ $250 one-time onboarding",
-    fit: "For established listings that need a reliable voice for guests.",
+    fit: "Already on Airbnb or Vrbo? We step in as your co-host and manage it from here.",
     features: [
       "Guest messaging from first inquiry through checkout",
       "Booking requests and guest screening",
@@ -92,14 +92,14 @@ export const cohostPlans: Plan[] = [
     ],
   },
   {
-    name: "Full-Service Co-Hosting",
+    name: "Co-Hosting: New Listing",
     price: "20%",
     unit: "of booking revenue",
     fee: "+ $1,200 one-time setup",
-    fit: "For owners who want the home fully managed.",
+    fit: "Not listed yet? We build your listing from the ground up, then manage it for you.",
     feature: true,
     features: [
-      "Everything in Essential Co-Hosting",
+      "Everything in Co-Hosting: Existing Listing",
       "Listings created and managed on Airbnb and Vrbo, plus private bookings",
       "Dynamic pricing",
       "Maintenance coordination and vendor scheduling",
@@ -109,11 +109,11 @@ export const cohostPlans: Plan[] = [
 ];
 
 export const setupFeeWaiver =
-  "Sign up for Full-Service Co-Hosting within 30 days of any launch package, and we waive the $1,200 setup fee.";
+  "Sign up for Co-Hosting: New Listing within 30 days of any launch package, and we waive the $1,200 setup fee.";
 
 export const whichFits: [string, string][] = [
-  ["Want the home managed for you every month", "Full-Service Co-Hosting"],
-  ["Already host and want help with guest communication", "Essential Co-Hosting"],
+  ["Aren't listed yet and want a listing built and managed for you", "Co-Hosting: New Listing"],
+  ["Are already on Airbnb or Vrbo and want us to manage it", "Co-Hosting: Existing Listing"],
   ["Have a home that needs furniture, supplies, or a safety check before guests arrive", "Design & Readiness Plan"],
   ["Have a guest-ready home and plan to host it yourself", "Listing Launch"],
   ["Want the whole process handled from empty home to first booking", "Turnkey Launch"],
