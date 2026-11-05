@@ -24,7 +24,7 @@ export default function Services() {
 
       <section className="bg-mist">
         <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
-          <SectionHeading eyebrow="Monthly, on completed stays" title="Property management" intro="Two local, five-star rated co-hosts with decades of sales and real estate experience, managing your home month to month." />
+          <SectionHeading title="Property management" intro="Two local, five-star rated co-hosts with decades of sales and real estate experience, managing your home month to month." />
           <article className="mt-12 overflow-hidden rounded-3xl border border-deep bg-white shadow-lg shadow-teal/10">
             <div className="grid gap-8 bg-deep px-7 py-9 text-white md:grid-cols-[1fr_1.2fr] md:items-center sm:px-10">
               <div>

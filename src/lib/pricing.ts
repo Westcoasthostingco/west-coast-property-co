@@ -30,7 +30,7 @@ export const cohostPlan = {
         "Co-host access set up on your existing listing",
         "Review of your listing, rates, and guidebook",
         "Saved guest message templates",
-        "Lock access set up for co-hosts",
+        "Smart lock set up, including co-host access",
       ],
     },
     {
