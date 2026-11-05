@@ -8,16 +8,16 @@ export const cohostPlan = {
   unit: "of booking revenue",
   fit: "Full management for your home, whether it's already listed or starting from scratch.",
   features: [
-    "Guest messaging from first inquiry through checkout",
+    "Listings managed on Airbnb and Vrbo, plus private bookings",
     "Booking requests and guest screening",
+    "Guest messaging from first inquiry through checkout",
     "Check-in and check-out instructions sent to every guest",
     "Guest reviews and responses",
     "Cleaning and turnover scheduling",
-    "Listings managed on Airbnb and Vrbo, plus private bookings",
-    "Dynamic pricing",
     "Maintenance coordination and vendor scheduling",
-    "Quarterly in-person property check",
     "Prompt notice to the owner when something at the home needs attention",
+    "Dynamic pricing",
+    "Quarterly in-person property check",
   ],
   starts: [
     {

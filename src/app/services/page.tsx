@@ -36,7 +36,7 @@ export default function Services() {
             </div>
             <div className="px-7 py-9 sm:px-10">
               <p className="caps-tight text-[0.65rem] text-deep">Management includes</p>
-              <ul className="mt-4 grid gap-x-10 gap-y-2 text-[0.95rem] leading-snug text-charcoal md:grid-cols-2">
+              <ul className="mt-4 gap-x-10 text-[0.95rem] leading-snug text-charcoal md:columns-2 [&>li]:mb-2 [&>li]:break-inside-avoid">
                 {cohostPlan.features.map((f) => <li key={f} className="flex gap-3"><span aria-hidden className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full bg-wave" />{f}</li>)}
               </ul>
               <p className="caps-tight mt-10 text-[0.65rem] text-deep">Pick your starting point</p>
