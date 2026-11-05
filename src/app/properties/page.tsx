@@ -7,7 +7,7 @@ import { getProperties } from "@/lib/data";
 import { itemListJsonLd } from "@/lib/seo";
 
 const description =
-  "Four vacation homes in Washington: The Grand View and The Bay House in Gig Harbor, The Leonora by the Sea on Hood Canal, and The Bedrock near Mount Rainier. Book on Airbnb or Vrbo.";
+  "Four vacation homes in Washington: The Grand View and Rocky Bay Cabin in Gig Harbor, The Leonora by the Sea on Hood Canal, and The Bedrock near Mount Rainier. Book on Airbnb or Vrbo.";
 export const metadata: Metadata = {
   title: "Vacation homes in Gig Harbor, Hood Canal & Mount Rainier",
   description,
