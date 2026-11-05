@@ -44,7 +44,7 @@ export const cohostPlan = {
         "Your Airbnb and Vrbo listings created for you",
         "Title, description, amenities, house rules, and rates set up",
         "Saved guest message templates",
-        "Welcome guide for your home",
+        "Create a welcome guide for your home",
         "Smart lock set up, including co-host access",
       ],
       note: "Professional photography is not included and is paid by the owner separately.",
