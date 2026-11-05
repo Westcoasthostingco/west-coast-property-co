@@ -59,7 +59,7 @@ export const billing = [
 ];
 
 export const goodToKnow = [
-  "Co-hosting is month to month. Either party may end it with 30 days written notice.",
+  "Co-hosting is month to month. Either party may terminate the partnership with 30 days written notice.",
   "Cleaning, repairs, and supplies are paid by the owner and approved in advance.",
   "Home watch and concierge services are available on request.",
 ];
