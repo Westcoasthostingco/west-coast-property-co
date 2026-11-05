@@ -28,7 +28,7 @@ export const cohostPlan = {
       includes: [
         "In-person walkthrough of your home",
         "Co-host access set up on your existing listing",
-        "Review of your listing, rates, and guidebook",
+        "Review of your listing, rates, and welcome guide for your home",
         "Saved guest message templates",
         "Smart lock set up, including co-host access",
       ],
