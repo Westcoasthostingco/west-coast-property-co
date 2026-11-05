@@ -28,9 +28,9 @@ export const cohostPlan = {
       includes: [
         "In-person walkthrough of your home",
         "Co-host access set up on your existing listing",
-        "Review of your listing, rates, and guidebook",
+        "Review of your listing, rates, and welcome guide for your home",
         "Saved guest message templates",
-        "Lock access set up for co-hosts",
+        "Smart lock set up, including co-host access",
       ],
     },
     {
@@ -44,7 +44,7 @@ export const cohostPlan = {
         "Your Airbnb and Vrbo listings created for you",
         "Title, description, amenities, house rules, and rates set up",
         "Saved guest message templates",
-        "Welcome guide for your home",
+        "Create a welcome guide for your home",
         "Smart lock set up, including co-host access",
       ],
       note: "Professional photography is not included and is paid by the owner separately.",
@@ -59,7 +59,7 @@ export const billing = [
 ];
 
 export const goodToKnow = [
-  "Co-hosting is month to month. Either party may end it with 30 days written notice.",
+  "Co-hosting is month to month. Either party may terminate the partnership with 30 days written notice.",
   "Cleaning, repairs, and supplies are paid by the owner and approved in advance.",
   "Home watch and concierge services are available on request.",
 ];
